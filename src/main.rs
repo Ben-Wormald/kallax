@@ -6,6 +6,33 @@ const COLOUR_TEXT: u32 = 0xf2f4f3;
 
 actions!(musicplayer, [Quit]);
 
+struct MusicPlayer {
+    player: Model<Player>,
+    files: View<Files>,
+}
+impl MusicPlayer {
+    fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
+        let player = cx.new_model(|_cx| Player {});
+        let files = cx.new_view(|_cx| Files::new());
+
+        player.update(cx, |_this, cx| {
+            cx.subscribe(&files, |_subscriber, _emitter, event, _cx| {
+                dbg!(event);
+            }).detach();
+        });
+
+        MusicPlayer {
+            player,
+            files,
+        }
+    }
+}
+impl Render for MusicPlayer {
+    fn render(&mut self, _cx: &mut ViewContext<Self>) -> impl IntoElement {
+        self.files.clone()
+    }
+}
+
 struct Files {
     names: Vec<String>,
 }
@@ -38,6 +65,7 @@ impl Render for Files {
                     .border_color(rgb(COLOUR_BORDER))
                     .size_full()
                     .on_click(cx.listener(|_this, _event, cx| {
+                        dbg!("c");
                         cx.emit(PlayEvent)
                     })),
             )
@@ -59,20 +87,8 @@ fn main() {
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
 
-        let player = cx.new_model(|_cx| Player {});
-
-        cx.observe_new_views(move |_: &mut Files, cx| {
-            let files = cx.view().clone();
-
-            player.update(cx, |_this, cx| {
-                cx.subscribe(&files, |_subscriber, _emitter, event, _cx| {
-                    dbg!(event);
-                }).detach();
-            });
-        }).detach();
-
         cx.open_window(WindowOptions::default(), |cx| {
-            cx.new_view(|_cx: &mut ViewContext<Files>| Files::new())
+            cx.new_view(|cx: &mut ViewContext<MusicPlayer>| MusicPlayer::new(cx))
         });
     });
 }
