@@ -1,7 +1,6 @@
-use std::{fs::File, io::BufReader, thread};
-
+use std::{fs::File, io::BufReader, sync::Arc};
 use gpui::*;
-use rodio::{Decoder, OutputStream, Sink};
+use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
 
 const COLOUR_BG: u32 = 0x333531;
 const COLOUR_BORDER: u32 = 0x1f211f;
@@ -19,17 +18,8 @@ impl MusicPlayer {
         let player = cx.new_model(|_cx| Player::new());
         let files = cx.new_view(|_cx| Files::new());
 
-        let player2 = player.clone();
         cx.subscribe(&files, move |_subscriber, _emitter, _event, cx| {
-
             Player::play(cx);
-            // let player = player.clone();
-            // let player = player2.clone();
-            // cx.spawn(move |_this, mut cx| async move {
-            //     player2.update(cx, |player, _cx| {
-            //         player.play();
-            //     });
-            // }).detach();
         }).detach();
 
         MusicPlayer {
@@ -72,7 +62,8 @@ impl Render for Files {
             .font("Work Sans")
             .child(
                 div()
-                    .id("manage-members")
+                    .id("tracks")
+                    .hover(|style| style.bg(rgb(COLOUR_BORDER)))
                     .children(text)
                     .border()
                     .border_color(rgb(COLOUR_BORDER))
@@ -82,35 +73,37 @@ impl Render for Files {
                     })),
             )
             .child(
-                div().child("tracks").border().border_color(rgb(COLOUR_BORDER)).size_full(),
+                div().child("hi").border().border_color(rgb(COLOUR_BORDER)).size_full(),
             )
     }
 }
 
 struct Player {
-    sink: Sink,
+    sink: Arc<Sink>,
+    _stream: OutputStream,
+    _stream_handle: OutputStreamHandle,
 }
 impl Player {
     fn new() -> Player {
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         let sink = Sink::try_new(&stream_handle).unwrap();
+        let sink = Arc::new(sink);
 
         Player {
             sink,
+            _stream,
+            _stream_handle: stream_handle,
         }
     }
 
     fn play(cx: &mut AppContext) {
-        println!("play");
-        cx.update_global::<Self, _>(|this, cx| {
+        let sink = cx.global::<Player>().sink.clone();
+        cx.background_executor().spawn(async move {
             let file = BufReader::new(File::open("/Users/wormab01/Music/Skee Mask - Compro/Skee Mask - ITLP04 - Compro - 06 Soundboy Ext..mp3").unwrap());
             let source = Decoder::new(file).unwrap();
-            this.sink.append(source);
-            dbg!(this.sink.volume());
-            dbg!(this.sink.is_paused());
-            // self.sink.sleep_until_end();
-            println!("play3");
-        });
+            sink.append(source);
+            sink.sleep_until_end();
+        }).detach();
     }
 }
 
