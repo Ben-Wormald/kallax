@@ -25,7 +25,6 @@ impl MusicPlayer {
         let files = cx.new_view(|_cx| Tracks::new());
 
         cx.subscribe(&files, move |_subscriber, _emitter, event, cx| {
-            dbg!("event");
             Player::play(event.track.clone(), cx);
         }).detach();
 
@@ -79,13 +78,8 @@ impl Render for Tracks {
                     .children(
                         self.tracks.clone().into_iter().map(|track|
                             render_track(track, cx)
-                                .on_click(cx.listener(move |_this, _event, cx| {
-                                    let track = track.clone();
-                                    dbg!("play {}", &track.name);
-                                    cx.emit(PlayEvent { track })
-                                }))
                         )
-                    ),
+                    )
             )
             .child(
                 div().child("hi").border().border_color(rgb(COLOUR_BORDER)).size_full(),
@@ -95,9 +89,13 @@ impl Render for Tracks {
 
 fn render_track(track: Track, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
     div()
-        .id("track.path")
+        .id(ElementId::Name(track.name.clone().into()))
         .hover(|style| style.bg(rgb(COLOUR_BORDER)))
         .child(track.name.clone())
+        .on_click(cx.listener(move |_this, _event, cx| {
+            let track = track.clone();
+            cx.emit(PlayEvent { track })
+        }))
 }
 
 struct Player {
@@ -119,7 +117,6 @@ impl Player {
     }
 
     fn play(track: Track, cx: &mut AppContext) {
-        dbg!("playing {}", &track.path);
         let sink = cx.global::<Player>().sink.clone();
         cx.background_executor().spawn(async move {
             let file = BufReader::new(File::open(track.path).unwrap());
