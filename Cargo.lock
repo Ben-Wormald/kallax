@@ -1485,6 +1485,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "id3"
+version = "1.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ba0a11a3cf6f08d58a5629531bdb4e7c3b8b595e9812a31a7058b1176c4631e"
+dependencies = [
+ "bitflags 2.4.2",
+ "byteorder",
+ "flate2",
+]
+
+[[package]]
 name = "idna"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1892,6 +1903,7 @@ name = "musicplayer"
 version = "0.1.0"
 dependencies = [
  "gpui",
+ "id3",
  "rodio",
 ]
 

@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 gpui = { git = "https://github.com/zed-industries/zed" }
+id3 = "1.12.0"
 rodio = "0.17.3"

@@ -1,6 +1,7 @@
-use std::{fs::File, io::BufReader, sync::Arc};
 use gpui::*;
+use id3::{Tag, TagLike};
 use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
+use std::{fs::File, io::BufReader, sync::Arc};
 
 const COLOUR_BG: u32 = 0x333531;
 const COLOUR_BORDER: u32 = 0x1f211f;
@@ -8,23 +9,28 @@ const COLOUR_TEXT: u32 = 0xf2f4f3;
 
 actions!(musicplayer, [Quit]);
 
+#[derive(Clone)]
+struct Track {
+    path: String,
+    name: String,
+}
+
 struct MusicPlayer {
-    is_playing: bool,
-    player: Model<Player>,
-    files: View<Files>,
+    _player: Model<Player>,
+    files: View<Tracks>,
 }
 impl MusicPlayer {
     fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
         let player = cx.new_model(|_cx| Player::new());
-        let files = cx.new_view(|_cx| Files::new());
+        let files = cx.new_view(|_cx| Tracks::new());
 
-        cx.subscribe(&files, move |_subscriber, _emitter, _event, cx| {
-            Player::play(cx);
+        cx.subscribe(&files, move |_subscriber, _emitter, event, cx| {
+            dbg!("event");
+            Player::play(event.track.clone(), cx);
         }).detach();
 
         MusicPlayer {
-            is_playing: false,
-            player,
+            _player: player,
             files,
         }
     }
@@ -35,25 +41,33 @@ impl Render for MusicPlayer {
     }
 }
 
-struct Files {
-    names: Vec<String>,
+struct Tracks {
+    tracks: Vec<Track>,
 }
-impl Files {
-    fn new() -> Files {
+impl Tracks {
+    fn new() -> Tracks {
         // let path = "/Users/ben/Music/Alvvays/Antisocialites";
-        let path = "/Users/wormab01/Music/Skee Mask - Compro";
+        let dir = "/Users/wormab01/Music/Skee Mask - Compro";
 
-        let names = std::fs::read_dir(path).unwrap()
-            .map(|entry| entry.unwrap().file_name().to_str().unwrap().to_string())
-            .collect::<Vec<String>>();
+        let tracks = std::fs::read_dir(dir).unwrap()
+            .filter_map(|entry| {
+                let path = entry.unwrap().path();
 
-        Files { names }
+                if path.extension().unwrap() == "mp3" {
+                    let path = path.to_str().unwrap().to_string();
+                    let name = Tag::read_from_path(&path).unwrap().title().unwrap().to_string();
+                    Some(Track { name, path })
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<Track>>();
+
+        Tracks { tracks }
     }
 }
-impl Render for Files {
+impl Render for Tracks {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
-        let text = self.names.clone().into_iter().map(|name| name);
-
         div()
             .flex()
             .bg(rgb(COLOUR_BG))
@@ -62,20 +76,28 @@ impl Render for Files {
             .font("Work Sans")
             .child(
                 div()
-                    .id("tracks")
-                    .hover(|style| style.bg(rgb(COLOUR_BORDER)))
-                    .children(text)
-                    .border()
-                    .border_color(rgb(COLOUR_BORDER))
-                    .size_full()
-                    .on_click(cx.listener(|_this, _event, cx| {
-                        cx.emit(PlayEvent)
-                    })),
+                    .children(
+                        self.tracks.clone().into_iter().map(|track|
+                            render_track(track, cx)
+                                .on_click(cx.listener(move |_this, _event, cx| {
+                                    let track = track.clone();
+                                    dbg!("play {}", &track.name);
+                                    cx.emit(PlayEvent { track })
+                                }))
+                        )
+                    ),
             )
             .child(
                 div().child("hi").border().border_color(rgb(COLOUR_BORDER)).size_full(),
             )
     }
+}
+
+fn render_track(track: Track, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
+    div()
+        .id("track.path")
+        .hover(|style| style.bg(rgb(COLOUR_BORDER)))
+        .child(track.name.clone())
 }
 
 struct Player {
@@ -96,10 +118,11 @@ impl Player {
         }
     }
 
-    fn play(cx: &mut AppContext) {
+    fn play(track: Track, cx: &mut AppContext) {
+        dbg!("playing {}", &track.path);
         let sink = cx.global::<Player>().sink.clone();
         cx.background_executor().spawn(async move {
-            let file = BufReader::new(File::open("/Users/wormab01/Music/Skee Mask - Compro/Skee Mask - ITLP04 - Compro - 06 Soundboy Ext..mp3").unwrap());
+            let file = BufReader::new(File::open(track.path).unwrap());
             let source = Decoder::new(file).unwrap();
             sink.append(source);
             sink.sleep_until_end();
@@ -107,9 +130,11 @@ impl Player {
     }
 }
 
-#[derive(Debug)]
-struct PlayEvent;
-impl EventEmitter<PlayEvent> for Files {}
+// #[derive(Debug)]
+struct PlayEvent {
+    track: Track,
+}
+impl EventEmitter<PlayEvent> for Tracks {}
 
 fn main() {
     App::new().run(|cx: &mut AppContext| {
