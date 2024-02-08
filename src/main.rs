@@ -10,9 +10,7 @@ mod views;
 use domain::*;
 use events::*;
 use player::Player;
-use views::music_player::MusicPlayer;
-use views::now_playing::NowPlaying;
-use views::tracks::Tracks;
+use views::*;
 
 const COLOUR_BG: u32 = 0x333531;
 const COLOUR_BORDER: u32 = 0x1f211f;

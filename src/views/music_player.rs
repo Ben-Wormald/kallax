@@ -10,7 +10,7 @@ pub struct MusicPlayer {
 
 impl MusicPlayer {
     pub fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
-        let player = cx.new_model(|_cx| Player::new());
+        let _player = cx.new_model(|_cx| Player::new());
         let tracks = cx.new_view(|_cx| Tracks::new());
         let now_playing = cx.new_view(|_cx| NowPlaying::new());
 
@@ -25,7 +25,7 @@ impl MusicPlayer {
         });
 
         MusicPlayer {
-            _player: player,
+            _player,
             tracks,
             now_playing,
         }
