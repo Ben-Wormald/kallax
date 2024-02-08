@@ -1904,6 +1904,7 @@ version = "0.1.0"
 dependencies = [
  "gpui",
  "id3",
+ "image",
  "rodio",
 ]
 

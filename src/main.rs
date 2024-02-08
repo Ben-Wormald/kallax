@@ -4,6 +4,7 @@ mod domain;
 mod elements;
 mod events;
 mod player;
+mod utils;
 mod views;
 
 use domain::*;
