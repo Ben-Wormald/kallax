@@ -17,26 +17,42 @@ struct Track {
 
 struct MusicPlayer {
     _player: Model<Player>,
-    files: View<Tracks>,
+    tracks: View<Tracks>,
+    now_playing: View<NowPlaying>,
 }
 impl MusicPlayer {
     fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
         let player = cx.new_model(|_cx| Player::new());
-        let files = cx.new_view(|_cx| Tracks::new());
+        let tracks = cx.new_view(|_cx| Tracks::new());
+        let now_playing = cx.new_view(|_cx| NowPlaying::new());
 
-        cx.subscribe(&files, move |_subscriber, _emitter, event, cx| {
+        cx.subscribe(&tracks, move |_subscriber, _emitter, event, cx| {
             Player::play(event.track.clone(), cx);
         }).detach();
 
+        cx.update_view(&now_playing, |_, cx| {
+            cx.subscribe(&tracks, move |subscriber, _emitter, event, _cx| {
+                subscriber.track = Some(event.track.clone());
+            }).detach();
+        });
+
         MusicPlayer {
             _player: player,
-            files,
+            tracks,
+            now_playing,
         }
     }
 }
 impl Render for MusicPlayer {
     fn render(&mut self, _cx: &mut ViewContext<Self>) -> impl IntoElement {
-        self.files.clone()
+        div()
+            .flex()
+            .bg(rgb(COLOUR_BG))
+            .size_full()
+            .text_color(rgb(COLOUR_TEXT))
+            .font("Work Sans")
+            .child(self.tracks.clone())
+            .child(self.now_playing.clone())
     }
 }
 
@@ -68,22 +84,32 @@ impl Tracks {
 impl Render for Tracks {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         div()
-            .flex()
-            .bg(rgb(COLOUR_BG))
+            .children(
+                self.tracks.clone().into_iter().map(|track|
+                    render_track(track, cx)
+                )
+            )
+    }
+}
+
+struct NowPlaying {
+    track: Option<Track>,
+}
+impl NowPlaying {
+    fn new() -> NowPlaying {
+        NowPlaying {
+            track: None,
+        }
+    }
+}
+impl Render for NowPlaying {
+    fn render(&mut self, _cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
+        div()
+            .child("Now playing:")
+            .child(self.track.clone().map_or("-".to_string(), |track| track.name))
+            .border()
+            .border_color(rgb(COLOUR_BORDER))
             .size_full()
-            .text_color(rgb(COLOUR_TEXT))
-            .font("Work Sans")
-            .child(
-                div()
-                    .children(
-                        self.tracks.clone().into_iter().map(|track|
-                            render_track(track, cx)
-                        )
-                    )
-            )
-            .child(
-                div().child("hi").border().border_color(rgb(COLOUR_BORDER)).size_full(),
-            )
     }
 }
 
