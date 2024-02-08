@@ -1,9 +1,10 @@
 use gpui::*;
+use std::sync::Arc;
 
 use crate::*;
 
 pub struct NowPlaying {
-    pub track: Option<Track>,
+    pub track: Option<Arc<Track>>,
 }
 
 impl NowPlaying {
@@ -21,10 +22,10 @@ impl Render for NowPlaying {
             .border_color(rgb(COLOUR_BORDER))
             .size_full()
             .child("Now playing:")
-            .child(self.track.clone().map_or("-".to_string(), |track| track.name));
+            .child(self.track.clone().map_or("-".to_string(), |track| track.name.clone()));
 
         if let Some(track) = self.track.clone() {
-            if let Some(artwork) = track.artwork {
+            if let Some(artwork) = track.artwork.clone() {
                 div.child(
                     img(artwork)
                         .flex_none()

@@ -1,10 +1,11 @@
 use gpui::*;
 use id3::{Tag, TagLike};
+use std::sync::Arc;
 
 use crate::*;
 
 pub struct Tracks {
-    tracks: Vec<Track>,
+    tracks: Vec<Arc<Track>>,
 }
 
 impl Tracks {
@@ -22,16 +23,16 @@ impl Tracks {
                     let name = tags.title().unwrap().to_string();
                     let artwork = utils::get_image(&tags);
 
-                    Some(Track {
+                    Some(Arc::new(Track {
                         name,
                         path,
                         artwork,
-                    })
+                    }))
                 } else {
                     None
                 }
             })
-            .collect::<Vec<Track>>();
+            .collect::<Vec<Arc<Track>>>();
 
         Tracks { tracks }
     }

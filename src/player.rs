@@ -21,10 +21,10 @@ impl Player {
         }
     }
 
-    pub fn play(track: Track, cx: &mut gpui::AppContext) {
+    pub fn play(track: Arc<Track>, cx: &mut gpui::AppContext) {
         let sink = cx.global::<Player>().sink.clone();
         cx.background_executor().spawn(async move {
-            let file = BufReader::new(File::open(track.path).unwrap());
+            let file = BufReader::new(File::open(track.path.clone()).unwrap());
             let source = Decoder::new(file).unwrap();
             sink.append(source);
             sink.sleep_until_end();
