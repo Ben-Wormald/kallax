@@ -3,7 +3,7 @@ use gpui::*;
 pub struct ContextMenu {
     pub is_visible: bool,
     pub position: Option<Point<Pixels>>,
-    pub items: Vec<String>,
+    pub items: Vec<ContextMenuItem>,
 }
 
 impl ContextMenu {
@@ -19,9 +19,16 @@ impl ContextMenu {
 impl Render for ContextMenu {
     fn render(&mut self, _cx: &mut ViewContext<ContextMenu>) -> impl IntoElement {
         if self.is_visible {
-            overlay().children(self.items.clone().into_iter()).position(self.position.unwrap())
+            overlay()
+                .position(self.position.unwrap())
+                .children(self.items.iter().map(|item| item.label.clone()))
         } else {
             overlay()
         }
     }
+}
+
+pub struct ContextMenuItem {
+    pub label: String,
+    pub action: Box<dyn Fn(usize) -> usize>,
 }

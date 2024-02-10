@@ -17,10 +17,13 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
                 cx.emit(PlayEvent { track })
             }
         }))
-        .on_mouse_down(MouseButton::Right, cx.listener(move |_this, event: &MouseDownEvent, cx: &mut ViewContext<Tracks>| {
-            cx.emit(RightClickEvent {
-                position: event.position,
-                items: vec!["hello".to_string(), "hey".to_string()],
-            });
-        }))
+        .on_mouse_down(
+            MouseButton::Right,
+            cx.listener(move |_this, event: &MouseDownEvent, cx: &mut ViewContext<Tracks>| {
+                cx.emit(RightClickEvent {
+                    position: event.position,
+                    items: vec!["hello".to_string(), "hey".to_string()],
+                });
+            })
+        )
 }
