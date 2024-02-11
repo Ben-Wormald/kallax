@@ -22,12 +22,8 @@ impl MusicPlayer {
         }).detach();
 
         cx.subscribe(&context_menu, move |_subscriber, _emitter, event: &Arc<Event>, cx| {
-            dbg!("hi");
-
-            let event = **event;
-
-            match event {
-                Event::PlayEvent(event) => Player::play(Arc::clone(&event.track), cx),
+            match (**event).clone() {
+                Event::Play(event) => Player::play(Arc::clone(&event.track), cx),
                 _ => {}
             };
         }).detach();
@@ -35,6 +31,13 @@ impl MusicPlayer {
         cx.update_view(&now_playing, |_, cx| {
             cx.subscribe(&tracks, move |subscriber, _emitter, event: &PlayEvent, _cx| {
                 subscriber.track = Some(Arc::clone(&event.track));
+            }).detach();
+
+            cx.subscribe(&context_menu, move |subscriber, _emitter, event: &Arc<Event>, _cx| {
+                match (**event).clone() {
+                    Event::Play(event) => subscriber.track = Some(Arc::clone(&event.track)),
+                    _ => {}
+                };
             }).detach();
         });
 

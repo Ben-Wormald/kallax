@@ -28,6 +28,8 @@ impl Render for ContextMenu {
                     div()
                         .flex_col()
                         .bg(rgb(COLOUR_BG))
+                        .border()
+                        .border_color(rgb(COLOUR_BORDER))
                         .children(self.items.iter().map(|item|
                             div()
                                 .id(ElementId::Name(item.label.clone().into()))
@@ -38,9 +40,7 @@ impl Render for ContextMenu {
                                 .on_mouse_down(MouseButton::Left, cx.listener({
                                     let event = Arc::clone(&item.event);
                                     move |_this, _event, cx| {
-                                        dbg!("on_click");
-                                        let event = Arc::clone(&event);
-                                        cx.emit(event);
+                                        cx.emit(Arc::clone(&event));
                                     }
                                 }))
                         ))

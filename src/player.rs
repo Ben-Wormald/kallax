@@ -22,7 +22,7 @@ impl Player {
     }
 
     pub fn play(track: Arc<Track>, cx: &mut gpui::AppContext) {
-        let sink = cx.global::<Player>().sink.clone();
+        let sink = Arc::clone(&cx.global::<Player>().sink);
         cx.background_executor().spawn(async move {
             let file = BufReader::new(File::open(track.path.clone()).unwrap());
             let source = Decoder::new(file).unwrap();

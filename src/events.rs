@@ -4,19 +4,22 @@ use crate::*;
 
 use context_menu::ContextMenuItem;
 
+#[derive(Clone)]
 pub enum Event {
-    PlayEvent(PlayEvent),
-    QueueEvent(QueueEvent),
+    Play(PlayEvent),
+    Queue(QueueEvent),
 }
 
 impl gpui::EventEmitter<Arc<Event>> for ContextMenu {}
 
+#[derive(Clone)]
 pub struct PlayEvent {
     pub track: Arc<Track>,
 }
 impl gpui::EventEmitter<PlayEvent> for Tracks {}
 impl gpui::EventEmitter<PlayEvent> for ContextMenu {}
 
+#[derive(Clone)]
 pub struct QueueEvent {
     pub track: Arc<Track>,
 }

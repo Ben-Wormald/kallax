@@ -27,11 +27,11 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
                     items: Arc::new(vec![
                         ContextMenuItem {
                             label: "Play".to_string(),
-                            event: Arc::new(Event::PlayEvent(PlayEvent { track: Arc::clone(&track) })),
+                            event: Arc::new(Event::Play(PlayEvent { track: Arc::clone(&track) })),
                         },
                         ContextMenuItem {
                             label: "Queue".to_string(),
-                            event: Arc::new(Event::PlayEvent(PlayEvent { track: Arc::clone(&track) })),
+                            event: Arc::new(Event::Queue(QueueEvent { track: Arc::clone(&track) })),
                         },
                     ]),
                 });
