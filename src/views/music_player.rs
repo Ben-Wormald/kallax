@@ -1,4 +1,5 @@
 use gpui::*;
+use std::sync::Arc;
 
 use crate::*;
 
@@ -17,12 +18,23 @@ impl MusicPlayer {
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
 
         cx.subscribe(&tracks, move |_subscriber, _emitter, event: &PlayEvent, cx| {
-            Player::play(event.track.clone(), cx);
+            Player::play(Arc::clone(&event.track), cx);
+        }).detach();
+
+        cx.subscribe(&context_menu, move |_subscriber, _emitter, event: &Arc<Event>, cx| {
+            dbg!("hi");
+
+            let event = **event;
+
+            match event {
+                Event::PlayEvent(event) => Player::play(Arc::clone(&event.track), cx),
+                _ => {}
+            };
         }).detach();
 
         cx.update_view(&now_playing, |_, cx| {
             cx.subscribe(&tracks, move |subscriber, _emitter, event: &PlayEvent, _cx| {
-                subscriber.track = Some(event.track.clone());
+                subscriber.track = Some(Arc::clone(&event.track));
             }).detach();
         });
 
@@ -30,7 +42,7 @@ impl MusicPlayer {
             cx.subscribe(&tracks, move |subscriber, _emitter, event: &RightClickEvent, _cx| {
                 subscriber.position = Some(event.position);
                 subscriber.is_visible = true;
-                subscriber.items = event.items.clone();
+                subscriber.items = Arc::clone(&event.items);
             }).detach();
         });
 

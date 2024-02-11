@@ -3,6 +3,8 @@ use std::sync::Arc;
 
 use crate::*;
 
+use context_menu::ContextMenuItem;
+
 pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
     div()
         .id(ElementId::Name(track.name.clone().into()))
@@ -11,9 +13,9 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
         .hover(|style| style.bg(rgb(COLOUR_BORDER)))
         .child(track.name.clone())
         .on_click(cx.listener({
-            let track = track.clone();
+            let track = Arc::clone(&track);
             move |_this, _event, cx| {
-                let track = track.clone();
+                let track = Arc::clone(&track);
                 cx.emit(PlayEvent { track })
             }
         }))
@@ -22,7 +24,16 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
             cx.listener(move |_this, event: &MouseDownEvent, cx: &mut ViewContext<Tracks>| {
                 cx.emit(RightClickEvent {
                     position: event.position,
-                    items: vec!["hello".to_string(), "hey".to_string()],
+                    items: Arc::new(vec![
+                        ContextMenuItem {
+                            label: "Play".to_string(),
+                            event: Arc::new(Event::PlayEvent(PlayEvent { track: Arc::clone(&track) })),
+                        },
+                        ContextMenuItem {
+                            label: "Queue".to_string(),
+                            event: Arc::new(Event::PlayEvent(PlayEvent { track: Arc::clone(&track) })),
+                        },
+                    ]),
                 });
             })
         )
