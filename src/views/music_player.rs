@@ -4,7 +4,7 @@ use std::sync::Arc;
 use crate::*;
 
 pub struct MusicPlayer {
-    _player: Model<Player>,
+    _player: Model<Player>, // does this need to be a model stored here?
     tracks: View<Tracks>,
     now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,

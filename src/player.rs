@@ -29,7 +29,7 @@ impl Player {
             sink.clear();
             sink.append(source);
             sink.play();
-            sink.sleep_until_end();
+            sink.sleep_until_end(); // does it still need to sleep here?
         }).detach();
     }
 

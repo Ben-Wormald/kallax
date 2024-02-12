@@ -14,10 +14,7 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
         .child(track.name.clone())
         .on_click(cx.listener({
             let track = Arc::clone(&track);
-            move |_this, _event, cx| {
-                let track = Arc::clone(&track);
-                cx.emit(Arc::new(Event::Play(PlayEvent { track })))
-            }
+            move |_this, _event, cx| cx.emit(Event::play(&track))
         }))
         .on_mouse_down(
             MouseButton::Right,
@@ -27,11 +24,11 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
                     items: Arc::new(vec![
                         ContextMenuItem {
                             label: "Play".to_string(),
-                            event: Arc::new(Event::Play(PlayEvent { track: Arc::clone(&track) })),
+                            event: Event::play(&track),
                         },
                         ContextMenuItem {
                             label: "Queue".to_string(),
-                            event: Arc::new(Event::Queue(QueueEvent { track: Arc::clone(&track) })),
+                            event: Event::queue(&track),
                         },
                     ]),
                 });

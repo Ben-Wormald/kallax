@@ -12,6 +12,15 @@ pub enum Event {
     Resume,
     Skip,
 }
+impl Event {
+    pub fn play(track: &Arc<Track>) -> Arc<Event> {
+        Arc::new(Event::Play(PlayEvent { track: Arc::clone(track) }))
+    }
+
+    pub fn queue(track: &Arc<Track>) -> Arc<Event> {
+        Arc::new(Event::Queue(QueueEvent { track: Arc::clone(track) }))
+    }
+}
 impl gpui::EventEmitter<Arc<Event>> for Tracks {}
 impl gpui::EventEmitter<Arc<Event>> for NowPlaying {}
 impl gpui::EventEmitter<Arc<Event>> for ContextMenu {}
