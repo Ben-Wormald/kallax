@@ -16,7 +16,7 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
             let track = Arc::clone(&track);
             move |_this, _event, cx| {
                 let track = Arc::clone(&track);
-                cx.emit(PlayEvent { track })
+                cx.emit(Arc::new(Event::Play(PlayEvent { track })))
             }
         }))
         .on_mouse_down(
