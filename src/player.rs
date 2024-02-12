@@ -26,7 +26,43 @@ impl Player {
         cx.background_executor().spawn(async move {
             let file = BufReader::new(File::open(track.path.clone()).unwrap());
             let source = Decoder::new(file).unwrap();
+            sink.clear();
             sink.append(source);
+            sink.play();
+            sink.sleep_until_end();
+        }).detach();
+    }
+
+    pub fn queue(track: Arc<Track>, cx: &mut gpui::AppContext) {
+        let sink = Arc::clone(&cx.global::<Player>().sink);
+        cx.background_executor().spawn(async move {
+            let file = BufReader::new(File::open(track.path.clone()).unwrap());
+            let source = Decoder::new(file).unwrap();
+            sink.append(source);
+            sink.sleep_until_end();
+        }).detach();
+    }
+
+    pub fn pause(cx: &mut gpui::AppContext) {
+        let sink = Arc::clone(&cx.global::<Player>().sink);
+        cx.background_executor().spawn(async move {
+            sink.pause();
+            sink.sleep_until_end();
+        }).detach();
+    }
+
+    pub fn resume(cx: &mut gpui::AppContext) {
+        let sink = Arc::clone(&cx.global::<Player>().sink);
+        cx.background_executor().spawn(async move {
+            sink.play();
+            sink.sleep_until_end();
+        }).detach();
+    }
+
+    pub fn skip(cx: &mut gpui::AppContext) {
+        let sink = Arc::clone(&cx.global::<Player>().sink);
+        cx.background_executor().spawn(async move {
+            sink.skip_one();
             sink.sleep_until_end();
         }).detach();
     }

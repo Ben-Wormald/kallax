@@ -8,9 +8,13 @@ use context_menu::ContextMenuItem;
 pub enum Event {
     Play(PlayEvent),
     Queue(QueueEvent),
+    Pause,
+    Resume,
+    Skip,
 }
 
 impl gpui::EventEmitter<Arc<Event>> for ContextMenu {}
+impl gpui::EventEmitter<Arc<Event>> for NowPlaying {}
 
 #[derive(Clone)]
 pub struct PlayEvent {
@@ -24,6 +28,15 @@ pub struct QueueEvent {
     pub track: Arc<Track>,
 }
 impl gpui::EventEmitter<QueueEvent> for ContextMenu {}
+
+// pub struct PauseEvent;
+// impl gpui::EventEmitter<PauseEvent> for NowPlaying {}
+
+// pub struct ResumeEvent;
+// impl gpui::EventEmitter<ResumeEvent> for NowPlaying {}
+
+// pub struct SkipEvent;
+// impl gpui::EventEmitter<SkipEvent> for NowPlaying {}
 
 pub struct RightClickEvent {
     pub position: Point<Pixels>,

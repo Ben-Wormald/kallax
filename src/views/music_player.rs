@@ -24,7 +24,20 @@ impl MusicPlayer {
         cx.subscribe(&context_menu, move |_subscriber, _emitter, event: &Arc<Event>, cx| {
             match (**event).clone() {
                 Event::Play(event) => Player::play(Arc::clone(&event.track), cx),
-                _ => {}
+                Event::Queue(event) => Player::queue(Arc::clone(&event.track), cx),
+                Event::Pause => Player::pause(cx),
+                Event::Resume => Player::resume(cx),
+                Event::Skip => Player::skip(cx),
+            };
+        }).detach();
+
+        cx.subscribe(&now_playing, move |_subscriber, _emitter, event: &Arc<Event>, cx| {
+            match (**event).clone() {
+                Event::Play(event) => Player::play(Arc::clone(&event.track), cx),
+                Event::Queue(event) => Player::queue(Arc::clone(&event.track), cx),
+                Event::Pause => Player::pause(cx),
+                Event::Resume => Player::resume(cx),
+                Event::Skip => Player::skip(cx),
             };
         }).detach();
 
