@@ -21,11 +21,19 @@ impl Player {
         }
     }
 
+    fn get_sink(cx: &mut gpui::AppContext) -> Arc<Sink> {
+        Arc::clone(&cx.global::<Player>().sink)
+    }
+
+    fn get_source(track: Arc<Track>) -> Decoder<BufReader<File>> {
+        let file = BufReader::new(File::open(track.path.clone()).unwrap());
+        Decoder::new(file).unwrap()
+    }
+
     pub fn play(track: Arc<Track>, cx: &mut gpui::AppContext) {
-        let sink = Arc::clone(&cx.global::<Player>().sink);
+        let sink = Self::get_sink(cx);
         cx.background_executor().spawn(async move {
-            let file = BufReader::new(File::open(track.path.clone()).unwrap());
-            let source = Decoder::new(file).unwrap();
+            let source = Self::get_source(track);
             sink.clear();
             sink.append(source);
             sink.play();
@@ -33,30 +41,29 @@ impl Player {
     }
 
     pub fn queue(track: Arc<Track>, cx: &mut gpui::AppContext) {
-        let sink = Arc::clone(&cx.global::<Player>().sink);
+        let sink = Self::get_sink(cx);
         cx.background_executor().spawn(async move {
-            let file = BufReader::new(File::open(track.path.clone()).unwrap());
-            let source = Decoder::new(file).unwrap();
+            let source = Self::get_source(track);
             sink.append(source);
         }).detach();
     }
 
     pub fn pause(cx: &mut gpui::AppContext) {
-        let sink = Arc::clone(&cx.global::<Player>().sink);
+        let sink = Self::get_sink(cx);
         cx.background_executor().spawn(async move {
             sink.pause();
         }).detach();
     }
 
     pub fn resume(cx: &mut gpui::AppContext) {
-        let sink = Arc::clone(&cx.global::<Player>().sink);
+        let sink = Self::get_sink(cx);
         cx.background_executor().spawn(async move {
             sink.play();
         }).detach();
     }
 
     pub fn skip(cx: &mut gpui::AppContext) {
-        let sink = Arc::clone(&cx.global::<Player>().sink);
+        let sink = Self::get_sink(cx);
         cx.background_executor().spawn(async move {
             sink.skip_one();
         }).detach();
