@@ -4,7 +4,6 @@ use std::sync::Arc;
 use crate::*;
 
 pub struct ContextMenu {
-    pub is_visible: bool,
     pub position: Option<Point<Pixels>>,
     pub items: Arc<Vec<ContextMenuItem>>,
 }
@@ -12,7 +11,6 @@ pub struct ContextMenu {
 impl ContextMenu {
     pub fn new() -> ContextMenu {
         ContextMenu {
-            is_visible: false,
             position: None,
             items: Arc::new(vec![]),
         }
@@ -21,9 +19,9 @@ impl ContextMenu {
 
 impl Render for ContextMenu {
     fn render(&mut self, cx: &mut ViewContext<ContextMenu>) -> impl IntoElement {
-        if self.is_visible {
+        if let Some(position) = self.position {
             overlay()
-                .position(self.position.unwrap())
+                .position(position)
                 .child(
                     div()
                         .flex_col()

@@ -38,7 +38,6 @@ impl MusicPlayer {
         cx.update_view(&context_menu, |_, cx| {
             cx.subscribe(&tracks, move |subscriber, _emitter, event: &RightClickEvent, _cx| {
                 subscriber.position = Some(event.position);
-                subscriber.is_visible = true;
                 subscriber.items = Arc::clone(&event.items);
             }).detach();
         });
@@ -64,7 +63,7 @@ impl Render for MusicPlayer {
             .child(self.context_menu.clone())
             .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, cx| {
                 this.context_menu.update(cx, |context_menu, _cx| {
-                    context_menu.is_visible = false;
+                    context_menu.position = None;
                 });
             }))
     }
