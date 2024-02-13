@@ -4,7 +4,6 @@ use std::sync::Arc;
 use crate::*;
 
 pub struct MusicPlayer {
-    _player: Model<Player>, // does this need to be a model stored here?
     tracks: View<Tracks>,
     now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,
@@ -12,7 +11,6 @@ pub struct MusicPlayer {
 
 impl MusicPlayer {
     pub fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
-        let _player = cx.new_model(|_cx| Player::new());
         let tracks = cx.new_view(|_cx| Tracks::new());
         let now_playing = cx.new_view(|_cx| NowPlaying::new());
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
@@ -46,7 +44,6 @@ impl MusicPlayer {
         });
 
         MusicPlayer {
-            _player,
             tracks,
             now_playing,
             context_menu,

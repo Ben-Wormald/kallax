@@ -29,7 +29,6 @@ impl Player {
             sink.clear();
             sink.append(source);
             sink.play();
-            sink.sleep_until_end(); // does it still need to sleep here?
         }).detach();
     }
 
@@ -39,7 +38,6 @@ impl Player {
             let file = BufReader::new(File::open(track.path.clone()).unwrap());
             let source = Decoder::new(file).unwrap();
             sink.append(source);
-            sink.sleep_until_end();
         }).detach();
     }
 
@@ -47,7 +45,6 @@ impl Player {
         let sink = Arc::clone(&cx.global::<Player>().sink);
         cx.background_executor().spawn(async move {
             sink.pause();
-            sink.sleep_until_end();
         }).detach();
     }
 
@@ -55,7 +52,6 @@ impl Player {
         let sink = Arc::clone(&cx.global::<Player>().sink);
         cx.background_executor().spawn(async move {
             sink.play();
-            sink.sleep_until_end();
         }).detach();
     }
 
@@ -63,7 +59,6 @@ impl Player {
         let sink = Arc::clone(&cx.global::<Player>().sink);
         cx.background_executor().spawn(async move {
             sink.skip_one();
-            sink.sleep_until_end();
         }).detach();
     }
 }
