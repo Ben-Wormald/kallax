@@ -12,7 +12,7 @@ impl ContextMenu {
     pub fn new() -> ContextMenu {
         ContextMenu {
             position: None,
-            items: Arc::new(vec![]),
+            items: Arc::new(Vec::new()),
         }
     }
 }
