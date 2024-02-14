@@ -41,4 +41,19 @@ pub struct RightClickEvent {
     pub position: Point<Pixels>,
     pub items: Arc<Vec<ContextMenuItem>>,
 }
-impl gpui::EventEmitter<RightClickEvent> for Tracks {}
+
+#[derive(Clone)]
+pub enum PlaybackEvent {
+    TrackStarted(TrackStartedEvent),
+}
+impl PlaybackEvent {
+    pub fn start(track: &Arc<Track>) -> Arc<PlaybackEvent> {
+        Arc::new(PlaybackEvent::TrackStarted(TrackStartedEvent { track: Arc::clone(track) }))
+    }
+}
+impl gpui::EventEmitter<Arc<PlaybackEvent>> for Player {}
+
+#[derive(Clone)]
+pub struct TrackStartedEvent {
+    pub track: Arc<Track>,
+}

@@ -11,29 +11,43 @@ pub struct MusicPlayer {
 
 impl MusicPlayer {
     pub fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
+        let player = cx.global::<Model<Player>>().clone();
+
         let tracks = cx.new_view(|_cx| Tracks::new());
         let now_playing = cx.new_view(|_cx| NowPlaying::new());
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
 
         cx.subscribe(&tracks, {
-            let now_playing = now_playing.clone();
             let context_menu = context_menu.clone();
             move |_subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-                handle_event(event, cx, now_playing.clone(), context_menu.clone());
+                handle_event(event, cx, context_menu.clone());
             }
         }).detach();
 
         cx.subscribe(&context_menu, {
-            let now_playing = now_playing.clone();
             move |_subscriber, emitter, event: &Arc<UiEvent>, cx| {
-                handle_event(event, cx, now_playing.clone(), emitter);
+                handle_event(event, cx, emitter);
             }
         }).detach();
 
         cx.subscribe(&now_playing, {
             let context_menu = context_menu.clone();
-            move |_subscriber, emitter, event: &Arc<UiEvent>, cx| {
-                handle_event(event, cx, emitter, context_menu.clone());
+            move |_subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+                handle_event(event, cx, context_menu.clone());
+            }
+        }).detach();
+
+        cx.subscribe(&player, {
+            let now_playing = now_playing.clone();
+            move |_subscriber, _emitter, event: &Arc<PlaybackEvent>, cx| {
+                match (**event).clone() {
+                    PlaybackEvent::TrackStarted(event) => {
+                        now_playing.update(cx, |this, cx| {
+                            this.track = Some(Arc::clone(&event.track));
+                            cx.notify();
+                        });
+                    }
+                }
             }
         }).detach();
 
@@ -67,17 +81,10 @@ impl Render for MusicPlayer {
 fn handle_event(
     event: &Arc<UiEvent>,
     cx: &mut ViewContext<MusicPlayer>,
-    now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,
 ) {
     match (**event).clone() {
-        UiEvent::PlayClicked(event) => {
-            Player::play(Arc::clone(&event.track), cx);
-            now_playing.update(cx, |this, cx| {
-                this.track = Some(Arc::clone(&event.track));
-                cx.notify();
-            });
-        },
+        UiEvent::PlayClicked(event) => Player::play(Arc::clone(&event.track), cx),
         UiEvent::QueueClicked(event) => Player::queue(Arc::clone(&event.track), cx),
         UiEvent::PauseClicked => Player::pause(cx),
         UiEvent::ResumeClicked => Player::resume(cx),

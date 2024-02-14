@@ -32,15 +32,18 @@ impl Player {
 
     pub fn play(track: Arc<Track>, cx: &mut gpui::AppContext) {
         let sink = Self::get_sink(cx);
+        let track2 = track.clone();
+
         cx.background_executor().spawn(async move {
-            let source = Self::get_source(track);
+            let source = Self::get_source(track2);
             sink.clear();
             sink.append(source);
             sink.play();
         }).detach();
 
-        cx.global::<Model<Player>>().update(cx, |this, cx| {
-            cx.emit(PlaybackEvent::TrackStarted);
+        let player = cx.global::<Model<Player>>().clone();
+        player.update(cx, |_this, cx| {
+            cx.emit(PlaybackEvent::start(&track));
         });
     }
 
