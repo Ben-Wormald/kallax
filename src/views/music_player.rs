@@ -47,6 +47,7 @@ impl MusicPlayer {
                             cx.notify();
                         });
                     }
+                    _ => {},
                 }
             }
         }).detach();

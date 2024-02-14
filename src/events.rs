@@ -45,6 +45,7 @@ pub struct RightClickEvent {
 #[derive(Clone)]
 pub enum PlaybackEvent {
     TrackStarted(TrackStartedEvent),
+    TrackEnded,
 }
 impl PlaybackEvent {
     pub fn start(track: &Arc<Track>) -> Arc<PlaybackEvent> {

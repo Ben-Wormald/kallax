@@ -1,5 +1,5 @@
 use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
-use std::{fs::File, io::BufReader, sync::Arc};
+use std::{fs::File, io::BufReader, sync::{atomic::AtomicUsize, Arc}, time::Duration};
 
 use crate::*;
 
@@ -30,21 +30,45 @@ impl Player {
         Decoder::new(file).unwrap()
     }
 
-    pub fn play(track: Arc<Track>, cx: &mut gpui::AppContext) {
-        let sink = Self::get_sink(cx);
-        let track2 = track.clone();
-
-        cx.background_executor().spawn(async move {
-            let source = Self::get_source(track2);
-            sink.clear();
-            sink.append(source);
-            sink.play();
-        }).detach();
-
+    fn emit(cx: &mut gpui::AppContext, event: Arc<PlaybackEvent>) {
         let player = cx.global::<Model<Player>>().clone();
         player.update(cx, |_this, cx| {
-            cx.emit(PlaybackEvent::start(&track));
+            cx.emit(event);
         });
+    }
+
+    pub fn play(track: Arc<Track>, cx: &mut gpui::AppContext) {
+        let sink = Self::get_sink(cx);
+        let signal = Arc::new(AtomicUsize::new(1));
+
+        {
+            let track = track.clone();
+            let signal = signal.clone();
+            cx.background_executor().spawn(async move {
+                let source = rodio::source::Done::new(Self::get_source(track), signal);
+                sink.clear();
+                sink.append(source);
+                sink.play();
+            }).detach();
+        }
+
+        cx.spawn(|mut cx| async move {
+            loop {
+                std::thread::sleep(Duration::from_secs(1));
+                if signal.load(std::sync::atomic::Ordering::SeqCst) == 0 {
+                    dbg!(&signal);
+                    cx.update_global(|this: &mut Model<Player>, cx| {
+                        this.update(cx, |_this, cx| {
+                            dbg!("track ended!");
+                            cx.emit(Arc::new(PlaybackEvent::TrackEnded));
+                        })
+                    }).ok();
+                    break;
+                }
+            }
+        }).detach();
+
+        Self::emit(cx, PlaybackEvent::start(&track));
     }
 
     pub fn queue(track: Arc<Track>, cx: &mut gpui::AppContext) {
