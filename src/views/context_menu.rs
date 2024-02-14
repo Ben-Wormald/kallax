@@ -51,5 +51,5 @@ impl Render for ContextMenu {
 
 pub struct ContextMenuItem {
     pub label: String,
-    pub event: Arc<Event>,
+    pub event: Arc<UiEvent>,
 }

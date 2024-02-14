@@ -41,13 +41,13 @@ impl Render for NowPlaying {
 
         now_playing
             .child(div().id("pause").child("Pause").on_click(cx.listener(|_this, _event, cx| {
-                cx.emit(Arc::new(Event::Pause))
+                cx.emit(Arc::new(UiEvent::PauseClicked))
             })))
             .child(div().id("resume").child("Resume").on_click(cx.listener(|_this, _event, cx| {
-                cx.emit(Arc::new(Event::Resume))
+                cx.emit(Arc::new(UiEvent::ResumeClicked))
             })))
             .child(div().id("skip").child("Skip").on_click(cx.listener(|_this, _event, cx| {
-                cx.emit(Arc::new(Event::Skip))
+                cx.emit(Arc::new(UiEvent::SkipClicked))
             })))
     }
 }

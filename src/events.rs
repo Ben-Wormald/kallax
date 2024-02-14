@@ -5,36 +5,38 @@ use crate::*;
 use context_menu::ContextMenuItem;
 
 #[derive(Clone)]
-pub enum Event {
-    Play(PlayEvent),
-    Queue(QueueEvent),
-    Pause,
-    Resume,
-    Skip,
+pub enum UiEvent {
+    PlayClicked(PlayClickedEvent),
+    QueueClicked(QueueClickedEvent),
+    PauseClicked,
+    ResumeClicked,
+    SkipClicked,
+    RightClick(RightClickEvent),
 }
-impl Event {
-    pub fn play(track: &Arc<Track>) -> Arc<Event> {
-        Arc::new(Event::Play(PlayEvent { track: Arc::clone(track) }))
+impl UiEvent {
+    pub fn play(track: &Arc<Track>) -> Arc<UiEvent> {
+        Arc::new(UiEvent::PlayClicked(PlayClickedEvent { track: Arc::clone(track) }))
     }
 
-    pub fn queue(track: &Arc<Track>) -> Arc<Event> {
-        Arc::new(Event::Queue(QueueEvent { track: Arc::clone(track) }))
+    pub fn queue(track: &Arc<Track>) -> Arc<UiEvent> {
+        Arc::new(UiEvent::QueueClicked(QueueClickedEvent { track: Arc::clone(track) }))
     }
 }
-impl gpui::EventEmitter<Arc<Event>> for Tracks {}
-impl gpui::EventEmitter<Arc<Event>> for NowPlaying {}
-impl gpui::EventEmitter<Arc<Event>> for ContextMenu {}
+impl gpui::EventEmitter<Arc<UiEvent>> for Tracks {}
+impl gpui::EventEmitter<Arc<UiEvent>> for NowPlaying {}
+impl gpui::EventEmitter<Arc<UiEvent>> for ContextMenu {}
 
 #[derive(Clone)]
-pub struct PlayEvent {
+pub struct PlayClickedEvent {
     pub track: Arc<Track>,
 }
 
 #[derive(Clone)]
-pub struct QueueEvent {
+pub struct QueueClickedEvent {
     pub track: Arc<Track>,
 }
 
+#[derive(Clone)]
 pub struct RightClickEvent {
     pub position: Point<Pixels>,
     pub items: Arc<Vec<ContextMenuItem>>,
