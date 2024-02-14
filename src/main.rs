@@ -24,7 +24,8 @@ fn main() {
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
 
-        cx.set_global(Player::new());
+        let player = cx.new_model(|_cx| Player::new());
+        cx.set_global(player);
 
         cx.open_window(WindowOptions::default(), |cx| {
             cx.new_view(|cx: &mut ViewContext<MusicPlayer>| MusicPlayer::new(cx))

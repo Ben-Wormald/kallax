@@ -22,7 +22,7 @@ impl Player {
     }
 
     fn get_sink(cx: &mut gpui::AppContext) -> Arc<Sink> {
-        Arc::clone(&cx.global::<Player>().sink)
+        Arc::clone(&cx.global::<Model<Player>>().read(cx).sink)
     }
 
     fn get_source(track: Arc<Track>) -> Decoder<BufReader<File>> {
@@ -38,6 +38,10 @@ impl Player {
             sink.append(source);
             sink.play();
         }).detach();
+
+        cx.global::<Model<Player>>().update(cx, |this, cx| {
+            cx.emit(PlaybackEvent::TrackStarted);
+        });
     }
 
     pub fn queue(track: Arc<Track>, cx: &mut gpui::AppContext) {
