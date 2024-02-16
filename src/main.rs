@@ -3,13 +3,13 @@ use gpui::*;
 mod domain;
 mod elements;
 mod events;
-mod player;
+mod playback;
 mod utils;
 mod views;
 
 use domain::*;
 use events::*;
-use player::Player;
+use playback::*;
 use views::*;
 
 const COLOUR_BG: u32 = 0x333531;
@@ -24,8 +24,8 @@ fn main() {
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
 
-        let player = cx.new_model(|_cx| Player::new());
-        cx.set_global(player);
+        let playback = cx.new_model(|_cx| Playback::new());
+        cx.set_global(playback);
 
         cx.open_window(WindowOptions::default(), |cx| {
             cx.new_view(|cx: &mut ViewContext<MusicPlayer>| MusicPlayer::new(cx))

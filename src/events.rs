@@ -52,7 +52,7 @@ impl PlaybackEvent {
         Arc::new(PlaybackEvent::TrackStarted(TrackStartedEvent { track: Arc::clone(track) }))
     }
 }
-impl gpui::EventEmitter<Arc<PlaybackEvent>> for Player {}
+impl gpui::EventEmitter<Arc<PlaybackEvent>> for Playback {}
 
 #[derive(Clone)]
 pub struct TrackStartedEvent {

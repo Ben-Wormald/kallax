@@ -11,7 +11,7 @@ pub struct MusicPlayer {
 
 impl MusicPlayer {
     pub fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
-        let player = cx.global::<Model<Player>>().clone();
+        let playback = cx.global::<Model<Playback>>().clone();
 
         let tracks = cx.new_view(|_cx| Tracks::new());
         let now_playing = cx.new_view(|_cx| NowPlaying::new());
@@ -37,7 +37,7 @@ impl MusicPlayer {
             }
         }).detach();
 
-        cx.subscribe(&player, {
+        cx.subscribe(&playback, {
             let now_playing = now_playing.clone();
             move |_subscriber, _emitter, event: &Arc<PlaybackEvent>, cx| {
                 match (**event).clone() {
@@ -85,11 +85,11 @@ fn handle_event(
     context_menu: View<ContextMenu>,
 ) {
     match (**event).clone() {
-        UiEvent::PlayClicked(event) => Player::play(Arc::clone(&event.track), cx),
-        UiEvent::QueueClicked(event) => Player::queue(Arc::clone(&event.track), cx),
-        UiEvent::PauseClicked => Player::pause(cx),
-        UiEvent::ResumeClicked => Player::resume(cx),
-        UiEvent::SkipClicked => Player::skip(cx),
+        UiEvent::PlayClicked(event) => Playback::play(Arc::clone(&event.track), cx),
+        // UiEvent::QueueClicked(event) => Playback::queue(Arc::clone(&event.track), cx),
+        // UiEvent::PauseClicked => Playback::pause(cx),
+        // UiEvent::ResumeClicked => Playback::resume(cx),
+        // UiEvent::SkipClicked => Playback::skip(cx),
         UiEvent::RightClick(event) => {
             context_menu.update(cx, |this, cx| {
                 this.items = Arc::clone(&event.items);
@@ -97,5 +97,6 @@ fn handle_event(
                 cx.notify();
             });
         },
+        _ => {},
     };
 }
