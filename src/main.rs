@@ -24,7 +24,7 @@ fn main() {
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
 
-        let playback = cx.new_model(|_cx| Playback::new());
+        let playback = cx.new_model(|cx| Playback::new(cx));
         cx.set_global(playback);
 
         cx.open_window(WindowOptions::default(), |cx| {
