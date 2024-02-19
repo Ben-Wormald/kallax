@@ -15,12 +15,12 @@ use crate::*;
 // https://docs.rs/axum-streams/latest/axum_streams/index.html
 
 pub struct Playback {
-    queue: Arc<Queue>,
+    queue: Queue,
     player: Arc<Player>,
 }
 impl Playback {
     pub fn new(cx: &mut gpui::ModelContext<Playback>) -> Playback {
-        let queue = Arc::new(Queue::new());
+        let queue = Queue::new();
 
         let player = Player::new();
         player.watch(cx);
@@ -64,8 +64,13 @@ impl Playback {
         Arc::clone(&cx.global::<Model<Playback>>().read(cx).player)
     }
 
-    fn get_queue(cx: &mut gpui::AppContext) -> Arc<Queue> {
-        Arc::clone(&cx.global::<Model<Playback>>().read(cx).queue)
+    // fn get_queue(cx: &mut gpui::AppContext) -> Arc<Queue> {
+    //     Arc::clone(&cx.global::<Model<Playback>>().read(cx).queue)
+    // }
+
+    fn next(&mut self, cx: &mut gpui::ModelContext<Playback>) {
+        self.queue.next();
+        Self::emit(cx, Arc::new(PlaybackEvent::TrackEnded));
     }
 }
 
@@ -146,8 +151,9 @@ impl Player {
                 }
 
                 if current_len < prev_len {
-                    this.update(&mut cx, |_, cx| {
-                        cx.emit(Arc::new(PlaybackEvent::TrackEnded))
+                    this.update(&mut cx, |playback, cx| {
+                        playback.next(cx);
+                        // cx.emit(Arc::new(PlaybackEvent::TrackEnded))
                     }).ok();
                 }
                 prev_len = current_len;
