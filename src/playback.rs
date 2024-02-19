@@ -1,5 +1,13 @@
 use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
-use std::{fs::File, io::BufReader, sync::{atomic::AtomicUsize, Arc}, time::Duration};
+use std::{
+    fs::File,
+    io::BufReader,
+    sync::{
+        atomic::{AtomicUsize, Ordering::SeqCst},
+        Arc,
+    },
+    time::Duration,
+};
 
 use crate::*;
 
@@ -14,17 +22,8 @@ impl Playback {
     pub fn new(cx: &mut gpui::ModelContext<Playback>) -> Playback {
         let queue = Arc::new(Queue::new());
 
-        let player = Player::new()
-            .on_track_end({
-                let queue = Arc::clone(&queue);
-                move || {
-                    queue.next();
-                    Self::emit(cx, Arc::new(PlaybackEvent::TrackEnded));
-                }
-            });
-
+        let player = Player::new();
         player.watch(cx);
-
         let player = Arc::new(player);
 
         Playback {
@@ -36,6 +35,18 @@ impl Playback {
     pub fn play(track: Arc<Track>, cx: &mut gpui::AppContext) {
         Self::get_player(cx).play(&track, cx);
         Self::emit(cx, PlaybackEvent::start(&track));
+    }
+
+    pub fn queue(track: Arc<Track>, cx: &mut gpui::AppContext) {
+        Self::get_player(cx).queue(&track, cx);
+    }
+
+    pub fn pause(cx: &mut gpui::AppContext) {
+        Self::get_player(cx).pause(cx);
+    }
+
+    pub fn resume(cx: &mut gpui::AppContext) {
+        Self::get_player(cx).resume(cx);
     }
 
     pub fn skip(cx: &mut gpui::AppContext) {
@@ -105,7 +116,6 @@ pub struct Player {
     sink: Arc<Sink>,
     _stream: OutputStream,
     _stream_handle: OutputStreamHandle,
-    track_end: Arc<Option<Box<dyn Fn() + Sync + Send>>>,
     queue_len: Arc<AtomicUsize>,
 }
 impl Player {
@@ -118,63 +128,69 @@ impl Player {
             sink,
             _stream,
             _stream_handle: stream_handle,
-            track_end: Arc::new(None),
             queue_len: Arc::new(AtomicUsize::new(0)),
         }
     }
 
-    fn on_track_end(mut self, track_end: impl Fn() + Send + Sync + 'static) -> Self {
-        self.track_end = Arc::new(Some(Box::new(track_end)));
-        self
-    }
-
     fn watch(&self, cx: &mut gpui::ModelContext<Playback>) {
         let queue_len = Arc::clone(&self.queue_len);
-        let on_track_end = self.track_end.clone();
 
-        cx.background_executor().spawn(async move {
-            let mut prev_len = queue_len.load(std::sync::atomic::Ordering::SeqCst);
+        cx.spawn(|this, mut cx| async move {
+            let mut prev_len = queue_len.load(SeqCst);
 
             loop {
-                let current_len = queue_len.load(std::sync::atomic::Ordering::SeqCst);
+                let current_len = queue_len.load(SeqCst);
+
+                if current_len != prev_len {
+                    println!("queue_len {prev_len} -> {current_len}");
+                }
+
                 if current_len < prev_len {
-                    if let Some(ref on_track_end) = *on_track_end {
-                        on_track_end();
-                    }
+                    this.update(&mut cx, |_, cx| {
+                        cx.emit(Arc::new(PlaybackEvent::TrackEnded))
+                    }).ok();
                 }
                 prev_len = current_len;
-                std::thread::sleep(Duration::from_secs(1));
+                cx.background_executor().timer(Duration::from_millis(2000)).await;
             }
         }).detach();
     }
 
-    fn get_source(track: Arc<Track>) -> Decoder<BufReader<File>> {
+    fn get_source(track: &Arc<Track>) -> Decoder<BufReader<File>> {
         let file = BufReader::new(File::open(track.path.clone()).unwrap());
         Decoder::new(file).unwrap()
     }
 
     fn play(&self, track: &Arc<Track>, cx: &mut gpui::AppContext) {
-            let track = QueueTrack::new(track);
-            let sink = Arc::clone(&self.sink);
-            let queue_len = Arc::clone(&self.queue_len);
+        let track = Arc::clone(track);
+        let sink = Arc::clone(&self.sink);
+        let queue_len = Arc::clone(&self.queue_len);
 
-            queue_len.store(1, std::sync::atomic::Ordering::SeqCst);
+        queue_len.store(1, SeqCst);
 
-            cx.background_executor().spawn(async move {
-                let source = rodio::source::Done::new(
-                    Self::get_source(track.track),
-                    queue_len,
-                );
-                sink.clear();
-                sink.append(source);
-                sink.play();
-            }).detach();
+        cx.background_executor().spawn(async move {
+            let source = rodio::source::Done::new(
+                Self::get_source(&track),
+                queue_len,
+            );
+            sink.clear();
+            sink.append(source);
+            sink.play();
+        }).detach();
     }
 
-    fn queue(&self, track: Arc<Track>, cx: &mut gpui::AppContext) {
+    fn queue(&self, track: &Arc<Track>, cx: &mut gpui::AppContext) {
+        let track = Arc::clone(track);
         let sink = Arc::clone(&self.sink);
+        let queue_len = Arc::clone(&self.queue_len);
+
+        queue_len.fetch_add(1, SeqCst);
+
         cx.background_executor().spawn(async move {
-            let source = Self::get_source(track);
+            let source = rodio::source::Done::new(
+                Self::get_source(&track),
+                queue_len,
+            );
             sink.append(source);
         }).detach();
     }
@@ -195,6 +211,10 @@ impl Player {
 
     fn skip(&self, cx: &mut gpui::AppContext) {
         let sink = Arc::clone(&self.sink);
+        let queue_len = Arc::clone(&self.queue_len);
+
+        queue_len.fetch_update(SeqCst, SeqCst, |len| Some(len - 1)).ok();
+
         cx.background_executor().spawn(async move {
             sink.skip_one();
         }).detach();

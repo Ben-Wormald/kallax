@@ -86,10 +86,10 @@ fn handle_event(
 ) {
     match (**event).clone() {
         UiEvent::PlayClicked(event) => Playback::play(Arc::clone(&event.track), cx),
-        // UiEvent::QueueClicked(event) => Playback::queue(Arc::clone(&event.track), cx),
-        // UiEvent::PauseClicked => Playback::pause(cx),
-        // UiEvent::ResumeClicked => Playback::resume(cx),
-        // UiEvent::SkipClicked => Playback::skip(cx),
+        UiEvent::QueueClicked(event) => Playback::queue(Arc::clone(&event.track), cx),
+        UiEvent::PauseClicked => Playback::pause(cx),
+        UiEvent::ResumeClicked => Playback::resume(cx),
+        UiEvent::SkipClicked => Playback::skip(cx),
         UiEvent::RightClick(event) => {
             context_menu.update(cx, |this, cx| {
                 this.items = Arc::clone(&event.items);
