@@ -37,6 +37,21 @@ impl MusicPlayer {
             }
         }).detach();
 
+        cx.observe(&playback, {
+            let now_playing = now_playing.clone();
+            move |_subscriber, _emitter, cx| {
+                // match (**event).clone() {
+                //     PlaybackEvent::TrackStarted(event) => {
+                //         now_playing.update(cx, |this, cx| {
+                //             this.track = Some(Arc::clone(&event.track));
+                //             cx.notify();
+                //         });
+                //     }
+                //     _ => {},
+                // }
+            }
+        }).detach();
+
         cx.subscribe(&playback, {
             let now_playing = now_playing.clone();
             move |_subscriber, _emitter, event: &Arc<PlaybackEvent>, cx| {
@@ -97,6 +112,5 @@ fn handle_event(
                 cx.notify();
             });
         },
-        _ => {},
     };
 }

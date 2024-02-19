@@ -15,6 +15,8 @@ impl NowPlaying {
 
 impl Render for NowPlaying {
     fn render(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
+        let current_track = cx.global::<Playback>().get_current();
+
         let now_playing = div()
             .py_1()
             .px_3()
@@ -22,9 +24,11 @@ impl Render for NowPlaying {
             .border_color(rgb(COLOUR_BORDER))
             .size_full()
             .child("Now playing:")
-            .child(self.track.clone().map_or("-".to_string(), |track| track.name.clone()));
+            .child(current_track.clone().map_or("-".to_string(), |track| track.name.clone()));
 
-        let now_playing = if let Some(track) = self.track.clone() {
+        // let queue = cx.global::<Playback>().get_queue();
+
+        let now_playing = if let Some(track) = current_track {
             if let Some(artwork) = track.artwork.clone() {
                 now_playing.child(
                     img(artwork)

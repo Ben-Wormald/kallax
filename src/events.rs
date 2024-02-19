@@ -46,6 +46,8 @@ pub struct RightClickEvent {
 pub enum PlaybackEvent {
     TrackStarted(TrackStartedEvent),
     TrackEnded,
+    Paused,
+    Resumed,
 }
 impl PlaybackEvent {
     pub fn start(track: &Arc<Track>) -> Arc<PlaybackEvent> {

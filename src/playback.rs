@@ -14,6 +14,8 @@ use crate::*;
 // https://github.com/aschey/stream-download-rs/tree/main/examples
 // https://docs.rs/axum-streams/latest/axum_streams/index.html
 
+const POLL_DURATION: Duration = Duration::from_millis(100);
+
 pub struct Playback {
     queue: Queue,
     player: Arc<Player>,
@@ -68,7 +70,15 @@ impl Playback {
     //     Arc::clone(&cx.global::<Model<Playback>>().read(cx).queue)
     // }
 
-    fn next(&mut self, cx: &mut gpui::ModelContext<Playback>) {
+    pub fn get_queue(&self) -> &Vec<Arc<Track>> {
+        &self.queue.tracks
+    }
+
+    pub fn get_current(&self) -> Option<&Arc<Track>> {
+        self.queue.current.and_then(|current| self.queue.tracks.get(current))
+    }
+
+    fn on_track_end(&mut self, cx: &mut gpui::ModelContext<Playback>) {
         self.queue.next();
         Self::emit(cx, Arc::new(PlaybackEvent::TrackEnded));
     }
@@ -152,12 +162,11 @@ impl Player {
 
                 if current_len < prev_len {
                     this.update(&mut cx, |playback, cx| {
-                        playback.next(cx);
-                        // cx.emit(Arc::new(PlaybackEvent::TrackEnded))
+                        playback.on_track_end(cx);
                     }).ok();
                 }
                 prev_len = current_len;
-                cx.background_executor().timer(Duration::from_millis(2000)).await;
+                cx.background_executor().timer(POLL_DURATION).await;
             }
         }).detach();
     }
