@@ -4,6 +4,7 @@ use std::sync::Arc;
 use crate::*;
 
 pub struct MusicPlayer {
+    playback: Model<Playback>,
     tracks: View<Tracks>,
     now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,
@@ -11,67 +12,81 @@ pub struct MusicPlayer {
 
 impl MusicPlayer {
     pub fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
-        let playback = cx.global::<Model<Playback>>().clone();
+        let playback = cx.new_model(|cx| Playback::new(cx));
 
         let tracks = cx.new_view(|_cx| Tracks::new());
         let now_playing = cx.new_view(|_cx| NowPlaying::new());
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
 
         cx.subscribe(&tracks, {
-            let context_menu = context_menu.clone();
-            move |_subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-                handle_event(event, cx, context_menu.clone());
+            move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+                subscriber.handle_event(event, cx);
             }
         }).detach();
 
         cx.subscribe(&context_menu, {
-            move |_subscriber, emitter, event: &Arc<UiEvent>, cx| {
-                handle_event(event, cx, emitter);
+            move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+                subscriber.handle_event(event, cx);
             }
         }).detach();
 
         cx.subscribe(&now_playing, {
-            let context_menu = context_menu.clone();
-            move |_subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-                handle_event(event, cx, context_menu.clone());
+            move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+                subscriber.handle_event(event, cx);
             }
         }).detach();
 
         cx.observe(&playback, {
             let now_playing = now_playing.clone();
-            move |_subscriber, _emitter, cx| {
-                // match (**event).clone() {
-                //     PlaybackEvent::TrackStarted(event) => {
-                //         now_playing.update(cx, |this, cx| {
-                //             this.track = Some(Arc::clone(&event.track));
-                //             cx.notify();
-                //         });
-                //     }
-                //     _ => {},
-                // }
-            }
-        }).detach();
-
-        cx.subscribe(&playback, {
-            let now_playing = now_playing.clone();
-            move |_subscriber, _emitter, event: &Arc<PlaybackEvent>, cx| {
-                match (**event).clone() {
-                    PlaybackEvent::TrackStarted(event) => {
-                        now_playing.update(cx, |this, cx| {
-                            this.track = Some(Arc::clone(&event.track));
-                            cx.notify();
-                        });
-                    }
-                    _ => {},
-                }
+            move |_subscriber, emitter, cx| {
+                now_playing.update(cx, |this, cx| {
+                    this.tracks = emitter.read(cx).queue.tracks.clone();
+                    this.current = emitter.read(cx).queue.current;
+                    cx.notify();
+                });
             }
         }).detach();
 
         MusicPlayer {
+            playback,
             tracks,
             now_playing,
             context_menu,
         }
+    }
+
+    fn handle_event(
+        &mut self,
+        event: &Arc<UiEvent>,
+        cx: &mut ViewContext<MusicPlayer>,
+    ) {
+        match (**event).clone() {
+            UiEvent::PlayClicked(event) => self.playback.update(cx, |this, cx| {
+                this.play(Arc::clone(&event.track), cx);
+                cx.notify();
+            }),
+            UiEvent::QueueClicked(event) => self.playback.update(cx, |this, cx| {
+                this.add_to_queue(Arc::clone(&event.track), cx);
+                cx.notify();
+            }),
+            UiEvent::PauseClicked => self.playback.update(cx, |this, cx| {
+                this.pause(cx);
+                cx.notify();
+            }),
+            UiEvent::ResumeClicked => self.playback.update(cx, |this, cx| {
+                this.resume(cx);
+                cx.notify();
+            }),
+            UiEvent::SkipClicked => self.playback.update(cx, |this, cx| {
+                this.skip(cx);
+                cx.notify();
+            }),
+            UiEvent::RightClick(event) => self.context_menu.update(cx, |this, cx| {
+                this.items = Arc::clone(&event.items);
+                this.position = Some(event.position);
+                cx.notify();
+            }),
+        };
     }
 }
 
@@ -92,25 +107,4 @@ impl Render for MusicPlayer {
                 });
             }))
     }
-}
-
-fn handle_event(
-    event: &Arc<UiEvent>,
-    cx: &mut ViewContext<MusicPlayer>,
-    context_menu: View<ContextMenu>,
-) {
-    match (**event).clone() {
-        UiEvent::PlayClicked(event) => Playback::play(Arc::clone(&event.track), cx),
-        UiEvent::QueueClicked(event) => Playback::queue(Arc::clone(&event.track), cx),
-        UiEvent::PauseClicked => Playback::pause(cx),
-        UiEvent::ResumeClicked => Playback::resume(cx),
-        UiEvent::SkipClicked => Playback::skip(cx),
-        UiEvent::RightClick(event) => {
-            context_menu.update(cx, |this, cx| {
-                this.items = Arc::clone(&event.items);
-                this.position = Some(event.position);
-                cx.notify();
-            });
-        },
-    };
 }

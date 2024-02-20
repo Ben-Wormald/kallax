@@ -4,18 +4,26 @@ use std::sync::Arc;
 use crate::*;
 
 pub struct NowPlaying {
-    pub track: Option<Arc<Track>>,
+    pub tracks: Vec<Arc<Track>>,
+    pub current: Option<usize>,
 }
 
 impl NowPlaying {
     pub fn new() -> NowPlaying {
-        NowPlaying { track: None }
+        NowPlaying {
+            tracks: vec![],
+            current: None,
+        }
+    }
+
+    fn get_current(&self) -> Option<&Arc<Track>> {
+        self.current.and_then(|current| self.tracks.get(current))
     }
 }
 
 impl Render for NowPlaying {
     fn render(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
-        let current_track = cx.global::<Playback>().get_current();
+        let current_track = self.get_current();
 
         let now_playing = div()
             .py_1()
@@ -25,8 +33,6 @@ impl Render for NowPlaying {
             .size_full()
             .child("Now playing:")
             .child(current_track.clone().map_or("-".to_string(), |track| track.name.clone()));
-
-        // let queue = cx.global::<Playback>().get_queue();
 
         let now_playing = if let Some(track) = current_track {
             if let Some(artwork) = track.artwork.clone() {
