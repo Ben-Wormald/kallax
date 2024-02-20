@@ -18,22 +18,16 @@ impl MusicPlayer {
         let now_playing = cx.new_view(|cx| NowPlaying::new(&playback, cx));
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
 
-        cx.subscribe(&tracks, {
-            move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-                subscriber.handle_event(event, cx);
-            }
+        cx.subscribe(&tracks, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+            subscriber.handle_ui_event(event, cx);
         }).detach();
 
-        cx.subscribe(&context_menu, {
-            move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-                subscriber.handle_event(event, cx);
-            }
+        cx.subscribe(&context_menu, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+            subscriber.handle_ui_event(event, cx);
         }).detach();
 
-        cx.subscribe(&now_playing, {
-            move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-                subscriber.handle_event(event, cx);
-            }
+        cx.subscribe(&now_playing, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+            subscriber.handle_ui_event(event, cx);
         }).detach();
 
         MusicPlayer {
@@ -44,11 +38,7 @@ impl MusicPlayer {
         }
     }
 
-    fn handle_event(
-        &mut self,
-        event: &Arc<UiEvent>,
-        cx: &mut ViewContext<MusicPlayer>,
-    ) {
+    fn handle_ui_event(&mut self, event: &Arc<UiEvent>, cx: &mut ViewContext<MusicPlayer>) {
         match (**event).clone() {
             UiEvent::PlayClicked(event) => self.playback.update(cx, |this, cx| {
                 this.play(Arc::clone(&event.track), cx);

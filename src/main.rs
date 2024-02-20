@@ -19,13 +19,13 @@ const COLOUR_TEXT: u32 = 0xf2f4f3;
 actions!(musicplayer, [Quit]);
 
 fn main() {
-    App::new().run(|cx: &mut AppContext| {
+    App::new().run(|cx| {
         cx.activate(true);
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
 
         cx.open_window(WindowOptions::default(), |cx| {
-            cx.new_view(|cx: &mut ViewContext<MusicPlayer>| MusicPlayer::new(cx))
+            cx.new_view(|cx| MusicPlayer::new(cx))
         });
     });
 }
