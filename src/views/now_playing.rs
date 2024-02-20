@@ -31,31 +31,28 @@ impl Render for NowPlaying {
     fn render(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
         let current_track = self.get_current();
 
-        let now_playing = div()
-            .py_1()
-            .px_3()
-            .border()
-            .border_color(rgb(COLOUR_BORDER))
-            .size_full()
-            .child("Now playing:")
+        let track_details = div()
+            .id("track-details")
+            // .py_1()
+            // .px_3()
             .child(current_track.map_or("-".to_string(), |track| track.name.clone()));
 
-        let now_playing = if let Some(track) = current_track {
+        let track_details = if let Some(track) = current_track {
             if let Some(artwork) = track.artwork.clone() {
-                now_playing.child(
+                track_details.child(
                     img(artwork)
                         .flex_none()
                         .w_80()
                         .h_80()
                 )
             } else {
-                now_playing
+                track_details
             }
         } else {
-            now_playing
+            track_details
         };
 
-        now_playing
+        let track_details = track_details
             .child(div().id("pause").child("Pause").on_click(cx.listener(|_this, _event, cx| {
                 cx.emit(Arc::new(UiEvent::PauseClicked))
             })))
@@ -64,6 +61,34 @@ impl Render for NowPlaying {
             })))
             .child(div().id("skip").child("Skip").on_click(cx.listener(|_this, _event, cx| {
                 cx.emit(Arc::new(UiEvent::SkipClicked))
-            })))
+            })));
+
+        div()
+            .border_l()
+            .border_color(rgb(COLOUR_BORDER))
+            // .size_full()
+            .child(
+                div()
+                    .flex()
+                    .child(
+                        div()
+                            .id("now-playing")
+                            .flex_1()
+                            .py_1()
+                            .px_3()
+                            .hover(|style| style.bg(rgb(COLOUR_BORDER)))
+                            .child("Now playing")
+                    )
+                    .child(
+                        div()
+                            .id("queue")
+                            .flex_1()
+                            .py_1()
+                            .px_3()
+                            .hover(|style| style.bg(rgb(COLOUR_BORDER)))
+                            .child("Queue")
+                    )
+            )
+            .child(track_details)
     }
 }

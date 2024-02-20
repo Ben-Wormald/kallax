@@ -140,10 +140,6 @@ impl Player {
             loop {
                 let current_len = queue_len.load(SeqCst);
 
-                if current_len != prev_len {
-                    println!("queue_len {prev_len} -> {current_len}");
-                }
-
                 if current_len < prev_len {
                     this.update(&mut cx, |playback, cx| {
                         playback.on_track_end(cx);

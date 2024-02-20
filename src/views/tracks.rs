@@ -11,7 +11,7 @@ pub struct Tracks {
 impl Tracks {
     pub fn new() -> Tracks {
         let dir = "/Users/ben/Music/Alvvays/Antisocialites";
-        let dir = "/Users/wormab01/Music/Clouds - Heavy The Eclipse";
+        // let dir = "/Users/wormab01/Music/Clouds - Heavy The Eclipse";
 
         let tracks = std::fs::read_dir(dir).unwrap()
             .filter_map(|entry| {
@@ -41,6 +41,7 @@ impl Tracks {
 impl Render for Tracks {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         div()
+            .size_full()
             .children(
                 self.tracks.clone().into_iter().map(|track|
                     elements::track(track, cx)
