@@ -211,7 +211,9 @@ impl Player {
         let sink = Arc::clone(&self.sink);
         let queue_len = Arc::clone(&self.queue_len);
 
-        queue_len.fetch_update(SeqCst, SeqCst, |len| Some(len - 1)).ok();
+        queue_len.fetch_update(SeqCst, SeqCst, |len|
+            Some(if len > 0 { len - 1 } else { 0 })
+        ).ok();
 
         cx.background_executor().spawn(async move {
             sink.skip_one();
