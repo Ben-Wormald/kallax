@@ -87,7 +87,7 @@ impl Queue {
     fn get_current(&self) -> Option<Arc<Track>> {
         self.current
             .and_then(|index| self.tracks.get(index))
-            .map(|track| track.clone())
+            .cloned()
     }
 
     fn next(&mut self) {

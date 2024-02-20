@@ -38,7 +38,7 @@ impl Render for NowPlaying {
             .border_color(rgb(COLOUR_BORDER))
             .size_full()
             .child("Now playing:")
-            .child(current_track.clone().map_or("-".to_string(), |track| track.name.clone()));
+            .child(current_track.map_or("-".to_string(), |track| track.name.clone()));
 
         let now_playing = if let Some(track) = current_track {
             if let Some(artwork) = track.artwork.clone() {

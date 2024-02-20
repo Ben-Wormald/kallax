@@ -3,13 +3,13 @@ use gpui::*;
 mod domain;
 mod elements;
 mod events;
-mod playback;
+mod models;
 mod utils;
 mod views;
 
 use domain::*;
 use events::*;
-use playback::*;
+use models::*;
 use views::*;
 
 const COLOUR_BG: u32 = 0x333531;
