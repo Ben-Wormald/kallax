@@ -23,7 +23,7 @@ pub struct Playback {
 }
 impl Playback {
     pub fn new(cx: &mut ModelContext<Playback>) -> Playback {
-        let queue = Queue::new();
+        let queue = Queue::default();
 
         let player = Player::new();
         player.watch(cx);
@@ -46,10 +46,12 @@ impl Playback {
 
     pub fn pause(&mut self, cx: &mut AppContext) {
         self.player.pause(cx);
+        self.queue.is_playing = false;
     }
 
     pub fn resume(&mut self, cx: &mut AppContext) {
         self.player.resume(cx);
+        self.queue.is_playing = true;
     }
 
     pub fn skip(&mut self, cx: &mut AppContext) {
@@ -62,26 +64,23 @@ impl Playback {
     }
 }
 
+#[derive(Default)]
 pub struct Queue {
     pub tracks: Vec<Arc<Track>>,
     pub current: Option<usize>,
+    pub is_playing: bool,
 }
 impl Queue {
-    fn new() -> Queue {
-        Queue {
-            tracks: Vec::new(),
-            current: None,
-        }
-    }
-
     fn play(&mut self, track: &Arc<Track>) {
         self.tracks = vec![Arc::clone(track)];
         self.current = Some(0);
+        self.is_playing = true;
     }
 
     fn clear(&mut self) {
         self.tracks = Vec::new();
         self.current = None;
+        self.is_playing = false;
     }
 
     fn get_current(&self) -> Option<Arc<Track>> {
@@ -98,6 +97,8 @@ impl Queue {
                 None
             }
         );
+
+        self.is_playing = self.current.is_some();
     }
 
     fn get_next(&mut self) -> Option<Arc<Track>> {
