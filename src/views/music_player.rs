@@ -15,7 +15,7 @@ impl MusicPlayer {
         let playback = cx.new_model(|cx| Playback::new(cx));
 
         let tracks = cx.new_view(|_cx| Tracks::new());
-        let now_playing = cx.new_view(|_cx| NowPlaying::new());
+        let now_playing = cx.new_view(|cx| NowPlaying::new(&playback, cx));
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
 
         cx.subscribe(&tracks, {
@@ -33,17 +33,6 @@ impl MusicPlayer {
         cx.subscribe(&now_playing, {
             move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
                 subscriber.handle_event(event, cx);
-            }
-        }).detach();
-
-        cx.observe(&playback, {
-            let now_playing = now_playing.clone();
-            move |_subscriber, emitter, cx| {
-                now_playing.update(cx, |this, cx| {
-                    this.tracks = emitter.read(cx).queue.tracks.clone();
-                    this.current = emitter.read(cx).queue.current;
-                    cx.notify();
-                });
             }
         }).detach();
 

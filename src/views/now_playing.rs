@@ -9,7 +9,13 @@ pub struct NowPlaying {
 }
 
 impl NowPlaying {
-    pub fn new() -> NowPlaying {
+    pub fn new(playback: &Model<Playback>, cx: &mut ViewContext<NowPlaying>) -> NowPlaying {
+        cx.observe(playback, |subscriber, emitter, cx| {
+            subscriber.tracks = emitter.read(cx).queue.tracks.clone();
+            subscriber.current = emitter.read(cx).queue.current;
+            cx.notify();
+        }).detach();
+
         NowPlaying {
             tracks: vec![],
             current: None,
