@@ -65,7 +65,7 @@ impl Render for NowPlaying {
 
         div()
             .border_l()
-            .border_color(rgb(COLOUR_BORDER))
+            .border_color(rgb(theme::colours::AMSTERDAM))
             // .size_full()
             .child(
                 div()
@@ -76,7 +76,7 @@ impl Render for NowPlaying {
                             .flex_1()
                             .py_1()
                             .px_3()
-                            .hover(|style| style.bg(rgb(COLOUR_BORDER)))
+                            .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
                             .child("Now playing")
                     )
                     .child(
@@ -85,7 +85,7 @@ impl Render for NowPlaying {
                             .flex_1()
                             .py_1()
                             .px_3()
-                            .hover(|style| style.bg(rgb(COLOUR_BORDER)))
+                            .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
                             .child("Queue")
                     )
             )

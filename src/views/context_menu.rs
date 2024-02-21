@@ -25,15 +25,15 @@ impl Render for ContextMenu {
                 .child(
                     div()
                         .flex_col()
-                        .bg(rgb(COLOUR_BG))
+                        .bg(rgb(theme::colours::TOUCH))
                         .border()
-                        .border_color(rgb(COLOUR_BORDER))
+                        .border_color(rgb(theme::colours::AMSTERDAM))
                         .children(self.items.iter().map(|item|
                             div()
                                 .id(ElementId::Name(item.label.clone().into()))
                                 .py_1()
                                 .px_3()
-                                .hover(|style| style.bg(rgb(COLOUR_BORDER)))
+                                .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
                                 .child(item.label.clone())
                                 .on_mouse_down(MouseButton::Left, cx.listener({
                                     let event = Arc::clone(&item.event);

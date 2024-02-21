@@ -1,17 +1,13 @@
-mod colours {
-    const WINTER: u32 = 0x333531;
-    const SMOTHER: u32 = 0x1f211f;
-    const YOUTH: u32 = 0xf2f4f3;
-    const STILL: u32 = 0xf2f4f3;
-    const LIFEFORMS: u32 = 0xf2f4f3;
-    const TOMORROW: u32 = 0xf2f4f3;
-    const HUMAN: u32 = 0xf2f4f3;
-    const TOUCH: u32 = 0xf2f4f3;
-    const AMSTERDAM: u32 = 0xf2f4f3;
-    const SHALLOWS: u32 = 0xf2f4f3;
-
-
-    const COLOUR_BG: u32 = 0x333531;
-    const COLOUR_BORDER: u32 = 0x1f211f;
-    const COLOUR_TEXT: u32 = 0xf2f4f3;
+#[allow(dead_code)]
+pub mod colours {
+    pub const WINTER: u32 = 0xf6f6f6;
+    pub const SMOTHER: u32 = 0xd6d6d6;
+    pub const YOUTH: u32 = 0xb7b7b7;
+    pub const STILL: u32 = 0x989898;
+    pub const LIFEFORMS: u32 = 0x7b7b7b;
+    pub const TOMORROW: u32 = 0x5f5f5f;
+    pub const HUMAN: u32 = 0x454545;
+    pub const TOUCH: u32 = 0x2c2c2c;
+    pub const AMSTERDAM: u32 = 0x151515;
+    pub const SHALLOWS: u32 = 0x030303;
 }

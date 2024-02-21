@@ -73,9 +73,9 @@ impl Render for MusicPlayer {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         div()
             .flex()
-            .bg(rgb(COLOUR_BG))
+            .bg(rgb(theme::colours::TOUCH))
             .size_full()
-            .text_color(rgb(COLOUR_TEXT))
+            .text_color(rgb(theme::colours::WINTER))
             .font("Work Sans")
             .child(self.tracks.clone())
             .child(self.now_playing.clone())

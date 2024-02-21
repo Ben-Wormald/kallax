@@ -4,6 +4,7 @@ mod domain;
 mod elements;
 mod events;
 mod models;
+mod theme;
 mod utils;
 mod views;
 
@@ -11,10 +12,6 @@ use domain::*;
 use events::*;
 use models::*;
 use views::*;
-
-const COLOUR_BG: u32 = 0x333531;
-const COLOUR_BORDER: u32 = 0x1f211f;
-const COLOUR_TEXT: u32 = 0xf2f4f3;
 
 actions!(musicplayer, [Quit]);
 
@@ -25,7 +22,7 @@ fn main() {
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
 
         cx.open_window(WindowOptions::default(), |cx| {
-            cx.new_view(|cx| MusicPlayer::new(cx))
+            cx.new_view(MusicPlayer::new)
         });
     });
 }

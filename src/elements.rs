@@ -10,7 +10,7 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
         .id(ElementId::Name(track.name.clone().into()))
         .py_1()
         .px_3()
-        .hover(|style| style.bg(rgb(COLOUR_BORDER)))
+        .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
         .child(track.name.clone())
         .on_click(cx.listener({
             let track = Arc::clone(&track);
