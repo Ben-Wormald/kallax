@@ -3,9 +3,12 @@ use std::sync::Arc;
 
 use crate::*;
 
+use self::elements::{tab_bar, TabBarItem};
+
 pub struct NowPlaying {
     pub tracks: Vec<Arc<Track>>,
     pub current: Option<usize>,
+    pub selected_tab: usize,
 }
 
 impl NowPlaying {
@@ -19,6 +22,7 @@ impl NowPlaying {
         NowPlaying {
             tracks: vec![],
             current: None,
+            selected_tab: 0,
         }
     }
 
@@ -33,9 +37,13 @@ impl Render for NowPlaying {
 
         let track_details = div()
             .id("track-details")
-            // .py_1()
-            // .px_3()
-            .child(current_track.map_or("-".to_string(), |track| track.name.clone()));
+            .py_1()
+            .px_3()
+            .children([
+                current_track.map_or("-".to_string(), |track| track.title.clone()),
+                current_track.map_or("-".to_string(), |track| track.artist_name.clone()),
+                current_track.map_or("-".to_string(), |track| track.album_title.clone()),
+            ]);
 
         let track_details = if let Some(track) = current_track {
             if let Some(artwork) = track.artwork.clone() {
@@ -66,28 +74,17 @@ impl Render for NowPlaying {
         div()
             .border_l()
             .border_color(rgb(theme::colours::AMSTERDAM))
-            // .size_full()
             .child(
-                div()
-                    .flex()
-                    .child(
-                        div()
-                            .id("now-playing")
-                            .flex_1()
-                            .py_1()
-                            .px_3()
-                            .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
-                            .child("Now playing")
-                    )
-                    .child(
-                        div()
-                            .id("queue")
-                            .flex_1()
-                            .py_1()
-                            .px_3()
-                            .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
-                            .child("Queue")
-                    )
+                tab_bar(vec![
+                    TabBarItem {
+                        label: "Now playing",
+                        event: Arc::new(UiEvent::NowPlayingTabClicked(0)),
+                    },
+                    TabBarItem {
+                        label: "Queue",
+                        event: Arc::new(UiEvent::NowPlayingTabClicked(1)),
+                    },
+                ], self.selected_tab, cx)
             )
             .child(track_details)
     }

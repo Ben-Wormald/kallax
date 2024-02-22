@@ -7,11 +7,11 @@ use context_menu::ContextMenuItem;
 
 pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
     div()
-        .id(ElementId::Name(track.name.clone().into()))
+        .id(ElementId::Name(track.title.clone().into()))
         .py_1()
         .px_3()
         .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
-        .child(track.name.clone())
+        .child(track.title.clone())
         .on_click(cx.listener({
             let track = Arc::clone(&track);
             move |_this, _event, cx| cx.emit(UiEvent::play(&track))
@@ -34,4 +34,38 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
                 })));
             })
         )
+}
+
+pub struct TabBarItem {
+    pub label: &'static str,
+    pub event: Arc<UiEvent>,
+}
+
+pub fn tab_bar(
+    tabs: Vec<TabBarItem>,
+    selected: usize,
+    cx: &mut ViewContext<NowPlaying>,
+) -> impl IntoElement {
+    div()
+        .flex()
+        .gap(Pixels::from(1.))
+        .bg(rgb(theme::colours::SHALLOWS))
+        .children(tabs.into_iter().enumerate().map(|(index, item)| {
+            div()
+                .id(item.label)
+                .flex_1()
+                .py_1()
+                .px_3()
+                .bg(rgb(if index == selected { theme::colours::TOUCH } else { theme::colours::AMSTERDAM }))
+                .border_b_1()
+                .border_color(rgb(if index == selected { theme::colours::TOUCH } else { theme::colours::SHALLOWS }))
+                .hover(|style| style
+                    .bg(rgb(theme::colours::SHALLOWS))
+                    .border_color(rgb(theme::colours::SHALLOWS))
+                )
+                .on_click(cx.listener(move |_this, _event, cx| {
+                    cx.emit(Arc::clone(&item.event));
+                }))
+                .child(item.label)
+        }))
 }

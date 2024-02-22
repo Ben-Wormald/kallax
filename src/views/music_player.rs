@@ -60,6 +60,10 @@ impl MusicPlayer {
                 this.skip(cx);
                 cx.notify();
             }),
+            UiEvent::NowPlayingTabClicked(tab_index) => self.now_playing.update(cx, |this, cx| {
+                this.selected_tab = tab_index;
+                cx.notify();
+            }),
             UiEvent::RightClick(event) => self.context_menu.update(cx, |this, cx| {
                 this.items = Arc::clone(&event.items);
                 this.position = Some(event.position);

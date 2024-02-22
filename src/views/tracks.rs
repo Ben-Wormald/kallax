@@ -1,5 +1,4 @@
 use gpui::*;
-use id3::{Tag, TagLike};
 use std::sync::Arc;
 
 use crate::*;
@@ -18,16 +17,7 @@ impl Tracks {
                 let path = entry.unwrap().path();
 
                 if path.extension().is_some_and(|extension| extension == "mp3") {
-                    let path = path.to_str().unwrap().to_string();
-                    let tags = Tag::read_from_path(&path).unwrap();
-                    let name = tags.title().unwrap().to_string();
-                    let artwork = utils::get_image(&tags);
-
-                    Some(Arc::new(Track {
-                        name,
-                        path,
-                        artwork,
-                    }))
+                    Some(Arc::new(Track::read(path)))
                 } else {
                     None
                 }

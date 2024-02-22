@@ -11,6 +11,7 @@ pub enum UiEvent {
     PauseClicked,
     ResumeClicked,
     SkipClicked,
+    NowPlayingTabClicked(usize),
     RightClick(RightClickEvent),
 }
 impl UiEvent {
