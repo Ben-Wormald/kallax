@@ -29,16 +29,16 @@ impl NowPlaying {
     fn get_current(&self) -> Option<&Arc<Track>> {
         self.current.and_then(|current| self.tracks.get(current))
     }
-}
 
-impl Render for NowPlaying {
-    fn render(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
+    fn render_now_playing(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
         let current_track = self.get_current();
 
-        let track_details = div()
+        let now_playing = div()
             .id("track-details")
+            .flex_grow()
+            .flex()
             .flex_col()
-            .gap(Pixels::from(1.))
+            .gap_px()
             .bg(rgb(theme::colours::SHALLOWS))
             .child(
                 div()
@@ -52,33 +52,35 @@ impl Render for NowPlaying {
                     ])
             );
 
-        let track_details = if let Some(track) = current_track {
+        let now_playing = if let Some(track) = current_track {
             if let Some(artwork) = track.artwork.clone() {
-                track_details.child(
+                now_playing.child(
                     img(artwork)
                         .flex_none()
                         .w_80()
                         .h_80()
                 )
             } else {
-                track_details
+                now_playing
             }
         } else {
-            track_details
+            now_playing
         };
 
-        let track_details = track_details
+        now_playing
+            .child(div().bg(rgb(theme::colours::TOUCH)).flex_grow())
             .child(
                 div()
                     .flex()
-                    .gap(Pixels::from(1.))
-                    .mt_auto()
+                    .gap_px()
                     .children([
                         div()
                             .id("pause")
                             .flex_1()
                             .py_1()
                             .px_3()
+                            .flex()
+                            .justify_center()
                             .bg(rgb(theme::colours::TOUCH))
                             .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
                             .child("Pause")
@@ -88,6 +90,8 @@ impl Render for NowPlaying {
                             .flex_1()
                             .py_1()
                             .px_3()
+                            .flex()
+                            .justify_center()
                             .bg(rgb(theme::colours::TOUCH))
                             .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
                             .child("Resume")
@@ -97,16 +101,25 @@ impl Render for NowPlaying {
                             .flex_1()
                             .py_1()
                             .px_3()
+                            .flex()
+                            .justify_center()
                             .bg(rgb(theme::colours::TOUCH))
                             .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
                             .child("Skip")
                             .on_click(cx.listener(|_this, _event, cx| cx.emit(Arc::new(UiEvent::SkipClicked)))),
                     ])
-            );
+            )
+    }
+}
 
+impl Render for NowPlaying {
+    fn render(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
         div()
             .border_l()
             .border_color(rgb(theme::colours::AMSTERDAM))
+            .h_full()
+            .flex()
+            .flex_col()
             .child(
                 tab_bar(vec![
                     TabBarItem {
@@ -119,6 +132,6 @@ impl Render for NowPlaying {
                     },
                 ], self.selected_tab, cx)
             )
-            .child(track_details)
+            .child(self.render_now_playing(cx))
     }
 }

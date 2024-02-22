@@ -56,6 +56,8 @@ pub fn tab_bar(
                 .flex_1()
                 .py_1()
                 .px_3()
+                .flex()
+                .justify_center()
                 .bg(rgb(if index == selected { theme::colours::TOUCH } else { theme::colours::AMSTERDAM }))
                 .border_b_1()
                 .border_color(rgb(if index == selected { theme::colours::TOUCH } else { theme::colours::SHALLOWS }))
