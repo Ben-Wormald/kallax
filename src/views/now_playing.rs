@@ -37,13 +37,20 @@ impl Render for NowPlaying {
 
         let track_details = div()
             .id("track-details")
-            .py_1()
-            .px_3()
-            .children([
-                current_track.map_or("-".to_string(), |track| track.title.clone()),
-                current_track.map_or("-".to_string(), |track| track.artist_name.clone()),
-                current_track.map_or("-".to_string(), |track| track.album_title.clone()),
-            ]);
+            .flex_col()
+            .gap(Pixels::from(1.))
+            .bg(rgb(theme::colours::SHALLOWS))
+            .child(
+                div()
+                    .py_1()
+                    .px_3()
+                    .bg(rgb(theme::colours::TOUCH))
+                    .children([
+                        current_track.map_or("-".to_string(), |track| track.title.clone()),
+                        current_track.map_or("-".to_string(), |track| track.artist_name.clone()),
+                        current_track.map_or("-".to_string(), |track| track.album_title.clone()),
+                    ])
+            );
 
         let track_details = if let Some(track) = current_track {
             if let Some(artwork) = track.artwork.clone() {
@@ -61,15 +68,41 @@ impl Render for NowPlaying {
         };
 
         let track_details = track_details
-            .child(div().id("pause").child("Pause").on_click(cx.listener(|_this, _event, cx| {
-                cx.emit(Arc::new(UiEvent::PauseClicked))
-            })))
-            .child(div().id("resume").child("Resume").on_click(cx.listener(|_this, _event, cx| {
-                cx.emit(Arc::new(UiEvent::ResumeClicked))
-            })))
-            .child(div().id("skip").child("Skip").on_click(cx.listener(|_this, _event, cx| {
-                cx.emit(Arc::new(UiEvent::SkipClicked))
-            })));
+            .child(
+                div()
+                    .flex()
+                    .gap(Pixels::from(1.))
+                    .mt_auto()
+                    .children([
+                        div()
+                            .id("pause")
+                            .flex_1()
+                            .py_1()
+                            .px_3()
+                            .bg(rgb(theme::colours::TOUCH))
+                            .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
+                            .child("Pause")
+                            .on_click(cx.listener(|_this, _event, cx| cx.emit(Arc::new(UiEvent::PauseClicked)))),
+                        div()
+                            .id("resume")
+                            .flex_1()
+                            .py_1()
+                            .px_3()
+                            .bg(rgb(theme::colours::TOUCH))
+                            .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
+                            .child("Resume")
+                            .on_click(cx.listener(|_this, _event, cx| cx.emit(Arc::new(UiEvent::ResumeClicked)))),
+                        div()
+                            .id("skip")
+                            .flex_1()
+                            .py_1()
+                            .px_3()
+                            .bg(rgb(theme::colours::TOUCH))
+                            .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
+                            .child("Skip")
+                            .on_click(cx.listener(|_this, _event, cx| cx.emit(Arc::new(UiEvent::SkipClicked)))),
+                    ])
+            );
 
         div()
             .border_l()
