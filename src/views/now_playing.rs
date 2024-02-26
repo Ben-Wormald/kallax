@@ -110,11 +110,33 @@ impl NowPlaying {
                     ])
             )
     }
+
+    fn render_queue(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
+        div()
+            .children(self.tracks.iter().enumerate().map(|(index, track)| {
+                div()
+                    .id(ElementId::Name(track.title.clone().into()))
+                    .py_1()
+                    .px_3()
+                    .font_weight({
+                        if let Some(current) = self.current {
+                            if index == current {
+                                FontWeight::BOLD
+                            } else {
+                                FontWeight::default()
+                            }
+                        } else {
+                            FontWeight::default()
+                        }
+                    })
+                    .child(track.title.clone())
+            }))
+    }
 }
 
 impl Render for NowPlaying {
     fn render(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
-        div()
+        let now_playing = div()
             .border_l()
             .border_color(rgb(theme::colours::AMSTERDAM))
             .h_full()
@@ -131,7 +153,12 @@ impl Render for NowPlaying {
                         event: Arc::new(UiEvent::NowPlayingTabClicked(1)),
                     },
                 ], self.selected_tab, cx)
-            )
-            .child(self.render_now_playing(cx))
+            );
+
+        match self.selected_tab {
+            0 => now_playing.child(self.render_now_playing(cx)),
+            1 => now_playing.child(self.render_queue(cx)),
+            _ => now_playing,
+        }
     }
 }
