@@ -8,6 +8,7 @@ pub struct MusicPlayer {
     tracks: View<Tracks>,
     now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,
+    modal: View<Modal>,
 }
 
 impl MusicPlayer {
@@ -17,6 +18,7 @@ impl MusicPlayer {
         let tracks = cx.new_view(|_cx| Tracks::new());
         let now_playing = cx.new_view(|cx| NowPlaying::new(&playback, cx));
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
+        let modal = cx.new_view(|_cx| Modal::new());
 
         cx.subscribe(&tracks, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
             subscriber.handle_ui_event(event, cx);
@@ -35,6 +37,7 @@ impl MusicPlayer {
             tracks,
             now_playing,
             context_menu,
+            modal,
         }
     }
 
@@ -84,6 +87,7 @@ impl Render for MusicPlayer {
             .child(self.tracks.clone())
             .child(self.now_playing.clone())
             .child(self.context_menu.clone())
+            .child(self.modal.clone())
             .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, cx| {
                 this.context_menu.update(cx, |context_menu, _cx| {
                     context_menu.position = None;
