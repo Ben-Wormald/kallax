@@ -16,7 +16,8 @@ impl Modal {
 
 impl Render for Modal {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
-        div()
+        let modal = div()
+            .id("modal-overlay")
             .absolute()
             .size_full()
             .top_0()
@@ -26,9 +27,19 @@ impl Render for Modal {
             .flex()
             .items_center()
             .justify_center()
+            .on_click(cx.listener(|this, _event, cx| {
+                this.is_visible = false;
+                cx.notify();
+            }))
             .child(
                 div()
                     .child("hi")
-            )
+            );
+
+        if self.is_visible {
+            modal
+        } else {
+            modal.invisible()
+        }
     }
 }
