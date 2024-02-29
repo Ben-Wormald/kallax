@@ -5,6 +5,7 @@ use crate::*;
 
 pub struct MusicPlayer {
     playback: Model<Playback>,
+    _scrobbler: Model<Scrobbler>,
     tracks: View<Tracks>,
     now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,
@@ -14,6 +15,7 @@ pub struct MusicPlayer {
 impl MusicPlayer {
     pub fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
         let playback = cx.new_model(Playback::new);
+        let _scrobbler = cx.new_model(|cx| Scrobbler::new(&playback, cx));
 
         let tracks = cx.new_view(|_cx| Tracks::new());
         let now_playing = cx.new_view(|cx| NowPlaying::new(&playback, cx));
@@ -34,6 +36,7 @@ impl MusicPlayer {
 
         MusicPlayer {
             playback,
+            _scrobbler,
             tracks,
             now_playing,
             context_menu,

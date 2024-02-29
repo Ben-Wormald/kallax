@@ -15,6 +15,8 @@ use crate::*;
 // https://github.com/aschey/stream-download-rs/tree/main/examples
 // https://docs.rs/axum-streams/latest/axum_streams/index.html
 
+type Mcx<'a> = ModelContext<'a, Playback>;
+
 const POLL_DURATION: Duration = Duration::from_millis(100);
 
 pub struct Playback {
@@ -22,7 +24,7 @@ pub struct Playback {
     player: Player,
 }
 impl Playback {
-    pub fn new(cx: &mut ModelContext<Playback>) -> Playback {
+    pub fn new(cx: &mut Mcx) -> Playback {
         let queue = Queue::default();
 
         let player = Player::new();
@@ -34,9 +36,11 @@ impl Playback {
         }
     }
 
-    pub fn play(&mut self, track: Arc<Track>, cx: &mut AppContext) {
+    pub fn play(&mut self, track: Arc<Track>, cx: &mut Mcx) {
         self.player.play(&track, cx);
         self.queue.play(&track);
+
+        cx.emit(PlaybackEvent::start(&track));
     }
 
     pub fn add_to_queue(&mut self, track: Arc<Track>, cx: &mut AppContext) {
@@ -44,23 +48,29 @@ impl Playback {
         self.queue.add_to_queue(&track);
     }
 
-    pub fn pause(&mut self, cx: &mut AppContext) {
+    pub fn pause(&mut self, cx: &mut Mcx) {
         self.player.pause(cx);
         self.queue.is_playing = false;
+
+        cx.emit(Arc::new(PlaybackEvent::Paused));
     }
 
-    pub fn resume(&mut self, cx: &mut AppContext) {
+    pub fn resume(&mut self, cx: &mut Mcx) {
         self.player.resume(cx);
         self.queue.is_playing = true;
+
+        cx.emit(Arc::new(PlaybackEvent::Resumed));
     }
 
     pub fn skip(&mut self, cx: &mut AppContext) {
         self.player.skip(cx);
     }
 
-    fn on_track_end(&mut self, cx: &mut ModelContext<Playback>) {
+    fn on_track_end(&mut self, cx: &mut Mcx) {
         self.queue.next();
         cx.notify();
+
+        cx.emit(Arc::new(PlaybackEvent::TrackEnded));
     }
 }
 
@@ -131,7 +141,7 @@ impl Player {
         }
     }
 
-    fn watch(&self, cx: &mut ModelContext<Playback>) {
+    fn watch(&self, cx: &mut Mcx) {
         let queue_len = Arc::clone(&self.queue_len);
 
         cx.spawn(|this, mut cx| async move {

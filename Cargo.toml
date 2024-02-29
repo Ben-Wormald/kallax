@@ -6,7 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dotenv = "0.15.0"
 gpui = { git = "https://github.com/zed-industries/zed" }
 id3 = "1.12.0"
 image = "0.23"
+reqwest = { version = "0.11.24", features = ["json"] }
 rodio = "0.17.3"

@@ -12,7 +12,7 @@ pub struct Tracks {
 impl Tracks {
     pub fn new() -> Tracks {
         let dir = "/Users/ben/Music/Alvvays/Antisocialites";
-        let dir = "/Users/wormab01/Music/Skee Mask - Compro";
+        // let dir = "/Users/wormab01/Music/Skee Mask - Compro";
 
         let tracks = std::fs::read_dir(dir).unwrap()
             .filter_map(|entry| {
