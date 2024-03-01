@@ -45,17 +45,23 @@ impl Scrobbler {
             params.push(("duration", duration.to_string()));
         }
 
-        self.send(cx, params);
+        self.send(cx, params)
+            .inspect_err(|err| println!("{err}"))
+            .ok();
     }
 
-    fn send(&self, cx: &mut Mcx, mut params: Vec<(&'static str, String)>) {
+    fn send(
+        &self,
+        cx: &mut Mcx,
+        mut params: Vec<(&'static str, String)>,
+    ) -> Result<(), env::VarError> {
         let mut auth_params = vec![
-            ("api_key", env::var("LASTFM_API_KEY").unwrap()),
-            ("sk", env::var("LASTFM_SESSION_KEY").unwrap()),
+            ("api_key", env::var("LASTFM_API_KEY")?),
+            ("sk", env::var("LASTFM_SESSION_KEY")?),
         ];
         params.append(&mut auth_params);
 
-        let mut params = sign(params);
+        let mut params = sign(params)?;
 
         params.push(("format", "json".to_string()));
 
@@ -72,23 +78,28 @@ impl Scrobbler {
                 .body(body)
                 .header("User-Agent", "musicplayer")
                 .send()
-                .unwrap();
+                .inspect_err(|err| println!("{err}"))
+                .ok();
         }).detach();
+
+        Ok(())
     }
 }
 
-fn sign(mut params: Vec<(&'static str, String)>) -> Vec<(&'static str, String)> {
+fn sign(
+    mut params: Vec<(&'static str, String)>,
+) -> Result<Vec<(&'static str, String)>, env::VarError> {
     params.sort_by(|a, b| a.0.cmp(&b.0));
 
     let param_str = params.iter()
         .map(|(k, v)| format!("{k}{v}"))
         .collect::<Vec<String>>()
         .join("");
-    let param_str = format!("{}{}", param_str, env::var("LASTFM_SECRET_KEY").unwrap());
+    let param_str = format!("{}{}", param_str, env::var("LASTFM_SECRET_KEY")?);
 
     let signature = md5::compute(param_str);
     let signature = format!("{:x}", signature);
 
     params.push(("api_sig", signature));
-    params
+    Ok(params)
 }
