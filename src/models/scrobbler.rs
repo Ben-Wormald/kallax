@@ -1,6 +1,10 @@
 use gpui::{Model, ModelContext};
 use reqwest::blocking::Client;
-use std::{env, sync::Arc};
+use std::{
+    env,
+    sync::Arc,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use crate::*;
 
@@ -8,17 +12,21 @@ type Mcx<'a> = ModelContext<'a, Scrobbler>;
 
 const API: &str = "http://ws.audioscrobbler.com/2.0/";
 
+#[derive(Default)]
 pub struct Scrobbler {
     client: Arc<Client>,
+    current_track: Option<Arc<Track>>,
+    time_started: Option<SystemTime>,
+    time_elapsed: Duration,
 }
 impl Scrobbler {
     pub fn new(playback: &Model<Playback>, cx: &mut Mcx) -> Scrobbler {
         cx.subscribe(playback, |this, _emitter, event, cx| {
             match (**event).clone() {
-                PlaybackEvent::TrackStarted(track) => this.update_now_playing(cx, &track),
-                PlaybackEvent::Paused => {},
-                PlaybackEvent::Resumed => {},
-                PlaybackEvent::TrackEnded => {},
+                PlaybackEvent::TrackStarted(track) => this.start(cx, &track),
+                PlaybackEvent::Paused => this.pause(),
+                PlaybackEvent::Resumed => this.resume(),
+                PlaybackEvent::TrackEnded => this.end(cx),
             }
         }).detach();
 
@@ -26,12 +34,52 @@ impl Scrobbler {
 
         Scrobbler {
             client,
+            ..Default::default()
         }
     }
 
-    fn update_now_playing(&self, cx: &mut Mcx, track: &Arc<Track>) {
+    fn start(&mut self, cx: &mut Mcx, track: &Arc<Track>) {
         let track = Arc::clone(track);
 
+        self.current_track = Some(Arc::clone(&track));
+        self.time_started = Some(SystemTime::now());
+
+        self.update_now_playing(cx, &track);
+    }
+
+    fn pause(&mut self) {
+        if let Some(started) = self.time_started {
+            if let Ok(elapsed) = started.elapsed() {
+                self.time_elapsed += elapsed;
+            }
+            self.time_started = None;
+        }
+    }
+
+    fn resume(&mut self) {
+        self.time_started = Some(SystemTime::now());
+    }
+
+    fn end(&mut self, cx: &mut Mcx) {
+        if let Some(track) = self.current_track.clone() {
+            if let Some(started) = self.time_started {
+                if let Ok(elapsed) = started.elapsed() {
+                    let four_minutes_elapsed = elapsed > Duration::from_secs(4 * 60);
+                    let half_track_elapsed = elapsed.as_secs() > track.duration.unwrap_or(30) as u64;
+
+                    if four_minutes_elapsed || half_track_elapsed {
+                        self.scrobble(cx, &track);
+                    }
+                }
+            }
+        }
+
+        self.current_track = None;
+        self.time_started = None;
+        self.time_elapsed = Duration::default();
+    }
+
+    fn update_now_playing(&mut self, cx: &mut Mcx, track: &Arc<Track>) {
         let mut params = vec![
             ("method", String::from("track.updateNowPlaying")),
             ("track", track.title.clone()),
@@ -43,6 +91,28 @@ impl Scrobbler {
         }
         if let Some(duration) = track.duration {
             params.push(("duration", duration.to_string()));
+        }
+
+        self.send(cx, params)
+            .inspect_err(|err| println!("{err}"))
+            .ok();
+    }
+
+    fn scrobble(&mut self, cx: &mut Mcx, track: &Arc<Track>) {
+        let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+
+        let mut params = vec![
+            ("method", String::from("track.scrobble")),
+            ("timestamp[0]", timestamp.to_string()),
+            ("track[0]", track.title.clone()),
+            ("artist[0]", track.artist_name.clone()),
+            ("album[0]", track.album_title.clone()),
+        ];
+        if let Some(album_artist) = track.album_artist.clone() {
+            params.push(("albumArtist[0]", album_artist));
+        }
+        if let Some(duration) = track.duration {
+            params.push(("duration[0]", duration.to_string()));
         }
 
         self.send(cx, params)
