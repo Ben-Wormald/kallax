@@ -9,6 +9,7 @@ use std::{
 use crate::*;
 
 type Mcx<'a> = ModelContext<'a, Scrobbler>;
+type Params = Vec<(&'static str, String)>;
 
 const API: &str = "http://ws.audioscrobbler.com/2.0/";
 
@@ -120,11 +121,7 @@ impl Scrobbler {
             .ok();
     }
 
-    fn send(
-        &self,
-        cx: &mut Mcx,
-        mut params: Vec<(&'static str, String)>,
-    ) -> Result<(), env::VarError> {
+    fn send(&self, cx: &mut Mcx, mut params: Params) -> Result<(), env::VarError> {
         let mut auth_params = vec![
             ("api_key", env::var("LASTFM_API_KEY")?),
             ("sk", env::var("LASTFM_SESSION_KEY")?),
@@ -156,9 +153,7 @@ impl Scrobbler {
     }
 }
 
-fn sign(
-    mut params: Vec<(&'static str, String)>,
-) -> Result<Vec<(&'static str, String)>, env::VarError> {
+fn sign(mut params: Params) -> Result<Params, env::VarError> {
     params.sort_by(|a, b| a.0.cmp(&b.0));
 
     let param_str = params.iter()
