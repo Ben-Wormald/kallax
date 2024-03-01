@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use crate::*;
 
-use self::elements::{tab_bar, TabBarItem};
+use elements::{tab_bar, TabBarItem};
 
 pub struct NowPlaying {
     pub tracks: Vec<Arc<Track>>,

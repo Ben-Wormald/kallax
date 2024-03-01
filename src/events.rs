@@ -45,19 +45,14 @@ pub struct RightClickEvent {
 
 #[derive(Clone)]
 pub enum PlaybackEvent {
-    TrackStarted(TrackStartedEvent),
+    TrackStarted(Arc<Track>),
     TrackEnded,
     Paused,
     Resumed,
 }
 impl PlaybackEvent {
     pub fn start(track: &Arc<Track>) -> Arc<PlaybackEvent> {
-        Arc::new(PlaybackEvent::TrackStarted(TrackStartedEvent { track: Arc::clone(track) }))
+        Arc::new(PlaybackEvent::TrackStarted(Arc::clone(track)))
     }
 }
 impl gpui::EventEmitter<Arc<PlaybackEvent>> for Playback {}
-
-#[derive(Clone)]
-pub struct TrackStartedEvent {
-    pub track: Arc<Track>,
-}

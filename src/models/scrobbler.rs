@@ -1,5 +1,5 @@
 use gpui::{Model, ModelContext};
-use reqwest::Client;
+use reqwest::blocking::Client;
 use std::{env, sync::Arc};
 
 use crate::*;
@@ -13,9 +13,9 @@ pub struct Scrobbler {
 }
 impl Scrobbler {
     pub fn new(playback: &Model<Playback>, cx: &mut Mcx) -> Scrobbler {
-        cx.subscribe(playback, |_subscriber, _emitter, event, _cx| {
+        cx.subscribe(playback, |this, _emitter, event, cx| {
             match (**event).clone() {
-                PlaybackEvent::TrackStarted(_event) => {},
+                PlaybackEvent::TrackStarted(track) => this.update_now_playing(cx, &track),
                 PlaybackEvent::Paused => {},
                 PlaybackEvent::Resumed => {},
                 PlaybackEvent::TrackEnded => {},
@@ -29,29 +29,66 @@ impl Scrobbler {
         }
     }
 
-    fn update_now_playing(&self, cx: &mut Mcx) {
+    fn update_now_playing(&self, cx: &mut Mcx, track: &Arc<Track>) {
+        let track = Arc::clone(track);
+
+        let mut params = vec![
+            ("method", String::from("track.updateNowPlaying")),
+            ("track", track.title.clone()),
+            ("artist", track.artist_name.clone()),
+            ("album", track.album_title.clone()),
+        ];
+        if let Some(album_artist) = track.album_artist.clone() {
+            params.push(("albumArtist", album_artist));
+        }
+        if let Some(duration) = track.duration {
+            params.push(("duration", duration.to_string()));
+        }
+
+        self.send(cx, params);
+    }
+
+    fn send(&self, cx: &mut Mcx, mut params: Vec<(&'static str, String)>) {
+        let mut auth_params = vec![
+            ("api_key", env::var("LASTFM_API_KEY").unwrap()),
+            ("sk", env::var("LASTFM_SESSION_KEY").unwrap()),
+        ];
+        params.append(&mut auth_params);
+
+        let mut params = sign(params);
+
+        params.push(("format", "json".to_string()));
+
+        let params = params.iter()
+            .map(|(k, v)| (*k, v.as_str()))
+            .collect::<Vec<(&str, &str)>>();
+        let body = querystring::stringify(params);
+
         let client = Arc::clone(&self.client);
 
         cx.background_executor().spawn(async move {
-            let params = vec![
-                ("artist", "Kelly Moran"),
-                ("track", "Butterfly Phase"),
-                ("album", "Butterfly Phase"),
-                ("duration", "170"),
-                ("api_key", &env::var("LASTFM_API_KEY").unwrap()),
-                ("sk", &env::var("LASTFM_SESSION_KEY").unwrap()),
-                ("method", "track.updateNowPlaying"),
-                // ("format", "json"),
-            ];
-            client.post(API).body("hi").send().await.unwrap();
+            client
+                .post(API)
+                .body(body)
+                .header("User-Agent", "musicplayer")
+                .send()
+                .unwrap();
         }).detach();
     }
 }
 
-fn sign<'a>(mut params: Vec<(&'a str, &'a str)>) -> Vec<(&'a str, &'a str)> {
-    params.sort_by(|a, b| a.0.cmp(b.0));
+fn sign(mut params: Vec<(&'static str, String)>) -> Vec<(&'static str, String)> {
+    params.sort_by(|a, b| a.0.cmp(&b.0));
 
-    let param_str = params.iter().map(|(k, v)| format!("{k}{v}")).collect::<Vec<String>>().join("");
+    let param_str = params.iter()
+        .map(|(k, v)| format!("{k}{v}"))
+        .collect::<Vec<String>>()
+        .join("");
+    let param_str = format!("{}{}", param_str, env::var("LASTFM_SECRET_KEY").unwrap());
 
+    let signature = md5::compute(param_str);
+    let signature = format!("{:x}", signature);
+
+    params.push(("api_sig", signature));
     params
 }
