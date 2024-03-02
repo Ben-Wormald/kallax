@@ -30,11 +30,11 @@ impl Render for ContextMenu {
                         .border_color(rgb(theme::colours::AMSTERDAM))
                         .children(self.items.iter().map(|item|
                             div()
-                                .id(ElementId::Name(item.label.clone().into()))
+                                .id(ElementId::Name(item.label.into()))
                                 .py_1()
                                 .px_3()
                                 .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
-                                .child(item.label.clone())
+                                .child(item.label)
                                 .on_mouse_down(MouseButton::Left, cx.listener({
                                     let event = Arc::clone(&item.event);
                                     move |_this, _event, cx| {
@@ -50,6 +50,6 @@ impl Render for ContextMenu {
 }
 
 pub struct ContextMenuItem {
-    pub label: String,
+    pub label: &'static str,
     pub event: Arc<UiEvent>,
 }

@@ -23,11 +23,11 @@ pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElemen
                     position: event.position,
                     items: Arc::new(vec![
                         ContextMenuItem {
-                            label: "Play".to_string(),
+                            label: "Play",
                             event: UiEvent::play(&track),
                         },
                         ContextMenuItem {
-                            label: "Queue".to_string(),
+                            label: "Queue",
                             event: UiEvent::queue(&track),
                         },
                     ]),
@@ -48,7 +48,7 @@ pub fn tab_bar(
 ) -> impl IntoElement {
     div()
         .flex()
-        .gap(Pixels::from(1.))
+        .gap(px(1.))
         .bg(rgb(theme::colours::SHALLOWS))
         .children(tabs.into_iter().enumerate().map(|(index, item)| {
             div()
@@ -58,9 +58,21 @@ pub fn tab_bar(
                 .px_3()
                 .flex()
                 .justify_center()
-                .bg(rgb(if index == selected { theme::colours::TOUCH } else { theme::colours::AMSTERDAM }))
+                .bg(rgb(
+                    if index == selected {
+                        theme::colours::TOUCH
+                    } else {
+                        theme::colours::AMSTERDAM
+                    }
+                ))
                 .border_b_1()
-                .border_color(rgb(if index == selected { theme::colours::TOUCH } else { theme::colours::SHALLOWS }))
+                .border_color(rgb(
+                    if index == selected {
+                        theme::colours::TOUCH
+                    } else {
+                        theme::colours::SHALLOWS
+                    }
+                ))
                 .hover(|style| style
                     .bg(rgb(theme::colours::SHALLOWS))
                     .border_color(rgb(theme::colours::SHALLOWS))

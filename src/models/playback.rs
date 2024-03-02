@@ -37,6 +37,10 @@ impl Playback {
     }
 
     pub fn play(&mut self, track: Arc<Track>, cx: &mut Mcx) {
+        if self.queue.current.is_some() {
+            cx.emit(Arc::new(PlaybackEvent::TrackEnded));
+        }
+
         self.player.play(&track, cx);
         self.queue.play(&track);
 
@@ -67,10 +71,14 @@ impl Playback {
     }
 
     fn on_track_end(&mut self, cx: &mut Mcx) {
-        self.queue.next();
+        let next = self.queue.get_next();
         cx.notify();
 
         cx.emit(Arc::new(PlaybackEvent::TrackEnded));
+
+        if let Some(next) = next {
+            cx.emit(PlaybackEvent::start(&next));
+        }
     }
 }
 
