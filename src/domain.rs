@@ -17,11 +17,11 @@ pub struct Track {
 impl Track {
     pub fn read(path: PathBuf) -> Track {
         let path = path.to_str().unwrap().to_string();
-        let tags = Tag::read_from_path(&path).unwrap();
+        let tags = Tag::read_from_path(&path).unwrap_or_default();
 
-        let title = tags.title().unwrap().to_string();
-        let artist_name = tags.artist().unwrap().to_string();
-        let album_title = tags.album().unwrap().to_string();
+        let title = tags.title().unwrap_or("Unknown").to_string();
+        let artist_name = tags.artist().unwrap_or("Unknown").to_string();
+        let album_title = tags.album().unwrap_or("Unknown").to_string();
         let album_artist = tags.album_artist().map(str::to_string);
         let duration = tags.duration();
         let artwork = utils::get_image(&tags);

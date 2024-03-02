@@ -21,7 +21,7 @@ pub struct Scrobbler {
     time_elapsed: Duration,
 }
 impl Scrobbler {
-    pub fn new(playback: &Model<Playback>, cx: &mut Mcx) -> Scrobbler {
+    pub fn new(cx: &mut Mcx, playback: &Model<Playback>) -> Scrobbler {
         cx.subscribe(playback, |this, _emitter, event, cx| {
             match (**event).clone() {
                 PlaybackEvent::TrackStarted(track) => this.start(cx, &track),

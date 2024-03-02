@@ -5,6 +5,8 @@ use crate::*;
 
 use elements::{tab_bar, TabBarItem};
 
+type Vcx<'a> = ViewContext<'a, NowPlaying>;
+
 pub struct NowPlaying {
     pub tracks: Vec<Arc<Track>>,
     pub current: Option<usize>,
@@ -12,7 +14,7 @@ pub struct NowPlaying {
 }
 
 impl NowPlaying {
-    pub fn new(playback: &Model<Playback>, cx: &mut ViewContext<NowPlaying>) -> NowPlaying {
+    pub fn new(cx: &mut Vcx, playback: &Model<Playback>) -> NowPlaying {
         cx.observe(playback, |subscriber, emitter, cx| {
             subscriber.tracks = emitter.read(cx).queue.tracks.clone();
             subscriber.current = emitter.read(cx).queue.current;
@@ -30,7 +32,7 @@ impl NowPlaying {
         self.current.and_then(|current| self.tracks.get(current))
     }
 
-    fn render_now_playing(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
+    fn render_now_playing(&mut self, cx: &mut Vcx) -> impl IntoElement {
         let current_track = self.get_current();
 
         let now_playing = div()
@@ -84,7 +86,9 @@ impl NowPlaying {
                             .bg(rgb(theme::colours::TOUCH))
                             .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
                             .child("Pause")
-                            .on_click(cx.listener(|_this, _event, cx| cx.emit(Arc::new(UiEvent::PauseClicked)))),
+                            .on_click(cx.listener(|_this, _event, cx|
+                                cx.emit(Arc::new(UiEvent::PauseClicked))
+                            )),
                         div()
                             .id("resume")
                             .flex_1()
@@ -95,7 +99,9 @@ impl NowPlaying {
                             .bg(rgb(theme::colours::TOUCH))
                             .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
                             .child("Resume")
-                            .on_click(cx.listener(|_this, _event, cx| cx.emit(Arc::new(UiEvent::ResumeClicked)))),
+                            .on_click(cx.listener(|_this, _event, cx|
+                                cx.emit(Arc::new(UiEvent::ResumeClicked))
+                            )),
                         div()
                             .id("skip")
                             .flex_1()
@@ -106,12 +112,14 @@ impl NowPlaying {
                             .bg(rgb(theme::colours::TOUCH))
                             .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
                             .child("Skip")
-                            .on_click(cx.listener(|_this, _event, cx| cx.emit(Arc::new(UiEvent::SkipClicked)))),
+                            .on_click(cx.listener(|_this, _event, cx|
+                                cx.emit(Arc::new(UiEvent::SkipClicked))
+                            )),
                     ])
             )
     }
 
-    fn render_queue(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
+    fn render_queue(&mut self, cx: &mut Vcx) -> impl IntoElement {
         div()
             .children(self.tracks.iter().enumerate().map(|(index, track)| {
                 div()
@@ -135,7 +143,7 @@ impl NowPlaying {
 }
 
 impl Render for NowPlaying {
-    fn render(&mut self, cx: &mut ViewContext<NowPlaying>) -> impl IntoElement {
+    fn render(&mut self, cx: &mut Vcx) -> impl IntoElement {
         let now_playing = div()
             .border_l()
             .border_color(rgb(theme::colours::AMSTERDAM))

@@ -5,7 +5,9 @@ use crate::*;
 
 use context_menu::ContextMenuItem;
 
-pub fn track(track: Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
+pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
+    let track = Arc::clone(track);
+
     div()
         .id(ElementId::Name(track.title.clone().into()))
         .py_1()
