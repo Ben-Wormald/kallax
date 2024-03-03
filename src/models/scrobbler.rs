@@ -12,6 +12,7 @@ type Mcx<'a> = ModelContext<'a, Scrobbler>;
 type Params = Vec<(&'static str, String)>;
 
 const API: &str = "http://ws.audioscrobbler.com/2.0/";
+const USER_AGENT: &str = "kallax-music-player";
 
 #[derive(Default)]
 pub struct Scrobbler {
@@ -67,10 +68,10 @@ impl Scrobbler {
         if let Some(track) = self.current_track.clone() {
             if let Some(started) = self.time_started {
                 if let Ok(elapsed) = started.elapsed() {
-                    let four_minutes_elapsed = elapsed > Duration::from_secs(4 * 60);
-                    let half_track_elapsed = elapsed.as_secs() > track.duration.unwrap_or(30) as u64;
+                    let four_minutes = elapsed > Duration::from_secs(4 * 60);
+                    let half_track = elapsed.as_secs() > track.duration.unwrap_or(30) as u64;
 
-                    if four_minutes_elapsed || half_track_elapsed {
+                    if four_minutes || half_track {
                         self.scrobble(cx, &track);
                     }
                 }
@@ -145,7 +146,7 @@ impl Scrobbler {
             client
                 .post(API)
                 .body(body)
-                .header("User-Agent", "musicplayer")
+                .header("User-Agent", USER_AGENT)
                 .send()
                 .inspect_err(|err| println!("{err}"))
                 .ok();

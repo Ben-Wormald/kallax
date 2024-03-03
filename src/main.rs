@@ -14,7 +14,7 @@ use events::*;
 use models::*;
 use views::*;
 
-actions!(musicplayer, [Quit]);
+actions!(kallax, [Quit]);
 
 fn main() {
     dotenv().ok();
@@ -24,8 +24,16 @@ fn main() {
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
 
-        cx.open_window(WindowOptions::default(), |cx| {
-            cx.new_view(MusicPlayer::new)
+        let window_options = WindowOptions {
+            titlebar: Some(TitlebarOptions {
+                title: Some(SharedString::from("Kallax")),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        cx.open_window(window_options, |cx| {
+            cx.new_view(Kallax::new)
         });
     });
 }

@@ -1828,6 +1828,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "kallax"
+version = "0.1.0"
+dependencies = [
+ "dotenv",
+ "gpui",
+ "id3",
+ "image",
+ "md5",
+ "querystring",
+ "reqwest",
+ "rodio",
+ "turbosql",
+]
+
+[[package]]
 name = "kurbo"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2084,21 +2099,6 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "musicplayer"
-version = "0.1.0"
-dependencies = [
- "dotenv",
- "gpui",
- "id3",
- "image",
- "md5",
- "querystring",
- "reqwest",
- "rodio",
- "turbosql",
 ]
 
 [[package]]

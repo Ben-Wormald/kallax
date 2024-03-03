@@ -3,23 +3,23 @@ use std::sync::Arc;
 
 use crate::*;
 
-pub struct MusicPlayer {
+pub struct Kallax {
     playback: Model<Playback>,
     _scrobbler: Model<Scrobbler>,
-    library: Model<Library>,
+    _library: Model<Library>,
     browse: View<Browse>,
     now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,
     modal: View<Modal>,
 }
 
-impl MusicPlayer {
-    pub fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
+impl Kallax {
+    pub fn new(cx: &mut ViewContext<Kallax>) -> Kallax {
         let playback = cx.new_model(Playback::new);
         let _scrobbler = cx.new_model(|cx| Scrobbler::new(cx, &playback));
-        let library = cx.new_model(Library::new);
+        let _library = cx.new_model(Library::new);
 
-        let browse = cx.new_view(|cx| Browse::new(cx, &library));
+        let browse = cx.new_view(|cx| Browse::new(cx, &_library));
         let now_playing = cx.new_view(|cx| NowPlaying::new(cx, &playback));
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
         let modal = cx.new_view(|_cx| Modal::new());
@@ -41,10 +41,10 @@ impl MusicPlayer {
             subscriber.handle_ui_event(event, cx);
         }).detach();
 
-        MusicPlayer {
+        Kallax {
             playback,
             _scrobbler,
-            library,
+            _library,
             browse,
             now_playing,
             context_menu,
@@ -52,7 +52,7 @@ impl MusicPlayer {
         }
     }
 
-    pub fn handle_ui_event(&mut self, event: &Arc<UiEvent>, cx: &mut ViewContext<MusicPlayer>) {
+    pub fn handle_ui_event(&mut self, event: &Arc<UiEvent>, cx: &mut ViewContext<Kallax>) {
         match (**event).clone() {
             UiEvent::PlayClicked(event) => self.playback.update(cx, |this, cx| {
                 this.play(Arc::clone(&event.track), cx);
@@ -91,7 +91,7 @@ impl MusicPlayer {
     }
 }
 
-impl Render for MusicPlayer {
+impl Render for Kallax {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         div()
             .flex()
