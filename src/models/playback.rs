@@ -10,7 +10,7 @@ use std::{
     time::Duration,
 };
 
-use crate::*;
+use crate::{PlaybackEvent, Track};
 
 // https://github.com/aschey/stream-download-rs/tree/main/examples
 // https://docs.rs/axum-streams/latest/axum_streams/index.html

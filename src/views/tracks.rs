@@ -3,8 +3,6 @@ use std::sync::Arc;
 
 use crate::*;
 
-// https://github.com/trevyn/turbosql
-
 pub struct Tracks {
     tracks: Arc<Vec<Arc<Track>>>,
 }

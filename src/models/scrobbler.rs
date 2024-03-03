@@ -6,7 +6,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use crate::*;
+use crate::{Playback, PlaybackEvent, Track};
 
 type Mcx<'a> = ModelContext<'a, Scrobbler>;
 type Params = Vec<(&'static str, String)>;

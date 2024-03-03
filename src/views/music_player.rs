@@ -17,7 +17,7 @@ impl MusicPlayer {
     pub fn new(cx: &mut ViewContext<MusicPlayer>) -> MusicPlayer {
         let playback = cx.new_model(Playback::new);
         let _scrobbler = cx.new_model(|cx| Scrobbler::new(cx, &playback));
-        let library = cx.new_model(|_cx| Library::new());
+        let library = cx.new_model(Library::new);
 
         let tracks = cx.new_view(|cx| Tracks::new(cx, &library));
         let now_playing = cx.new_view(|cx| NowPlaying::new(cx, &playback));

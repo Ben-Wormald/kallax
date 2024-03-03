@@ -5,8 +5,8 @@ mod domain;
 mod elements;
 mod events;
 mod models;
+mod store;
 mod theme;
-mod utils;
 mod views;
 
 use domain::*;
