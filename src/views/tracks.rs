@@ -3,20 +3,38 @@ use std::sync::Arc;
 
 use crate::*;
 
+type Vcx<'a> = ViewContext<'a, Tracks>;
+
 pub struct Tracks {
-    tracks: Arc<Vec<Arc<Track>>>,
+    view: TrackView,
+    tracks: Vec<Arc<Track>>,
+}
+
+enum TrackView {
+    AllTracks,
+    // AllArtists,
+    // AllAlbums,
+    ArtistTracks(String),
+    // ArtistAlbums(String),
+    Album(String, String),
+    // Label(String),
+    // Playlist(String),
 }
 
 impl Tracks {
-    pub fn new(cx: &mut ViewContext<Tracks>, library: &Model<Library>) -> Tracks {
-        cx.observe(library, |this, emitter, cx| {
-            this.tracks = Arc::clone(&emitter.read(cx).tracks);
+    pub fn new(cx: &mut Vcx, library: &Model<Library>) -> Tracks {
+        cx.observe(library, |this, library, cx| {
+            this.tracks = get_tracks(cx, &library, &this.view);
             cx.notify();
         }).detach();
 
-        let tracks = Arc::clone(&library.read(cx).tracks);
+        let view = TrackView::AllTracks;
+        let tracks = get_tracks(cx, library, &view);
 
-        Tracks { tracks }
+        Tracks {
+            view,
+            tracks,
+        }
     }
 }
 
@@ -25,9 +43,21 @@ impl Render for Tracks {
         div()
             .size_full()
             .children(
-                Arc::clone(&self.tracks).iter().map(|track|
+                self.tracks.iter().map(|track|
                     elements::track(track, cx)
                 )
             )
+    }
+}
+
+fn get_tracks(cx: &mut Vcx, library: &Model<Library>, view: &TrackView) -> Vec<Arc<Track>> {
+    let tracks = (*library.read(cx).tracks).clone();
+
+    match view {
+        TrackView::AllTracks => tracks,
+        TrackView::ArtistTracks(artist) => tracks.into_iter()
+            .filter(|track| track.artist_name == *artist).collect(),
+        TrackView::Album(artist, album) => tracks.into_iter()
+            .filter(|track| track.artist_name == *artist && track.album_title == *album).collect(),
     }
 }

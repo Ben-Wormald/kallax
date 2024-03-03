@@ -2,7 +2,6 @@ use gpui::*;
 use std::sync::Arc;
 
 use crate::*;
-
 use elements::{tab_bar, TabBarItem};
 
 type Vcx<'a> = ViewContext<'a, NowPlaying>;

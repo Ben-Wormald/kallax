@@ -20,7 +20,7 @@ fn load_tracks() -> Vec<Arc<Track>> {
 
     if tracks.is_empty() {
         let mut tracks = vec![];
-        read_tracks(PathBuf::from("/Users/ben/Music/_soundtracks"), &mut tracks);
+        read_tracks(PathBuf::from("/Users/ben/Music/Alvvays/Antisocialites"), &mut tracks);
         tracks
     } else {
         tracks

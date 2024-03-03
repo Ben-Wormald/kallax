@@ -7,7 +7,7 @@ pub struct MusicPlayer {
     playback: Model<Playback>,
     _scrobbler: Model<Scrobbler>,
     library: Model<Library>,
-    tracks: View<Tracks>,
+    browse: View<Browse>,
     now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,
     modal: View<Modal>,
@@ -19,11 +19,16 @@ impl MusicPlayer {
         let _scrobbler = cx.new_model(|cx| Scrobbler::new(cx, &playback));
         let library = cx.new_model(Library::new);
 
-        let tracks = cx.new_view(|cx| Tracks::new(cx, &library));
+        let browse = cx.new_view(|cx| Browse::new(cx, &library));
         let now_playing = cx.new_view(|cx| NowPlaying::new(cx, &playback));
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
         let modal = cx.new_view(|_cx| Modal::new());
 
+        cx.subscribe(&browse, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+            subscriber.handle_ui_event(event, cx);
+        }).detach();
+
+        let tracks = browse.read(cx).tracks.clone();
         cx.subscribe(&tracks, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
             subscriber.handle_ui_event(event, cx);
         }).detach();
@@ -40,14 +45,14 @@ impl MusicPlayer {
             playback,
             _scrobbler,
             library,
-            tracks,
+            browse,
             now_playing,
             context_menu,
             modal,
         }
     }
 
-    fn handle_ui_event(&mut self, event: &Arc<UiEvent>, cx: &mut ViewContext<MusicPlayer>) {
+    pub fn handle_ui_event(&mut self, event: &Arc<UiEvent>, cx: &mut ViewContext<MusicPlayer>) {
         match (**event).clone() {
             UiEvent::PlayClicked(event) => self.playback.update(cx, |this, cx| {
                 this.play(Arc::clone(&event.track), cx);
@@ -73,6 +78,10 @@ impl MusicPlayer {
                 this.selected_tab = tab_index;
                 cx.notify();
             }),
+            UiEvent::BrowseTabClicked(tab_index) => self.browse.update(cx, |this, cx| {
+                this.selected_tab = tab_index;
+                cx.notify();
+            }),
             UiEvent::RightClick(event) => self.context_menu.update(cx, |this, cx| {
                 this.items = Arc::clone(&event.items);
                 this.position = Some(event.position);
@@ -90,7 +99,7 @@ impl Render for MusicPlayer {
             .size_full()
             .text_color(rgb(theme::colours::WINTER))
             .font("Work Sans")
-            .child(self.tracks.clone())
+            .child(self.browse.clone())
             .child(self.now_playing.clone())
             .child(self.context_menu.clone())
             .child(self.modal.clone())

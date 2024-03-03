@@ -43,10 +43,10 @@ pub struct TabBarItem {
     pub event: Arc<UiEvent>,
 }
 
-pub fn tab_bar(
+pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
     tabs: Vec<TabBarItem>,
     selected: usize,
-    cx: &mut ViewContext<NowPlaying>,
+    cx: &mut ViewContext<V>,
 ) -> impl IntoElement {
     div()
         .flex()
