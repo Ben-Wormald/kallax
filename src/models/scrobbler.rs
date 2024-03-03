@@ -23,11 +23,13 @@ pub struct Scrobbler {
 impl Scrobbler {
     pub fn new(cx: &mut Mcx, playback: &Model<Playback>) -> Scrobbler {
         cx.subscribe(playback, |this, _emitter, event, cx| {
-            match (**event).clone() {
-                PlaybackEvent::TrackStarted(track) => this.start(cx, &track),
-                PlaybackEvent::Paused => this.pause(),
-                PlaybackEvent::Resumed => this.resume(),
-                PlaybackEvent::TrackEnded => this.end(cx),
+            if env::var("ENABLE_SCROBBLING").is_ok_and(|var| var == "true") {
+                match (**event).clone() {
+                    PlaybackEvent::TrackStarted(track) => this.start(cx, &track),
+                    PlaybackEvent::Paused => this.pause(),
+                    PlaybackEvent::Resumed => this.resume(),
+                    PlaybackEvent::TrackEnded => this.end(cx),
+                }
             }
         }).detach();
 
@@ -154,7 +156,7 @@ impl Scrobbler {
 }
 
 fn sign(mut params: Params) -> Result<Params, env::VarError> {
-    params.sort_by(|a, b| a.0.cmp(&b.0));
+    params.sort_by(|a, b| a.0.cmp(b.0));
 
     let param_str = params.iter()
         .map(|(k, v)| format!("{k}{v}"))
