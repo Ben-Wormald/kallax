@@ -3,6 +3,8 @@ use std::{fs::read_dir, path::PathBuf, sync::Arc};
 
 use crate::{store, Track};
 
+// TODO give every track an ID and use that in events etc.?
+
 pub struct Library {
     pub tracks: Arc<Vec<Arc<Track>>>,
 }
