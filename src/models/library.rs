@@ -1,5 +1,5 @@
 use gpui::ModelContext;
-use std::{fs::read_dir, path::PathBuf, sync::Arc};
+use std::{env, fs::read_dir, path::PathBuf, sync::Arc};
 
 use crate::{store, Track};
 
@@ -21,8 +21,9 @@ fn load_tracks() -> Vec<Arc<Track>> {
     let tracks = store::load_all();
 
     if tracks.is_empty() {
+        let dir = PathBuf::from(env::var("LIBRARY_DIR").unwrap_or(String::from(".")));
         let mut tracks = vec![];
-        read_tracks(PathBuf::from("/Users/ben/Music/Alvvays/Antisocialites"), &mut tracks);
+        read_tracks(dir, &mut tracks);
         tracks
     } else {
         tracks
