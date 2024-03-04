@@ -41,7 +41,9 @@ impl Tracks {
 impl Render for Tracks {
     fn render(&mut self, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
         div()
+            .id("tracks")
             .size_full()
+            .overflow_y_scroll()
             .children(
                 self.tracks.iter().map(|track|
                     elements::track(track, cx)

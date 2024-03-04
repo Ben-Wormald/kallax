@@ -14,15 +14,18 @@ const PLAYLISTS: usize = 3;
 pub struct Browse {
     pub selected_tab: usize,
     pub tracks: View<Tracks>,
+    pub albums: View<Albums>,
 }
 
 impl Browse {
     pub fn new(cx: &mut Vcx, library: &Model<Library>) -> Browse {
         let tracks = cx.new_view(|cx| Tracks::new(cx, library));
+        let albums = cx.new_view(|cx| Albums::new(cx, library));
 
         Browse {
             selected_tab: TRACKS,
             tracks,
+            albums,
         }
     }
 }
@@ -56,6 +59,7 @@ impl Render for Browse {
 
         match self.selected_tab {
             TRACKS => browse.child(self.tracks.clone()),
+            ALBUMS => browse.child(self.albums.clone()),
             _ => browse,
         }
     }

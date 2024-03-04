@@ -38,6 +38,24 @@ pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoEleme
         )
 }
 
+pub fn album(album: &Album, cx: &mut ViewContext<Albums>) -> impl IntoElement {
+    let element = div()
+        .id("album");
+
+    let element = if let Some(artwork) = &album.artwork {
+        element.child(
+            img(Arc::clone(artwork))
+                        .flex_none()
+                        .w_80()
+                        .h_80()
+        )
+    } else {
+        element
+    };
+
+    element.child(album.title.clone())
+}
+
 pub struct TabBarItem {
     pub label: &'static str,
     pub event: Arc<UiEvent>,
