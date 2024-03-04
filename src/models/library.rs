@@ -5,6 +5,8 @@ use crate::{store, Track};
 
 // TODO give every track an ID and use that in events etc.?
 
+const SUPPORTED_FILETYPES: [&str; 2] = ["mp3", "wav"];
+
 pub struct Library {
     pub tracks: Arc<Vec<Arc<Track>>>,
 }
@@ -36,7 +38,9 @@ fn read_tracks(dir: PathBuf, tracks: &mut Vec<Arc<Track>>) {
 
         if path.is_dir() {
             read_tracks(path, tracks);
-        } else if path.extension().is_some_and(|extension| extension == "mp3") {
+        } else if path.extension().is_some_and(|extension|
+            SUPPORTED_FILETYPES.contains(&extension.to_str().unwrap())
+        ) {
             tracks.push(Arc::new(store::Track::read_and_save(path)))
         }
     }

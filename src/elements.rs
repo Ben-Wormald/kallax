@@ -71,35 +71,29 @@ pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
         .gap(px(1.))
         .bg(rgb(theme::colours::SHALLOWS))
         .children(tabs.into_iter().enumerate().map(|(index, item)| {
-            div()
+            let tab = div()
                 .id(item.label)
                 .flex_1()
                 .py_1()
                 .px_3()
                 .flex()
                 .justify_center()
-                .bg(rgb(
-                    if index == selected {
-                        theme::colours::TOUCH
-                    } else {
-                        theme::colours::AMSTERDAM
-                    }
-                ))
-                .border_b_1()
-                .border_color(rgb(
-                    if index == selected {
-                        theme::colours::TOUCH
-                    } else {
-                        theme::colours::SHALLOWS
-                    }
-                ))
-                .hover(|style| style
-                    .bg(rgb(theme::colours::SHALLOWS))
+                .child(item.label);
+
+            if index == selected {
+                tab
+                    .bg(rgb(theme::colours::TOUCH))
+                    .border_color(rgb(theme::colours::TOUCH))
+            } else {
+                tab
+                    .bg(rgb(theme::colours::AMSTERDAM))
+                    .border_b_1()
                     .border_color(rgb(theme::colours::SHALLOWS))
-                )
-                .on_click(cx.listener(move |_this, _event, cx| {
-                    cx.emit(Arc::clone(&item.event));
-                }))
-                .child(item.label)
+                    .hover(|style| style
+                        .bg(rgb(theme::colours::SHALLOWS))
+                    ).on_click(cx.listener(move |_this, _event, cx| {
+                        cx.emit(Arc::clone(&item.event));
+                    }))
+            }
         }))
 }
