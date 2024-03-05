@@ -12,7 +12,8 @@ pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoEleme
         .id(ElementId::Name(track.title.clone().into()))
         .py_1()
         .px_3()
-        .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
+        .rounded(px(1.))
+        .hover(|style| style.bg(rgb(theme::colours::TOUCH)))
         .child(track.title.clone())
         .on_click(cx.listener({
             let track = Arc::clone(&track);
@@ -68,8 +69,6 @@ pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
 ) -> impl IntoElement {
     div()
         .flex()
-        .gap(px(1.))
-        .bg(rgb(theme::colours::SHALLOWS))
         .children(tabs.into_iter().enumerate().map(|(index, item)| {
             let tab = div()
                 .id(item.label)
@@ -82,15 +81,17 @@ pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
 
             if index == selected {
                 tab
-                    .bg(rgb(theme::colours::TOUCH))
-                    .border_color(rgb(theme::colours::TOUCH))
+                    .bg(rgb(theme::colours::AMSTERDAM))
+                    .text_color(rgb(theme::colours::WINTER))
+                    .rounded_t_sm()
             } else {
                 tab
-                    .bg(rgb(theme::colours::AMSTERDAM))
-                    .border_b_1()
-                    .border_color(rgb(theme::colours::SHALLOWS))
+                    .text_color(rgb(theme::colours::AMSTERDAM))
+                    .rounded_t_sm()
                     .hover(|style| style
-                        .bg(rgb(theme::colours::SHALLOWS))
+                        .rounded_sm()
+                        .bg(rgb(theme::colours::YOUTH))
+                        .text_color(rgb(theme::colours::SHALLOWS))
                     ).on_click(cx.listener(move |_this, _event, cx| {
                         cx.emit(Arc::clone(&item.event));
                     }))

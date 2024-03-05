@@ -32,10 +32,27 @@ impl Browse {
 
 impl Render for Browse {
     fn render(&mut self, cx: &mut Vcx) -> impl IntoElement {
-        let browse = div()
-            .size_full()
+        let view = div()
+            .id("browse-view")
+            .flex_grow()
+            .overflow_scroll()
+            .rounded_b_sm()
+            .bg(rgb(theme::colours::AMSTERDAM))
+            .p(px(1.));
+
+        let view = match self.selected_tab {
+            TRACKS => view.child(self.tracks.clone()),
+            ALBUMS => view.child(self.albums.clone()),
+            _ => view,
+        };
+
+        let view = if self.selected_tab != 0 { view.rounded_tl_sm() } else { view };
+        let view = if self.selected_tab != 3 { view.rounded_tr_sm() } else { view };
+
+        div()
             .flex()
             .flex_col()
+            .min_h_0()
             .child(
                 tab_bar(vec![
                     TabBarItem {
@@ -55,12 +72,7 @@ impl Render for Browse {
                         event: Arc::new(UiEvent::BrowseTabClicked(PLAYLISTS)),
                     },
                 ], self.selected_tab, cx)
-            );
-
-        match self.selected_tab {
-            TRACKS => browse.child(self.tracks.clone()),
-            ALBUMS => browse.child(self.albums.clone()),
-            _ => browse,
-        }
+            )
+            .child(view)
     }
 }

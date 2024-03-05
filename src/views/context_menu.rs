@@ -25,23 +25,36 @@ impl Render for ContextMenu {
                 .child(
                     div()
                         .flex_col()
-                        .bg(rgb(theme::colours::TOUCH))
-                        .border()
-                        .border_color(rgb(theme::colours::AMSTERDAM))
-                        .children(self.items.iter().map(|item|
+                        .border_1()
+                        .border_color(rgb(theme::colours::SHALLOWS))
+                        .bg(rgb(theme::colours::SMOTHER))
+                        .p(px(2.))
+                        .rounded_md()
+                        .rounded_tl_none()
+                        .child(
                             div()
-                                .id(ElementId::Name(item.label.into()))
-                                .py_1()
-                                .px_3()
-                                .hover(|style| style.bg(rgb(theme::colours::AMSTERDAM)))
-                                .child(item.label)
-                                .on_mouse_down(MouseButton::Left, cx.listener({
-                                    let event = Arc::clone(&item.event);
-                                    move |_this, _event, cx| {
-                                        cx.emit(Arc::clone(&event));
-                                    }
-                                }))
-                        ))
+                                .rounded_sm()
+                                .rounded_tl_none()
+                                .bg(rgb(theme::colours::AMSTERDAM))
+                                .p(px(1.))
+                                .children(self.items.iter().map(|item|
+                                    div()
+                                        .id(ElementId::Name(item.label.into()))
+                                        .py_1()
+                                        .px_3()
+                                        .rounded(px(1.))
+                                        .hover(|style| style.bg(rgb(theme::colours::TOUCH)))
+                                        .child(item.label)
+                                        .on_mouse_down(MouseButton::Left, cx.listener({
+                                            let event = Arc::clone(&item.event);
+                                            move |this, _event, cx| {
+                                                cx.emit(Arc::clone(&event));
+                                                this.position = None;
+                                                cx.notify();
+                                            }
+                                        }))
+                                ))
+                        )
                 )
         } else {
             overlay()

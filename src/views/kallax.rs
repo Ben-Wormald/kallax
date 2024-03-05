@@ -94,19 +94,35 @@ impl Kallax {
 impl Render for Kallax {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         div()
-            .flex()
-            .bg(rgb(theme::colours::TOUCH))
             .size_full()
-            .text_color(rgb(theme::colours::WINTER))
-            .font("Work Sans")
-            .child(self.browse.clone())
-            .child(self.now_playing.clone())
-            .child(self.context_menu.clone())
-            .child(self.modal.clone())
-            .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, cx| {
-                this.context_menu.update(cx, |context_menu, _cx| {
-                    context_menu.position = None;
-                });
-            }))
+            .flex()
+            .flex_col()
+            .min_h_0()
+            .p_1()
+            .child(
+                div()
+                    .min_h(px(30.))
+            )
+            .child(
+                div()
+                    .flex_grow()
+                    .flex()
+                    .min_h_0()
+                    .gap(px(2.))
+                    .bg(rgb(theme::colours::STILL))
+                    .rounded_md()
+                    .p(px(2.))
+                    .text_color(rgb(theme::colours::WINTER))
+                    .font("Iosevka")
+                    .child(self.browse.clone())
+                    .child(self.now_playing.clone())
+                    .child(self.context_menu.clone())
+                    .child(self.modal.clone())
+                    .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, cx| {
+                        this.context_menu.update(cx, |context_menu, _cx| {
+                            context_menu.position = None;
+                        });
+                    }))
+            )
     }
 }

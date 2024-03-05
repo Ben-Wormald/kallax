@@ -27,6 +27,11 @@ fn main() {
         let window_options = WindowOptions {
             titlebar: Some(TitlebarOptions {
                 title: Some(SharedString::from("Kallax")),
+                appears_transparent: true,
+                ..Default::default()
+            }),
+            bounds: WindowBounds::Fixed(Bounds {
+                size: size(px(800.), px(600.)).into(),
                 ..Default::default()
             }),
             ..Default::default()

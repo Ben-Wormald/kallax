@@ -40,12 +40,12 @@ impl NowPlaying {
             .flex()
             .flex_col()
             .gap_px()
-            .bg(rgb(theme::colours::SHALLOWS))
+            .rounded_b_sm()
+            .bg(rgb(theme::colours::AMSTERDAM))
             .child(
                 div()
                     .py_1()
                     .px_3()
-                    .bg(rgb(theme::colours::TOUCH))
                     .children([
                         current_track.map_or("-".to_string(), |track| track.title.clone()),
                         current_track.map_or("-".to_string(), |track| track.artist_name.clone()),
@@ -69,10 +69,10 @@ impl NowPlaying {
         };
 
         now_playing
-            .child(div().bg(rgb(theme::colours::TOUCH)).flex_grow())
             .child(
                 div()
                     .flex()
+                    .mt_auto()
                     .gap_px()
                     .children([
                         div()
@@ -120,6 +120,9 @@ impl NowPlaying {
 
     fn render_queue(&mut self, cx: &mut Vcx) -> impl IntoElement {
         div()
+            .flex_grow()
+            .rounded_b_sm()
+            .bg(rgb(theme::colours::AMSTERDAM))
             .children(self.tracks.iter().enumerate().map(|(index, track)| {
                 div()
                     .id(ElementId::Name(track.title.clone().into()))
@@ -144,9 +147,7 @@ impl NowPlaying {
 impl Render for NowPlaying {
     fn render(&mut self, cx: &mut Vcx) -> impl IntoElement {
         let now_playing = div()
-            .border_l()
-            .border_color(rgb(theme::colours::AMSTERDAM))
-            .h_full()
+            .flex_grow()
             .flex()
             .flex_col()
             .child(
