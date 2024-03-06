@@ -50,6 +50,7 @@ impl Render for Browse {
         let view = if self.selected_tab != 3 { view.rounded_tr_sm() } else { view };
 
         div()
+            .flex_grow()
             .flex()
             .flex_col()
             .min_h_0()

@@ -150,6 +150,7 @@ impl Render for NowPlaying {
             .flex_grow()
             .flex()
             .flex_col()
+            .max_w_80()
             .child(
                 tab_bar(vec![
                     TabBarItem {

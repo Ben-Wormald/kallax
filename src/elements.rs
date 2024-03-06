@@ -5,56 +5,70 @@ use crate::*;
 
 use context_menu::ContextMenuItem;
 
-pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
-    let track = Arc::clone(track);
+pub fn track(index: usize, track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
+    let on_click = cx.listener({
+        let track = Arc::clone(&track);
+        move |_this, _event, cx| cx.emit(UiEvent::play(&track))
+    });
+    
+    let on_right_click = cx.listener({
+        let track = Arc::clone(track);
+        move |_this, event: &MouseDownEvent, cx: &mut ViewContext<Tracks>| {
+            cx.emit(Arc::new(UiEvent::RightClick(RightClickEvent {
+                position: event.position,
+                items: Arc::new(vec![
+                    ContextMenuItem {
+                        label: "Play",
+                        event: UiEvent::play(&track),
+                    },
+                    ContextMenuItem {
+                        label: "Queue",
+                        event: UiEvent::queue(&track),
+                    },
+                ]),
+            })));
+        }
+    });
 
     div()
         .id(ElementId::Name(track.title.clone().into()))
-        .py_1()
-        .px_3()
+        .flex()
+        .gap_3()
+        .h_8()
+        .items_center()
         .rounded(px(1.))
         .hover(|style| style.bg(rgb(theme::colours::TOUCH)))
-        .child(track.title.clone())
-        .on_click(cx.listener({
-            let track = Arc::clone(&track);
-            move |_this, _event, cx| cx.emit(UiEvent::play(&track))
-        }))
-        .on_mouse_down(
-            MouseButton::Right,
-            cx.listener(move |_this, event: &MouseDownEvent, cx: &mut ViewContext<Tracks>| {
-                cx.emit(Arc::new(UiEvent::RightClick(RightClickEvent {
-                    position: event.position,
-                    items: Arc::new(vec![
-                        ContextMenuItem {
-                            label: "Play",
-                            event: UiEvent::play(&track),
-                        },
-                        ContextMenuItem {
-                            label: "Queue",
-                            event: UiEvent::queue(&track),
-                        },
-                    ]),
-                })));
-            })
+        .child(
+            div()
+                .flex()
+                .w_8()
+                .justify_end()
+                .text_color(rgb(theme::colours::YOUTH))
+                .child((index + 1).to_string())
         )
+        .child(
+            div().child(track.title.clone())
+        )
+        .on_click(on_click)
+        .on_mouse_down(MouseButton::Right, on_right_click)
 }
 
 pub fn album(album: &Album, cx: &mut ViewContext<Albums>) -> impl IntoElement {
     let element = div()
-        .id("album");
+        .size_64();
 
     let element = if let Some(artwork) = &album.artwork {
         element.child(
             img(Arc::clone(artwork))
-                        .flex_none()
-                        .w_80()
-                        .h_80()
+                .rounded(px(1.))
+                .size_full()
         )
     } else {
         element
     };
 
-    element.child(album.title.clone())
+    element
+    // element.child(album.title.clone())
 }
 
 pub struct TabBarItem {

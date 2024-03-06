@@ -41,9 +41,12 @@ impl Tracks {
 impl Render for Tracks {
     fn render(&mut self, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
         div()
+            .flex()
+            .flex_col()
+            .gap(px(1.))
             .children(
-                self.tracks.iter().map(|track|
-                    elements::track(track, cx)
+                self.tracks.iter().enumerate().map(|(index, track)|
+                    elements::track(index, track, cx)
                 )
             )
     }

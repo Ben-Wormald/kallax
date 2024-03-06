@@ -35,6 +35,10 @@ impl Albums {
 impl Render for Albums {
     fn render(&mut self, cx: &mut ViewContext<Albums>) -> impl IntoElement {
         div()
+            .id("albums")
+            .flex()
+            .flex_wrap()
+            .gap(px(1.))
             .children(
                 self.albums.iter().map(|album|
                     elements::album(album, cx)
