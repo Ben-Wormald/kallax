@@ -3,11 +3,14 @@ use std::sync::Arc;
 
 use crate::*;
 
+use self::elements::UiAction;
+
 type Vcx<'a> = ViewContext<'a, Tracks>;
 
 pub struct Tracks {
     pub view: TrackView,
     tracks: Vec<Arc<Track>>,
+    sort_dropdown: View<Dropdown>,
 }
 
 pub enum TrackView {
@@ -30,10 +33,14 @@ impl Tracks {
 
         let view = TrackView::AllTracks;
         let tracks = get_tracks(cx, library, &view);
+        let sort_dropdown = cx.new_view(|_cx| Dropdown::new("Sort", vec![
+            UiAction { label: "Order", event: Arc::new(UiEvent::PauseClicked) }
+        ]));
 
         Tracks {
             view,
             tracks,
+            sort_dropdown,
         }
     }
 
@@ -49,6 +56,11 @@ impl Render for Tracks {
             .flex()
             .flex_col()
             .gap(px(1.))
+            .child(
+                div()
+                    .flex()
+                    .child(self.sort_dropdown.clone())
+            )
             .children(
                 self.tracks.iter().enumerate().map(|(index, track)|
                     elements::track(index, track, cx)

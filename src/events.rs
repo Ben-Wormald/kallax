@@ -32,6 +32,7 @@ impl UiEvent {
 impl gpui::EventEmitter<Arc<UiEvent>> for Albums {}
 impl gpui::EventEmitter<Arc<UiEvent>> for Browse {}
 impl gpui::EventEmitter<Arc<UiEvent>> for ContextMenu {}
+impl gpui::EventEmitter<Arc<UiEvent>> for Dropdown {}
 impl gpui::EventEmitter<Arc<UiEvent>> for NowPlaying {}
 impl gpui::EventEmitter<Arc<UiEvent>> for Tracks {}
 

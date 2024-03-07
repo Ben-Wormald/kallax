@@ -5,6 +5,11 @@ use crate::*;
 
 use context_menu::ContextMenuItem;
 
+pub struct UiAction {
+    pub label: &'static str,
+    pub event: Arc<UiEvent>,
+}
+
 pub fn track(index: usize, track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
     let on_click = cx.listener({
         let track = Arc::clone(&track);
@@ -77,13 +82,8 @@ pub fn album(album: &Arc<Album>, cx: &mut ViewContext<Albums>) -> impl IntoEleme
         })
 }
 
-pub struct TabBarItem {
-    pub label: &'static str,
-    pub event: Arc<UiEvent>,
-}
-
 pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
-    tabs: Vec<TabBarItem>,
+    tabs: Vec<UiAction>,
     selected: usize,
     cx: &mut ViewContext<V>,
 ) -> impl IntoElement {
