@@ -28,6 +28,17 @@ impl Browse {
             albums,
         }
     }
+
+    pub fn open_album(&mut self, cx: &mut Vcx, library: &Model<Library>, album: &Arc<Album>) {
+        self.selected_tab = TRACKS;
+        self.tracks.update(cx, |this, cx| {
+            this.update_view(
+                cx,
+                library,
+                tracks::TrackView::Album(album.artist_name.clone(), album.title.clone()),
+            );
+        });
+    }
 }
 
 impl Render for Browse {

@@ -6,11 +6,11 @@ use crate::*;
 type Vcx<'a> = ViewContext<'a, Tracks>;
 
 pub struct Tracks {
-    view: TrackView,
+    pub view: TrackView,
     tracks: Vec<Arc<Track>>,
 }
 
-enum TrackView {
+pub enum TrackView {
     AllTracks,
     // AllArtists,
     // AllAlbums,
@@ -35,6 +35,11 @@ impl Tracks {
             view,
             tracks,
         }
+    }
+
+    pub fn update_view(&mut self, cx: &mut Vcx, library: &Model<Library>, view: TrackView) {
+        self.view = view;
+        self.tracks = get_tracks(cx, library, &self.view);
     }
 }
 

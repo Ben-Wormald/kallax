@@ -6,11 +6,11 @@ use crate::*;
 type Vcx<'a> = ViewContext<'a, Albums>;
 
 pub struct Albums {
-    view: AlbumView,
-    albums: Vec<Album>,
+    pub view: AlbumView,
+    albums: Vec<Arc<Album>>,
 }
 
-enum AlbumView {
+pub enum AlbumView {
     AllAlbums,
     ArtistAlbums(String),
 }
@@ -47,7 +47,7 @@ impl Render for Albums {
     }
 }
 
-fn get_albums(cx: &mut Vcx, library: &Model<Library>, view: &AlbumView) -> Vec<Album> {
+fn get_albums(cx: &mut Vcx, library: &Model<Library>, view: &AlbumView) -> Vec<Arc<Album>> {
     let tracks = (*library.read(cx).tracks).clone();
     let mut albums: HashSet<Album> = HashSet::new();
 
@@ -59,7 +59,7 @@ fn get_albums(cx: &mut Vcx, library: &Model<Library>, view: &AlbumView) -> Vec<A
             .for_each(|track| get_album(track, &mut albums)),
     };
 
-    Vec::from_iter(albums)
+    albums.into_iter().map(|album| Arc::new(album)).collect()
 }
 
 fn get_album(track: &Arc<Track>, albums: &mut HashSet<Album>) {
