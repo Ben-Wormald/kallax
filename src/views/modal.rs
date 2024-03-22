@@ -22,7 +22,7 @@ impl Render for Modal {
             .size_full()
             .top_0()
             .left_0()
-            .z_index(100)
+            // .z_index(100)
             .bg(rgba(0x03030380))
             .flex()
             .items_center()
