@@ -2,7 +2,7 @@ use gpui::*;
 use std::sync::Arc;
 
 use crate::*;
-use elements::{tab_bar, TabBarItem};
+use elements::{tab_bar, UiAction};
 
 type Vcx<'a> = ViewContext<'a, NowPlaying>;
 
@@ -153,11 +153,11 @@ impl Render for NowPlaying {
             .max_w_80()
             .child(
                 tab_bar(vec![
-                    TabBarItem {
+                    UiAction {
                         label: "Now playing",
                         event: Arc::new(UiEvent::NowPlayingTabClicked(0)),
                     },
-                    TabBarItem {
+                    UiAction {
                         label: "Queue",
                         event: Arc::new(UiEvent::NowPlayingTabClicked(1)),
                     },

@@ -11,6 +11,7 @@ pub enum UiEvent {
     PauseClicked,
     ResumeClicked,
     SkipClicked,
+    AlbumClicked(Arc<Album>),
     NowPlayingTabClicked(usize),
     BrowseTabClicked(usize),
     RightClick(RightClickEvent),
@@ -23,9 +24,15 @@ impl UiEvent {
     pub fn queue(track: &Arc<Track>) -> Arc<UiEvent> {
         Arc::new(UiEvent::QueueClicked(QueueClickedEvent { track: Arc::clone(track) }))
     }
+
+    pub fn album(album: &Arc<Album>) -> Arc<UiEvent> {
+        Arc::new(UiEvent::AlbumClicked(Arc::clone(album)))
+    }
 }
+impl gpui::EventEmitter<Arc<UiEvent>> for Albums {}
 impl gpui::EventEmitter<Arc<UiEvent>> for Browse {}
 impl gpui::EventEmitter<Arc<UiEvent>> for ContextMenu {}
+impl gpui::EventEmitter<Arc<UiEvent>> for Dropdown {}
 impl gpui::EventEmitter<Arc<UiEvent>> for NowPlaying {}
 impl gpui::EventEmitter<Arc<UiEvent>> for Tracks {}
 

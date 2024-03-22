@@ -5,6 +5,11 @@ use crate::*;
 
 use context_menu::ContextMenuItem;
 
+pub struct UiAction {
+    pub label: &'static str,
+    pub event: Arc<UiEvent>,
+}
+
 pub fn track(index: usize, track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
     let on_click = cx.listener({
         let track = Arc::clone(&track);
@@ -53,8 +58,9 @@ pub fn track(index: usize, track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> 
         .on_mouse_down(MouseButton::Right, on_right_click)
 }
 
-pub fn album(album: &Album, cx: &mut ViewContext<Albums>) -> impl IntoElement {
+pub fn album(album: &Arc<Album>, cx: &mut ViewContext<Albums>) -> impl IntoElement {
     let element = div()
+        .id(ElementId::Name(format!("{}{}", &album.artist_name, &album.title).into()))
         .size_64();
 
     let element = if let Some(artwork) = &album.artwork {
@@ -68,16 +74,16 @@ pub fn album(album: &Album, cx: &mut ViewContext<Albums>) -> impl IntoElement {
     };
 
     element
-    // element.child(album.title.clone())
-}
-
-pub struct TabBarItem {
-    pub label: &'static str,
-    pub event: Arc<UiEvent>,
+        .on_click({
+            let album = Arc::clone(album);
+            cx.listener(move |_this, _event, cx| {
+                cx.emit(UiEvent::album(&album));
+            })
+        })
 }
 
 pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
-    tabs: Vec<TabBarItem>,
+    tabs: Vec<UiAction>,
     selected: usize,
     cx: &mut ViewContext<V>,
 ) -> impl IntoElement {

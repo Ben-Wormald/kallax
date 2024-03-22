@@ -3,10 +3,12 @@ use std::sync::Arc;
 
 use crate::*;
 
+use self::tracks::TrackView;
+
 pub struct Kallax {
     playback: Model<Playback>,
     _scrobbler: Model<Scrobbler>,
-    _library: Model<Library>,
+    library: Model<Library>,
     browse: View<Browse>,
     now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,
@@ -17,9 +19,9 @@ impl Kallax {
     pub fn new(cx: &mut ViewContext<Kallax>) -> Kallax {
         let playback = cx.new_model(Playback::new);
         let _scrobbler = cx.new_model(|cx| Scrobbler::new(cx, &playback));
-        let _library = cx.new_model(Library::new);
+        let library = cx.new_model(Library::new);
 
-        let browse = cx.new_view(|cx| Browse::new(cx, &_library));
+        let browse = cx.new_view(|cx| Browse::new(cx, &library));
         let now_playing = cx.new_view(|cx| NowPlaying::new(cx, &playback));
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
         let modal = cx.new_view(|_cx| Modal::new());
@@ -30,6 +32,11 @@ impl Kallax {
 
         let tracks = browse.read(cx).tracks.clone();
         cx.subscribe(&tracks, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+            subscriber.handle_ui_event(event, cx);
+        }).detach();
+
+        let albums = browse.read(cx).albums.clone();
+        cx.subscribe(&albums, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
             subscriber.handle_ui_event(event, cx);
         }).detach();
 
@@ -44,7 +51,7 @@ impl Kallax {
         Kallax {
             playback,
             _scrobbler,
-            _library,
+            library,
             browse,
             now_playing,
             context_menu,
@@ -72,6 +79,10 @@ impl Kallax {
             }),
             UiEvent::SkipClicked => self.playback.update(cx, |this, cx| {
                 this.skip(cx);
+                cx.notify();
+            }),
+            UiEvent::AlbumClicked(album) => self.browse.update(cx, |this, cx| {
+                this.open_album(cx, &self.library, &album);
                 cx.notify();
             }),
             UiEvent::NowPlayingTabClicked(tab_index) => self.now_playing.update(cx, |this, cx| {

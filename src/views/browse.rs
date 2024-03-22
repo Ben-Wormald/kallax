@@ -2,7 +2,7 @@ use gpui::*;
 use std::sync::Arc;
 
 use crate::*;
-use elements::{tab_bar, TabBarItem};
+use elements::{tab_bar, UiAction};
 
 type Vcx<'a> = ViewContext<'a, Browse>;
 
@@ -27,6 +27,17 @@ impl Browse {
             tracks,
             albums,
         }
+    }
+
+    pub fn open_album(&mut self, cx: &mut Vcx, library: &Model<Library>, album: &Arc<Album>) {
+        self.selected_tab = TRACKS;
+        self.tracks.update(cx, |this, cx| {
+            this.update_view(
+                cx,
+                library,
+                tracks::TrackView::Album(album.artist_name.clone(), album.title.clone()),
+            );
+        });
     }
 }
 
@@ -56,19 +67,19 @@ impl Render for Browse {
             .min_h_0()
             .child(
                 tab_bar(vec![
-                    TabBarItem {
+                    UiAction {
                         label: "Tracks",
                         event: Arc::new(UiEvent::BrowseTabClicked(TRACKS)),
                     },
-                    TabBarItem {
+                    UiAction {
                         label: "Artists",
                         event: Arc::new(UiEvent::BrowseTabClicked(ARTISTS)),
                     },
-                    TabBarItem {
+                    UiAction {
                         label: "Albums",
                         event: Arc::new(UiEvent::BrowseTabClicked(ALBUMS)),
                     },
-                    TabBarItem {
+                    UiAction {
                         label: "Playlists",
                         event: Arc::new(UiEvent::BrowseTabClicked(PLAYLISTS)),
                     },
