@@ -16,6 +16,8 @@ pub struct Track {
     pub album_title: String,
     pub album_artist: Option<String>,
     pub duration: Option<u32>,
+    pub track_number: Option<u32>,
+    pub disc_number: Option<u32>,
     pub artwork: Option<Vec<u8>>,
 }
 impl Track {
@@ -28,6 +30,8 @@ impl Track {
         let album_title = tags.album().unwrap_or("Unknown").to_string();
         let album_artist = tags.album_artist().map(str::to_string);
         let duration = read_duration(&path).or(tags.duration());
+        let track_number = tags.track();
+        let disc_number = tags.disc();
         let artwork = tags.pictures().next().map(|picture| picture.data.clone());
 
         let track = Track {
@@ -38,6 +42,8 @@ impl Track {
             album_title,
             album_artist,
             duration,
+            track_number,
+            disc_number,
             artwork,
         };
 
@@ -68,6 +74,8 @@ impl Track {
             album_title: self.album_title,
             album_artist: self.album_artist,
             duration: self.duration,
+            track_number: self.track_number,
+            disc_number: self.disc_number,
             artwork,
         }
     }

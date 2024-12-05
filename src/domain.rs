@@ -8,6 +8,8 @@ pub struct Track {
     pub album_title: String,
     pub album_artist: Option<String>,
     pub duration: Option<u32>,
+    pub track_number: Option<u32>,
+    pub disc_number: Option<u32>,
     pub artwork: Option<Arc<RenderImage>>,
 }
 

@@ -62,8 +62,8 @@ impl Render for Tracks {
                     .child(self.sort_dropdown.clone())
             )
             .children(
-                self.tracks.iter().enumerate().map(|(index, track)|
-                    elements::track(index, track, cx)
+                self.tracks.iter().map(|track|
+                    elements::track(track, cx)
                 )
             )
     }

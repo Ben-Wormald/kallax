@@ -10,7 +10,7 @@ pub struct UiAction {
     pub event: Arc<UiEvent>,
 }
 
-pub fn track(index: usize, track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
+pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
     let on_click = cx.listener({
         let track = Arc::clone(&track);
         move |_this, _event, cx| cx.emit(UiEvent::play(&track))
@@ -49,7 +49,10 @@ pub fn track(index: usize, track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> 
                 .w_8()
                 .justify_end()
                 .text_color(rgb(theme::colours::YOUTH))
-                .child((index + 1).to_string())
+                .child(track.track_number.map_or(
+                    String::from(""),
+                    |track_number| track_number.to_string(),
+                ))
         )
         .child(
             div().child(track.title.clone())

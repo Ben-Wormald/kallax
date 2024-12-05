@@ -14,6 +14,8 @@ migrations_append_only = [
     "ALTER TABLE track ADD COLUMN artwork BLOB",
     "ALTER TABLE track ADD COLUMN artwork2 TEXT",
     "ALTER TABLE track ADD COLUMN a TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE track ADD COLUMN track_number INTEGER",
+    "ALTER TABLE track ADD COLUMN disc_number INTEGER",
 ]
 output_generated_schema_for_your_information_do_not_edit = """
   CREATE TABLE _turbosql_migrations (
@@ -30,7 +32,9 @@ output_generated_schema_for_your_information_do_not_edit = """
     duration INTEGER,
     artwork BLOB,
     artwork2 TEXT,
-    a TEXT NOT NULL DEFAULT ''
+    a TEXT NOT NULL DEFAULT '',
+    track_number INTEGER,
+    disc_number INTEGER
   ) STRICT
 """
 
@@ -69,6 +73,16 @@ sql_type = "TEXT"
 
 [[output_generated_tables_do_not_edit.track.columns]]
 name = "duration"
+rust_type = "Option < u32 >"
+sql_type = "INTEGER"
+
+[[output_generated_tables_do_not_edit.track.columns]]
+name = "track_number"
+rust_type = "Option < u32 >"
+sql_type = "INTEGER"
+
+[[output_generated_tables_do_not_edit.track.columns]]
+name = "disc_number"
 rust_type = "Option < u32 >"
 sql_type = "INTEGER"
 

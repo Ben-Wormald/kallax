@@ -55,6 +55,7 @@ impl Render for Dropdown {
         if self.is_open {
             element.child(
                 div()
+                    .absolute()
                     .children(self.options.iter().map(|option| {
                         div()
                             .id(option.label)
