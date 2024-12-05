@@ -1,4 +1,4 @@
-use gpui::ImageData;
+use gpui::RenderImage;
 use std::{hash::Hash, sync::Arc};
 
 pub struct Track {
@@ -8,14 +8,14 @@ pub struct Track {
     pub album_title: String,
     pub album_artist: Option<String>,
     pub duration: Option<u32>,
-    pub artwork: Option<Arc<ImageData>>,
+    pub artwork: Option<Arc<RenderImage>>,
 }
 
 pub struct Album {
     pub title: String,
     pub artist_name: String,
     pub duration: u32,
-    pub artwork: Option<Arc<ImageData>>,
+    pub artwork: Option<Arc<RenderImage>>,
 }
 impl Hash for Album {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {

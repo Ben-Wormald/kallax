@@ -23,7 +23,7 @@ fn main() {
         cx.activate(true);
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
-        cx.set_menus(vec![Menu { name: "Kallax", items: vec![MenuItem::action("Quit", Quit),]}]);
+        cx.set_menus(vec![Menu { name: "Kallax".into(), items: vec![MenuItem::action("Quit", Quit),]}]);
 
         let window_options = WindowOptions {
             titlebar: Some(TitlebarOptions {
@@ -31,11 +31,19 @@ fn main() {
                 appears_transparent: true,
                 ..Default::default()
             }),
-            bounds: Some(Bounds {
-                size: size(px(800.), px(600.)).into(),
-                ..Default::default()
-            }),
-            ..Default::default()
+            window_bounds: Some(WindowBounds::Windowed(Bounds::new(
+                Point { x: px(0.), y: px(0.) },
+                Size { width: px(800.), height: px(600.) },
+            ))),
+            focus: true,
+            show: true,
+            kind: WindowKind::Normal,
+            is_movable: true,
+            display_id: None,
+            window_background: WindowBackgroundAppearance::Opaque,
+            app_id: None,
+            window_min_size: None,
+            window_decorations: None,
         };
 
         cx.open_window(window_options, |cx| {

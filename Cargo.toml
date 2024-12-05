@@ -9,9 +9,9 @@ repository = "https://github.com/Ben-Wormald/kallax"
 dotenv = "0.15.0"
 gpui = { git = "https://github.com/zed-industries/zed" }
 id3 = "1.12.0"
-image = "0.23"
+image = "0.25"
 md5 = "0.7.0"
 querystring = "1.1.0"
 reqwest = { version = "0.11.24", features = ["json", "blocking"] }
-rodio = "0.17.3"
+rodio = "0.20"
 turbosql = "0.10.0"

@@ -1,8 +1,8 @@
-use gpui::ImageData;
+use gpui::RenderImage;
 use id3::{Tag, TagLike};
-use image::{jpeg::JpegDecoder, DynamicImage};
+use image::{codecs::jpeg::JpegDecoder, DynamicImage, Frame};
 use rodio::{Decoder, Source};
-use std::{fs::File, io::BufReader, path::PathBuf, sync::Arc};
+use std::{fs::File, io::{BufReader, Cursor}, path::PathBuf, sync::Arc};
 use turbosql::{Turbosql, select};
 
 use crate::domain;
@@ -48,9 +48,17 @@ impl Track {
 
     pub fn to_domain(self) -> domain::Track {
         let artwork = self.artwork.and_then(|artwork| {
-            let decoder = JpegDecoder::new(artwork.as_slice()).ok()?;
-            let image = DynamicImage::from_decoder(decoder).ok()?;
-            Some(Arc::new(ImageData::new(image.to_bgra8())))
+            let cursor: Cursor<Vec<u8>> = Cursor::new(artwork);
+            let decoder = JpegDecoder::new(cursor).ok()?;
+            let mut image = DynamicImage::from_decoder(decoder).ok()?.into_rgba8();
+            for pixel in image.chunks_exact_mut(4) {
+                let (blue, green, red, alpha) = (pixel[0], pixel[1], pixel[2], pixel[3]);
+                pixel[0] = red;
+                pixel[1] = green;
+                pixel[2] = blue;
+                pixel[3] = alpha;
+            }
+            Some(Arc::new(RenderImage::new(vec![Frame::new(image.into())])))
         });
 
         domain::Track {

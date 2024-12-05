@@ -20,7 +20,7 @@ impl ContextMenu {
 impl Render for ContextMenu {
     fn render(&mut self, cx: &mut ViewContext<ContextMenu>) -> impl IntoElement {
         if let Some(position) = self.position {
-            overlay()
+            anchored()
                 .position(position)
                 .child(
                     div()
@@ -57,7 +57,7 @@ impl Render for ContextMenu {
                         )
                 )
         } else {
-            overlay()
+            anchored()
         }
     }
 }

@@ -124,7 +124,13 @@ impl Render for Kallax {
                     .rounded_md()
                     .p(px(2.))
                     .text_color(rgb(theme::colours::WINTER))
-                    .font("Iosevka")
+                    .font(Font {
+                        family: "Iosevka".into(),
+                        features: FontFeatures(Arc::new(Vec::new())),
+                        fallbacks: None,
+                        weight: FontWeight::NORMAL,
+                        style: FontStyle::Normal,
+                    })
                     .child(self.browse.clone())
                     .child(self.now_playing.clone())
                     .child(self.context_menu.clone())
