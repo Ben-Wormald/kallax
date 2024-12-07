@@ -5,6 +5,7 @@ pub mod dropdown;
 pub mod kallax;
 pub mod modal;
 pub mod now_playing;
+pub mod shelves;
 pub mod tracks;
 
 pub use albums::Albums;
@@ -14,4 +15,5 @@ pub use dropdown::Dropdown;
 pub use kallax::Kallax;
 pub use modal::Modal;
 pub use now_playing::NowPlaying;
+pub use shelves::Shelves;
 pub use tracks::Tracks;

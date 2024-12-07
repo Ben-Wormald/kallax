@@ -41,7 +41,7 @@ impl NowPlaying {
             .flex_col()
             .gap_px()
             .rounded_b_sm()
-            .bg(rgb(theme::colours::AMSTERDAM))
+            // .bg(rgb(theme::colours::AMSTERDAM))
             .child(
                 div()
                     .py_1()

@@ -5,13 +5,14 @@ mod domain;
 mod elements;
 mod events;
 mod models;
-mod store;
 mod theme;
+mod utils;
 mod views;
 
 use domain::*;
 use events::*;
 use models::*;
+use utils::*;
 use views::*;
 
 actions!(kallax, [Quit]);
@@ -33,7 +34,7 @@ fn main() {
             }),
             window_bounds: Some(WindowBounds::Windowed(Bounds::new(
                 Point { x: px(0.), y: px(0.) },
-                Size { width: px(800.), height: px(600.) },
+                Size { width: px(1280.), height: px(720.) },
             ))),
             focus: true,
             show: true,
@@ -48,6 +49,6 @@ fn main() {
 
         cx.open_window(window_options, |cx| {
             cx.new_view(Kallax::new)
-        });
+        }).ok();
     });
 }

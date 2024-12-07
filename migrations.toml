@@ -4,89 +4,118 @@
 # Modifying it by hand may be dangerous; see the docs.
 
 migrations_append_only = [
-    "CREATE TABLE track (rowid INTEGER PRIMARY KEY) STRICT",
-    "ALTER TABLE track ADD COLUMN path TEXT NOT NULL DEFAULT ''",
-    "ALTER TABLE track ADD COLUMN title TEXT NOT NULL DEFAULT ''",
-    "ALTER TABLE track ADD COLUMN artist_name TEXT NOT NULL DEFAULT ''",
-    "ALTER TABLE track ADD COLUMN album_title TEXT NOT NULL DEFAULT ''",
-    "ALTER TABLE track ADD COLUMN album_artist TEXT",
-    "ALTER TABLE track ADD COLUMN duration INTEGER",
-    "ALTER TABLE track ADD COLUMN artwork BLOB",
-    "ALTER TABLE track ADD COLUMN artwork2 TEXT",
-    "ALTER TABLE track ADD COLUMN a TEXT NOT NULL DEFAULT ''",
-    "ALTER TABLE track ADD COLUMN track_number INTEGER",
-    "ALTER TABLE track ADD COLUMN disc_number INTEGER",
+    "CREATE TABLE dbtrack (rowid INTEGER PRIMARY KEY) STRICT",
+    "ALTER TABLE dbtrack ADD COLUMN path TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbtrack ADD COLUMN title TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbtrack ADD COLUMN album_id TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbtrack ADD COLUMN artist_id TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbtrack ADD COLUMN duration INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE dbtrack ADD COLUMN track_number INTEGER",
+    "ALTER TABLE dbtrack ADD COLUMN disc_number INTEGER",
+    "CREATE TABLE dbalbum (rowid INTEGER PRIMARY KEY) STRICT",
+    "ALTER TABLE dbalbum ADD COLUMN id TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbalbum ADD COLUMN title TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbalbum ADD COLUMN sort_title TEXT",
+    "ALTER TABLE dbalbum ADD COLUMN album_artist TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbalbum ADD COLUMN artwork BLOB",
 ]
 output_generated_schema_for_your_information_do_not_edit = """
   CREATE TABLE _turbosql_migrations (
     rowid INTEGER PRIMARY KEY,
     migration TEXT NOT NULL
   ) STRICT
-  CREATE TABLE track (
+  CREATE TABLE dbalbum (
+    rowid INTEGER PRIMARY KEY,
+    id TEXT NOT NULL DEFAULT '',
+    title TEXT NOT NULL DEFAULT '',
+    sort_title TEXT,
+    album_artist TEXT NOT NULL DEFAULT '',
+    artwork BLOB
+  ) STRICT
+  CREATE TABLE dbtrack (
     rowid INTEGER PRIMARY KEY,
     path TEXT NOT NULL DEFAULT '',
     title TEXT NOT NULL DEFAULT '',
-    artist_name TEXT NOT NULL DEFAULT '',
-    album_title TEXT NOT NULL DEFAULT '',
-    album_artist TEXT,
-    duration INTEGER,
-    artwork BLOB,
-    artwork2 TEXT,
-    a TEXT NOT NULL DEFAULT '',
+    album_id TEXT NOT NULL DEFAULT '',
+    artist_id TEXT NOT NULL DEFAULT '',
+    duration INTEGER NOT NULL DEFAULT 0,
     track_number INTEGER,
     disc_number INTEGER
   ) STRICT
 """
 
-[output_generated_tables_do_not_edit.track]
-name = "track"
+[output_generated_tables_do_not_edit.dbalbum]
+name = "dbalbum"
 
-[[output_generated_tables_do_not_edit.track.columns]]
+[[output_generated_tables_do_not_edit.dbalbum.columns]]
 name = "rowid"
 rust_type = "Option < i64 >"
 sql_type = "INTEGER PRIMARY KEY"
 
-[[output_generated_tables_do_not_edit.track.columns]]
-name = "path"
+[[output_generated_tables_do_not_edit.dbalbum.columns]]
+name = "id"
 rust_type = "String"
 sql_type = "TEXT NOT NULL"
 
-[[output_generated_tables_do_not_edit.track.columns]]
+[[output_generated_tables_do_not_edit.dbalbum.columns]]
 name = "title"
 rust_type = "String"
 sql_type = "TEXT NOT NULL"
 
-[[output_generated_tables_do_not_edit.track.columns]]
-name = "artist_name"
-rust_type = "String"
-sql_type = "TEXT NOT NULL"
-
-[[output_generated_tables_do_not_edit.track.columns]]
-name = "album_title"
-rust_type = "String"
-sql_type = "TEXT NOT NULL"
-
-[[output_generated_tables_do_not_edit.track.columns]]
-name = "album_artist"
+[[output_generated_tables_do_not_edit.dbalbum.columns]]
+name = "sort_title"
 rust_type = "Option < String >"
 sql_type = "TEXT"
 
-[[output_generated_tables_do_not_edit.track.columns]]
-name = "duration"
-rust_type = "Option < u32 >"
-sql_type = "INTEGER"
+[[output_generated_tables_do_not_edit.dbalbum.columns]]
+name = "album_artist"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
 
-[[output_generated_tables_do_not_edit.track.columns]]
+[[output_generated_tables_do_not_edit.dbalbum.columns]]
+name = "artwork"
+rust_type = "Option < Vec < u8 > >"
+sql_type = "BLOB"
+
+[output_generated_tables_do_not_edit.dbtrack]
+name = "dbtrack"
+
+[[output_generated_tables_do_not_edit.dbtrack.columns]]
+name = "rowid"
+rust_type = "Option < i64 >"
+sql_type = "INTEGER PRIMARY KEY"
+
+[[output_generated_tables_do_not_edit.dbtrack.columns]]
+name = "path"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbtrack.columns]]
+name = "title"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbtrack.columns]]
+name = "album_id"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbtrack.columns]]
+name = "artist_id"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbtrack.columns]]
+name = "duration"
+rust_type = "u32"
+sql_type = "INTEGER NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbtrack.columns]]
 name = "track_number"
 rust_type = "Option < u32 >"
 sql_type = "INTEGER"
 
-[[output_generated_tables_do_not_edit.track.columns]]
+[[output_generated_tables_do_not_edit.dbtrack.columns]]
 name = "disc_number"
 rust_type = "Option < u32 >"
 sql_type = "INTEGER"
-
-[[output_generated_tables_do_not_edit.track.columns]]
-name = "artwork"
-rust_type = "Option < Vec < u8 > >"
-sql_type = "BLOB"

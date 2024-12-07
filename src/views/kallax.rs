@@ -3,12 +3,11 @@ use std::sync::Arc;
 
 use crate::*;
 
-use self::tracks::TrackView;
-
 pub struct Kallax {
     playback: Model<Playback>,
     _scrobbler: Model<Scrobbler>,
     library: Model<Library>,
+    shelves: View<Shelves>,
     browse: View<Browse>,
     now_playing: View<NowPlaying>,
     context_menu: View<ContextMenu>,
@@ -21,6 +20,7 @@ impl Kallax {
         let _scrobbler = cx.new_model(|cx| Scrobbler::new(cx, &playback));
         let library = cx.new_model(Library::new);
 
+        let shelves = cx.new_view(|cx| Shelves::new(cx, &library));
         let browse = cx.new_view(|cx| Browse::new(cx, &library));
         let now_playing = cx.new_view(|cx| NowPlaying::new(cx, &playback));
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
@@ -30,15 +30,15 @@ impl Kallax {
             subscriber.handle_ui_event(event, cx);
         }).detach();
 
-        let tracks = browse.read(cx).tracks.clone();
-        cx.subscribe(&tracks, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-            subscriber.handle_ui_event(event, cx);
-        }).detach();
+        // let tracks = browse.read(cx).tracks.clone();
+        // cx.subscribe(&tracks, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+        //     subscriber.handle_ui_event(event, cx);
+        // }).detach();
 
-        let albums = browse.read(cx).albums.clone();
-        cx.subscribe(&albums, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-            subscriber.handle_ui_event(event, cx);
-        }).detach();
+        // let albums = browse.read(cx).albums.clone();
+        // cx.subscribe(&albums, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+        //     subscriber.handle_ui_event(event, cx);
+        // }).detach();
 
         cx.subscribe(&context_menu, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
             subscriber.handle_ui_event(event, cx);
@@ -52,6 +52,7 @@ impl Kallax {
             playback,
             _scrobbler,
             library,
+            shelves,
             browse,
             now_playing,
             context_menu,
@@ -89,10 +90,6 @@ impl Kallax {
                 this.selected_tab = tab_index;
                 cx.notify();
             }),
-            UiEvent::BrowseTabClicked(tab_index) => self.browse.update(cx, |this, cx| {
-                this.selected_tab = tab_index;
-                cx.notify();
-            }),
             UiEvent::RightClick(event) => self.context_menu.update(cx, |this, cx| {
                 this.items = Arc::clone(&event.items);
                 this.position = Some(event.position);
@@ -109,37 +106,38 @@ impl Render for Kallax {
             .flex()
             .flex_col()
             .min_h_0()
-            .p_1()
+            .bg(rgb(theme::colours::WINTER))
+            .text_color(rgb(theme::colours::SHALLOWS))
+            .font(Font {
+                family: "Work Sans".into(),
+                features: FontFeatures(Arc::new(Vec::new())),
+                fallbacks: None,
+                weight: FontWeight::NORMAL,
+                style: FontStyle::Normal,
+            })
+            .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, cx| {
+                this.context_menu.update(cx, |context_menu, _cx| {
+                    context_menu.position = None;
+                });
+            }))
             .child(
                 div()
-                    .min_h(px(30.))
+                    .min_h(px(30.)) // title bar
             )
             .child(
                 div()
                     .flex_grow()
                     .flex()
                     .min_h_0()
-                    .gap(px(2.))
-                    .bg(rgb(theme::colours::STILL))
-                    .rounded_md()
-                    .p(px(2.))
-                    .text_color(rgb(theme::colours::WINTER))
-                    .font(Font {
-                        family: "Iosevka".into(),
-                        features: FontFeatures(Arc::new(Vec::new())),
-                        fallbacks: None,
-                        weight: FontWeight::NORMAL,
-                        style: FontStyle::Normal,
-                    })
+                    .child(self.shelves.clone())
                     .child(self.browse.clone())
                     .child(self.now_playing.clone())
-                    .child(self.context_menu.clone())
-                    .child(self.modal.clone())
-                    .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, cx| {
-                        this.context_menu.update(cx, |context_menu, _cx| {
-                            context_menu.position = None;
-                        });
-                    }))
             )
+            .child(
+                div()
+                    .min_h(px(30.)) // seek
+            )
+            .child(self.context_menu.clone())
+            .child(self.modal.clone())
     }
 }

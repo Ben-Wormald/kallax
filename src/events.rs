@@ -13,7 +13,6 @@ pub enum UiEvent {
     SkipClicked,
     AlbumClicked(Arc<Album>),
     NowPlayingTabClicked(usize),
-    BrowseTabClicked(usize),
     RightClick(RightClickEvent),
 }
 impl UiEvent {
@@ -34,6 +33,7 @@ impl gpui::EventEmitter<Arc<UiEvent>> for Browse {}
 impl gpui::EventEmitter<Arc<UiEvent>> for ContextMenu {}
 impl gpui::EventEmitter<Arc<UiEvent>> for Dropdown {}
 impl gpui::EventEmitter<Arc<UiEvent>> for NowPlaying {}
+impl gpui::EventEmitter<Arc<UiEvent>> for Shelves {}
 impl gpui::EventEmitter<Arc<UiEvent>> for Tracks {}
 
 #[derive(Clone)]
