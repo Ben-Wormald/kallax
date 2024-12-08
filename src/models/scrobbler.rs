@@ -69,7 +69,7 @@ impl Scrobbler {
             if let Some(started) = self.time_started {
                 if let Ok(elapsed) = started.elapsed() {
                     let four_minutes = elapsed > Duration::from_secs(4 * 60);
-                    let half_track = elapsed.as_secs() > track.duration.unwrap_or(30) as u64;
+                    let half_track = elapsed.as_secs() > track.duration as u64;
 
                     if four_minutes || half_track {
                         self.scrobble(cx, &track);

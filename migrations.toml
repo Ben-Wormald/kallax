@@ -53,11 +53,6 @@ rust_type = "Option < i64 >"
 sql_type = "INTEGER PRIMARY KEY"
 
 [[output_generated_tables_do_not_edit.dbalbum.columns]]
-name = "id"
-rust_type = "String"
-sql_type = "TEXT NOT NULL"
-
-[[output_generated_tables_do_not_edit.dbalbum.columns]]
 name = "title"
 rust_type = "String"
 sql_type = "TEXT NOT NULL"

@@ -1,9 +1,7 @@
 use gpui::ModelContext;
-use std::{collections::HashSet, sync::Arc};
+use std::sync::Arc;
 
 use crate::{store, Album, Track};
-
-// TODO give every track an ID and use that in events etc.?
 
 pub struct Library {
     pub tracks: Arc<Vec<Arc<Track>>>,
@@ -12,16 +10,10 @@ pub struct Library {
 
 impl Library {
     pub fn new(_cx: &mut ModelContext<Library>) -> Library {
-        // tracks, albums, shelves = store::load()
-
-        let tracks = store::load();
-        let albums = HashSet::new();
-
-        // tracks.iter().for_each(|track| albums.insert(track.album_title));
-
-        let tracks = Arc::new(tracks);
-        let albums = Arc::new(albums.into_iter().collect());
+        let (tracks, albums) = store::load();
         
+        let tracks = Arc::new(tracks.into_iter().map(|track| Arc::new(track)).collect());
+        let albums = Arc::new(albums.into_iter().map(|album| Arc::new(album)).collect());
 
         Library {
             tracks,

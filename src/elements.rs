@@ -63,7 +63,7 @@ pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoEleme
 
 pub fn album(album: &Arc<Album>, cx: &mut ViewContext<Albums>) -> impl IntoElement {
     let element = div()
-        .id(ElementId::Name(format!("{}{}", &album.artist_name, &album.title).into()))
+        .id(ElementId::Name(format!("{}{}", &album.album_artist, &album.title).into()))
         .size_64();
 
     let element = if let Some(artwork) = &album.artwork {

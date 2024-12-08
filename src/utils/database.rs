@@ -1,6 +1,3 @@
-use gpui::RenderImage;
-use image::{codecs::jpeg::JpegDecoder, DynamicImage, Frame};
-use std::{io::Cursor, sync::Arc};
 use turbosql::{select, Turbosql};
 
 use crate::{Album, Track};
@@ -12,13 +9,9 @@ pub struct DbTrack {
     pub title: String,
     pub album_id: String,
     pub artist_id: String,
-    // pub artist_name: String,
-    // pub album_title: String,
-    // pub album_artist: Option<String>,
     pub duration: u32,
     pub track_number: Option<u32>,
     pub disc_number: Option<u32>,
-    // pub artwork: Option<Vec<u8>>,
 }
 impl DbTrack {
     fn to_domain(self) -> Track {
@@ -36,9 +29,6 @@ impl DbTrack {
         //     Some(Arc::new(RenderImage::new(vec![Frame::new(image.into())])))
         // });
 
-        // let id = md5::compute(&self.path);
-        // let id = format!("{:x}", id);
-
         Track {
             path: self.path,
             title: self.title,
@@ -50,7 +40,7 @@ impl DbTrack {
         }
     }
 
-    fn from_domain(track: &Arc<Track>) -> DbTrack {
+    fn from_domain(track: &Track) -> DbTrack {
         DbTrack {
             rowid: None,
             path: track.path.clone(),
@@ -72,7 +62,6 @@ impl AsRef<DbTrack> for DbTrack {
 #[derive(Clone, Default, Turbosql)]
 pub struct DbAlbum {
     rowid: Option<i64>,
-    pub id: String,
     pub title: String,
     pub sort_title: Option<String>,
     pub album_artist: String,
@@ -88,11 +77,26 @@ impl DbAlbum {
             artwork: None,
         }
     }
+
+    fn from_domain(album: &Album) -> DbAlbum {
+        DbAlbum {
+            rowid: None,
+            title: album.title.clone(),
+            sort_title: album.sort_title.clone(),
+            album_artist: album.album_artist.clone(),
+            artwork: None,
+        }
+    }
+}
+impl AsRef<DbAlbum> for DbAlbum {
+    fn as_ref(&self) -> &DbAlbum {
+        self
+    }
 }
 
-pub fn load() -> (Vec<Arc<Track>>, Vec<Album>) {
+pub fn load() -> (Vec<Track>, Vec<Album>) {
     let tracks = select!(Vec<DbTrack>).unwrap();
-    let tracks = tracks.into_iter().map(|track| Arc::new(track.to_domain())).collect();
+    let tracks = tracks.into_iter().map(|track| track.to_domain()).collect();
 
     let albums = select!(Vec<DbAlbum>).unwrap();
     let albums = albums.into_iter().map(|album| album.to_domain()).collect();
@@ -100,7 +104,12 @@ pub fn load() -> (Vec<Arc<Track>>, Vec<Album>) {
     (tracks, albums)
 }
 
-pub fn save_batch(tracks: &Vec<Arc<Track>>) {
+pub fn save_tracks(tracks: &[Track]) {
     let tracks: Vec<DbTrack> = tracks.iter().map(DbTrack::from_domain).collect();
     DbTrack::insert_batch(&tracks).ok();
+}
+
+pub fn save_albums(albums: &[Album]) {
+    let albums: Vec<DbAlbum> = albums.iter().map(DbAlbum::from_domain).collect();
+    DbAlbum::insert_batch(&albums).ok();
 }
