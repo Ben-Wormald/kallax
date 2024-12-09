@@ -1,33 +1,55 @@
 use std::collections::HashSet;
 
-use crate::{Album, Track};
+use crate::{domain::Entity, Album, Artist, Track};
 use super::{database, files::{self, TrackFile}};
 
-pub fn load() -> (Vec<Track>, Vec<Album>) {
-    let (tracks, albums) = database::load();
+pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
+    let (tracks, albums, artists) = database::load();
 
     // TODO sync
 
     if tracks.is_empty() {
         let files = files::read();
-        let (tracks, albums) = from_files(files);
+        let (tracks, albums, artists) = from_files(files);
         database::save_tracks(&tracks);
         database::save_albums(&albums);
-        (tracks, albums)
+        database::save_artists(&artists);
+        (tracks, albums, artists)
     } else {
-        (tracks, albums)
+        (tracks, albums, artists)
     }
 }
 
-fn from_files(files: Vec<TrackFile>) -> (Vec<Track>, Vec<Album>) {
+fn from_files(files: Vec<TrackFile>) -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
     let mut tracks = Vec::new();
     let mut albums: HashSet<Album> = HashSet::new();
+    let mut artists: HashSet<Artist> = HashSet::new();
 
     for file in files.into_iter() {
+        let artist = Artist {
+            name: file.artist_name,
+            sort_name: None,
+        };
+
+        let artist_id = artist.id();
+        artists.insert(artist);
+
+        let album_artist_id = if let Some(name) = file.album_artist {
+            let artist = Artist {
+                name,
+                sort_name: None,
+            };
+            let album_artist_id = artist.id();
+            artists.insert(artist);
+            album_artist_id
+        } else {
+            artist_id.clone()
+        };
+
         let album = Album {
             title: file.album_title,
             sort_title: None,
-            album_artist: file.album_artist.unwrap_or(file.artist_name),
+            artist_id: album_artist_id,
             duration: file.duration,
             artwork: None,
         };
@@ -39,7 +61,7 @@ fn from_files(files: Vec<TrackFile>) -> (Vec<Track>, Vec<Album>) {
             path: file.path,
             title: file.title,
             album_id,
-            artist_id: "TODO".to_string(),
+            artist_id,
             duration: file.duration,
             track_number: file.track_number,
             disc_number: file.disc_number,
@@ -49,5 +71,6 @@ fn from_files(files: Vec<TrackFile>) -> (Vec<Track>, Vec<Album>) {
     }
 
     let albums = albums.into_iter().collect();
-    (tracks, albums)
+    let artists = artists.into_iter().collect();
+    (tracks, albums, artists)
 }

@@ -18,6 +18,10 @@ migrations_append_only = [
     "ALTER TABLE dbalbum ADD COLUMN sort_title TEXT",
     "ALTER TABLE dbalbum ADD COLUMN album_artist TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE dbalbum ADD COLUMN artwork BLOB",
+    "ALTER TABLE dbalbum ADD COLUMN artist_id TEXT NOT NULL DEFAULT ''",
+    "CREATE TABLE dbartist (rowid INTEGER PRIMARY KEY) STRICT",
+    "ALTER TABLE dbartist ADD COLUMN name TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbartist ADD COLUMN sort_name TEXT",
 ]
 output_generated_schema_for_your_information_do_not_edit = """
   CREATE TABLE _turbosql_migrations (
@@ -30,7 +34,13 @@ output_generated_schema_for_your_information_do_not_edit = """
     title TEXT NOT NULL DEFAULT '',
     sort_title TEXT,
     album_artist TEXT NOT NULL DEFAULT '',
-    artwork BLOB
+    artwork BLOB,
+    artist_id TEXT NOT NULL DEFAULT ''
+  ) STRICT
+  CREATE TABLE dbartist (
+    rowid INTEGER PRIMARY KEY,
+    name TEXT NOT NULL DEFAULT '',
+    sort_name TEXT
   ) STRICT
   CREATE TABLE dbtrack (
     rowid INTEGER PRIMARY KEY,
@@ -63,7 +73,7 @@ rust_type = "Option < String >"
 sql_type = "TEXT"
 
 [[output_generated_tables_do_not_edit.dbalbum.columns]]
-name = "album_artist"
+name = "artist_id"
 rust_type = "String"
 sql_type = "TEXT NOT NULL"
 
@@ -71,6 +81,24 @@ sql_type = "TEXT NOT NULL"
 name = "artwork"
 rust_type = "Option < Vec < u8 > >"
 sql_type = "BLOB"
+
+[output_generated_tables_do_not_edit.dbartist]
+name = "dbartist"
+
+[[output_generated_tables_do_not_edit.dbartist.columns]]
+name = "rowid"
+rust_type = "Option < i64 >"
+sql_type = "INTEGER PRIMARY KEY"
+
+[[output_generated_tables_do_not_edit.dbartist.columns]]
+name = "name"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbartist.columns]]
+name = "sort_name"
+rust_type = "Option < String >"
+sql_type = "TEXT"
 
 [output_generated_tables_do_not_edit.dbtrack]
 name = "dbtrack"

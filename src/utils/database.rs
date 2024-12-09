@@ -1,6 +1,6 @@
 use turbosql::{select, Turbosql};
 
-use crate::{Album, Track};
+use crate::{Album, Artist, Track};
 
 #[derive(Clone, Default, Turbosql)]
 pub struct DbTrack {
@@ -64,7 +64,7 @@ pub struct DbAlbum {
     rowid: Option<i64>,
     pub title: String,
     pub sort_title: Option<String>,
-    pub album_artist: String,
+    pub artist_id: String,
     pub artwork: Option<Vec<u8>>,
 }
 impl DbAlbum {
@@ -72,7 +72,7 @@ impl DbAlbum {
         Album {
             title: self.title,
             sort_title: self.sort_title,
-            album_artist: self.album_artist,
+            artist_id: self.artist_id,
             duration: 0,
             artwork: None,
         }
@@ -83,7 +83,7 @@ impl DbAlbum {
             rowid: None,
             title: album.title.clone(),
             sort_title: album.sort_title.clone(),
-            album_artist: album.album_artist.clone(),
+            artist_id: album.artist_id.clone(),
             artwork: None,
         }
     }
@@ -94,14 +94,45 @@ impl AsRef<DbAlbum> for DbAlbum {
     }
 }
 
-pub fn load() -> (Vec<Track>, Vec<Album>) {
+#[derive(Clone, Default, Turbosql)]
+pub struct DbArtist {
+    rowid: Option<i64>,
+    pub name: String,
+    pub sort_name: Option<String>,
+}
+impl DbArtist {
+    fn to_domain(self) -> Artist {
+        Artist {
+            name: self.name,
+            sort_name: self.sort_name,
+        }
+    }
+
+    fn from_domain(artist: &Artist) -> DbArtist {
+        DbArtist {
+            rowid: None,
+            name: artist.name.clone(),
+            sort_name: artist.sort_name.clone(),
+        }
+    }
+}
+impl AsRef<DbArtist> for DbArtist {
+    fn as_ref(&self) -> &DbArtist {
+        self
+    }
+}
+
+pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
     let tracks = select!(Vec<DbTrack>).unwrap();
     let tracks = tracks.into_iter().map(|track| track.to_domain()).collect();
 
     let albums = select!(Vec<DbAlbum>).unwrap();
     let albums = albums.into_iter().map(|album| album.to_domain()).collect();
 
-    (tracks, albums)
+    let artists = select!(Vec<DbArtist>).unwrap();
+    let artists = artists.into_iter().map(|artist| artist.to_domain()).collect();
+
+    (tracks, albums, artists)
 }
 
 pub fn save_tracks(tracks: &[Track]) {
@@ -112,4 +143,9 @@ pub fn save_tracks(tracks: &[Track]) {
 pub fn save_albums(albums: &[Album]) {
     let albums: Vec<DbAlbum> = albums.iter().map(DbAlbum::from_domain).collect();
     DbAlbum::insert_batch(&albums).ok();
+}
+
+pub fn save_artists(artists: &[Artist]) {
+    let artists: Vec<DbArtist> = artists.iter().map(DbArtist::from_domain).collect();
+    DbArtist::insert_batch(&artists).ok();
 }
