@@ -1,6 +1,6 @@
 use turbosql::{select, Turbosql};
 
-use crate::{prefix, Album, Artist, Expression, Field, LogicalExpression, LogicalOperator, MatchExpression, PlaylistShelf, SearchShelf, Track};
+use crate::{entity_type, Album, Artist, Expression, Field, LogicalExpression, LogicalOperator, MatchExpression, PlaylistShelf, SearchShelf, Track};
 
 #[derive(Clone, Default, Turbosql)]
 pub struct DbTrack {
@@ -202,7 +202,7 @@ pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>, Vec<SearchShelf>, Vec<Pla
         Expression::Match(MatchExpression {
             field: Field::Type,
             // operator: MatchOperator::Is,
-            value: prefix::TRACK.to_string(),
+            value: entity_type::TRACK.to_string(),
         }),
     )];
 

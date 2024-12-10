@@ -2,7 +2,7 @@ use gpui::RenderImage;
 use uuid::Uuid;
 use std::{hash::Hash, sync::Arc};
 
-pub mod prefix {
+pub mod entity_type {
     pub const TRACK: &str = "00";
     pub const ALBUM: &str = "02";
     pub const ARTIST: &str = "03";
@@ -99,11 +99,11 @@ impl MatchExpression {
     fn matches(&self, entity: &KallaxEntity) -> bool {
         match self.field {
             Field::Type => match entity {
-                KallaxEntity::Track(_) => self.value == prefix::TRACK,
-                KallaxEntity::Album(_) => self.value == prefix::ALBUM,
-                KallaxEntity::Artist(_) => self.value == prefix::ARTIST,
-                KallaxEntity::Search(_) => self.value == prefix::SEARCH,
-                KallaxEntity::Playlist(_) => self.value == prefix::PLAYLIST,
+                KallaxEntity::Track(_) => self.value == entity_type::TRACK,
+                KallaxEntity::Album(_) => self.value == entity_type::ALBUM,
+                KallaxEntity::Artist(_) => self.value == entity_type::ARTIST,
+                KallaxEntity::Search(_) => self.value == entity_type::SEARCH,
+                KallaxEntity::Playlist(_) => self.value == entity_type::PLAYLIST,
             },
             Field::Id => entity.id() == self.value,
             Field::NameOrTitle => entity.name().contains(&self.value),
@@ -134,7 +134,7 @@ impl SearchShelf {
     pub fn id(&self) -> String {
         format!(
             "{}_{}",
-            prefix::SEARCH,
+            entity_type::SEARCH,
             self.id,
         )
     }
@@ -159,7 +159,7 @@ impl PlaylistShelf {
     pub fn id(&self) -> String {
         format!(
             "{}_{}",
-            prefix::PLAYLIST,
+            entity_type::PLAYLIST,
             self.id,
         )
     }
@@ -178,7 +178,7 @@ impl Track {
     pub fn id(&self) -> String {
         format!(
             "{}_{}_{}_{}",
-            prefix::TRACK,
+            entity_type::TRACK,
             self.title,
             self.album_id,
             self.artist_id,
@@ -197,7 +197,7 @@ impl Album {
     pub fn id(&self) -> String {
         format!(
             "{}_{}_{}",
-            prefix::ALBUM,
+            entity_type::ALBUM,
             self.sort_title.as_ref().unwrap_or(&self.title),
             self.artist_id,
         )
@@ -223,7 +223,7 @@ impl Artist {
     pub fn id(&self) -> String {
         format!(
             "{}_{}",
-            prefix::ARTIST,
+            entity_type::ARTIST,
             self.sort_name.as_ref().unwrap_or(&self.name),
         )
     }

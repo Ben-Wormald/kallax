@@ -10,6 +10,29 @@ pub struct UiAction {
     pub event: Arc<UiEvent>,
 }
 
+pub enum BrowseContext {
+    Album(usize),
+    Artist,
+    Search,
+    Playlist(usize),
+}
+
+pub fn list_entity(
+    entity: &KallaxEntity,
+    browse_context: BrowseContext,
+    cx: &mut ViewContext<Browse>,
+) -> impl IntoElement {
+    let on_click = cx.listener(move |_this, _event, cx| {
+        match entity {
+            KallaxEntity::Track(track) => cx.emit(UiEvent::play(track)),
+            _ => todo!(),
+        }
+        cx.notify();
+    });
+
+    
+}
+
 pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
     let on_click = cx.listener({
         let track = Arc::clone(track);

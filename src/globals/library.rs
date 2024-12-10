@@ -1,7 +1,7 @@
 use gpui::Global;
 use std::sync::Arc;
 
-use crate::{prefix, store, Album, Artist, KallaxEntity, PlaylistShelf, SearchShelf, Track};
+use crate::{entity_type, store, Album, Artist, KallaxEntity, PlaylistShelf, SearchShelf, Track};
 
 pub struct Library {
     pub tracks: Vec<Arc<Track>>,
@@ -54,8 +54,8 @@ impl Library {
 
     pub fn get_entity(&self, id: &str) -> Option<KallaxEntity> {
         match &id[..2] {
-            prefix::TRACK => self.get_track(id).map(KallaxEntity::Track),
-            prefix::SEARCH => self.get_search(id).map(KallaxEntity::Search),
+            entity_type::TRACK => self.get_track(id).map(KallaxEntity::Track),
+            entity_type::SEARCH => self.get_search(id).map(KallaxEntity::Search),
             _ => panic!()
         }
     }
