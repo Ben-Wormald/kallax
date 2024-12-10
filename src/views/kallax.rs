@@ -6,7 +6,6 @@ use crate::*;
 pub struct Kallax {
     playback: Model<Playback>,
     _scrobbler: Model<Scrobbler>,
-    library: Model<Library>,
     shelves: View<Shelves>,
     browse: View<Browse>,
     now_playing: View<NowPlaying>,
@@ -16,15 +15,20 @@ pub struct Kallax {
 
 impl Kallax {
     pub fn new(cx: &mut ViewContext<Kallax>) -> Kallax {
+        cx.set_global(Library::new());
+
         let playback = cx.new_model(Playback::new);
         let _scrobbler = cx.new_model(|cx| Scrobbler::new(cx, &playback));
-        let library = cx.new_model(Library::new);
 
-        let shelves = cx.new_view(|cx| Shelves::new(cx, &library));
-        let browse = cx.new_view(|cx| Browse::new(cx, &library));
+        let shelves = cx.new_view(Shelves::new);
+        let browse = cx.new_view(Browse::new);
         let now_playing = cx.new_view(|cx| NowPlaying::new(cx, &playback));
         let context_menu = cx.new_view(|_cx| ContextMenu::new());
         let modal = cx.new_view(|_cx| Modal::new());
+
+        cx.subscribe(&shelves, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
+            subscriber.handle_ui_event(event, cx);
+        }).detach();
 
         cx.subscribe(&browse, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
             subscriber.handle_ui_event(event, cx);
@@ -51,7 +55,6 @@ impl Kallax {
         Kallax {
             playback,
             _scrobbler,
-            library,
             shelves,
             browse,
             now_playing,
@@ -83,7 +86,7 @@ impl Kallax {
                 cx.notify();
             }),
             UiEvent::AlbumClicked(album) => self.browse.update(cx, |this, cx| {
-                this.open_album(cx, &self.library, &album);
+                this.open_album(cx, &album);
                 cx.notify();
             }),
             UiEvent::NowPlayingTabClicked(tab_index) => self.now_playing.update(cx, |this, cx| {
@@ -93,6 +96,10 @@ impl Kallax {
             UiEvent::RightClick(event) => self.context_menu.update(cx, |this, cx| {
                 this.items = Arc::clone(&event.items);
                 this.position = Some(event.position);
+                cx.notify();
+            }),
+            UiEvent::EntityOpened(entity_id) => self.browse.update(cx, |this, cx| {
+                this.set_entity(cx, entity_id);
                 cx.notify();
             }),
         };

@@ -1,7 +1,5 @@
 use gpui::*;
 
-use crate::*;
-
 pub struct Modal {
     pub is_visible: bool,
 }

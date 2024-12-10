@@ -14,6 +14,7 @@ pub enum UiEvent {
     AlbumClicked(Arc<Album>),
     NowPlayingTabClicked(usize),
     RightClick(RightClickEvent),
+    EntityOpened(String),
 }
 impl UiEvent {
     pub fn play(track: &Arc<Track>) -> Arc<UiEvent> {

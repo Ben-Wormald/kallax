@@ -12,7 +12,7 @@ pub struct UiAction {
 
 pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
     let on_click = cx.listener({
-        let track = Arc::clone(&track);
+        let track = Arc::clone(track);
         move |_this, _event, cx| cx.emit(UiEvent::play(&track))
     });
     
@@ -63,7 +63,7 @@ pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoEleme
 
 pub fn album(album: &Arc<Album>, cx: &mut ViewContext<Albums>) -> impl IntoElement {
     let element = div()
-        .id(ElementId::Name(format!("{}{}", &album.album_artist, &album.title).into()))
+        .id(ElementId::Name(album.id().into()))
         .size_64();
 
     let element = if let Some(artwork) = &album.artwork {

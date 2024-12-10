@@ -2,7 +2,6 @@ use gpui::*;
 use std::sync::Arc;
 
 use crate::*;
-
 use self::elements::UiAction;
 
 type Vcx<'a> = ViewContext<'a, Tracks>;
@@ -69,14 +68,15 @@ impl Render for Tracks {
     }
 }
 
-fn get_tracks(cx: &mut Vcx, library: &Model<Library>, view: &TrackView) -> Vec<Arc<Track>> {
-    let tracks = (*library.read(cx).tracks).clone();
+fn get_tracks(_cx: &mut Vcx, _library: &Model<Library>, view: &TrackView) -> Vec<Arc<Track>> {
+    // let tracks = &library.read(cx).tracks;
 
     match view {
-        TrackView::AllTracks => tracks,
-        TrackView::ArtistTracks(artist) => tracks.into_iter()
-            .filter(|track| track.artist_name == *artist).collect(),
-        TrackView::Album(artist, album) => tracks.into_iter()
-            .filter(|track| track.artist_name == *artist && track.album_title == *album).collect(),
+        _ => unimplemented!(),
+        // TrackView::AllTracks => tracks,
+        // TrackView::ArtistTracks(artist) => tracks.into_iter()
+        //     .filter(|track| track.artist_name == *artist).collect(),
+        // TrackView::Album(artist, album) => tracks.into_iter()
+        //     .filter(|track| track.artist_name == *artist && track.album_title == *album).collect(),
     }
 }

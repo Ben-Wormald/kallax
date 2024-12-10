@@ -13,15 +13,22 @@ migrations_append_only = [
     "ALTER TABLE dbtrack ADD COLUMN track_number INTEGER",
     "ALTER TABLE dbtrack ADD COLUMN disc_number INTEGER",
     "CREATE TABLE dbalbum (rowid INTEGER PRIMARY KEY) STRICT",
-    "ALTER TABLE dbalbum ADD COLUMN id TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE dbalbum ADD COLUMN title TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE dbalbum ADD COLUMN sort_title TEXT",
-    "ALTER TABLE dbalbum ADD COLUMN album_artist TEXT NOT NULL DEFAULT ''",
-    "ALTER TABLE dbalbum ADD COLUMN artwork BLOB",
     "ALTER TABLE dbalbum ADD COLUMN artist_id TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbalbum ADD COLUMN artwork BLOB",
     "CREATE TABLE dbartist (rowid INTEGER PRIMARY KEY) STRICT",
     "ALTER TABLE dbartist ADD COLUMN name TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE dbartist ADD COLUMN sort_name TEXT",
+    "CREATE TABLE dbsearch (rowid INTEGER PRIMARY KEY) STRICT",
+    "ALTER TABLE dbsearch ADD COLUMN name TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbsearch ADD COLUMN expression TEXT NOT NULL DEFAULT ''",
+    "CREATE TABLE dbplaylist (rowid INTEGER PRIMARY KEY) STRICT",
+    "ALTER TABLE dbplaylist ADD COLUMN name TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbplaylist ADD COLUMN entities TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbsearch ADD COLUMN id TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbplaylist ADD COLUMN id TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE dbplaylist ADD COLUMN entity_ids TEXT NOT NULL DEFAULT ''",
 ]
 output_generated_schema_for_your_information_do_not_edit = """
   CREATE TABLE _turbosql_migrations (
@@ -30,17 +37,28 @@ output_generated_schema_for_your_information_do_not_edit = """
   ) STRICT
   CREATE TABLE dbalbum (
     rowid INTEGER PRIMARY KEY,
-    id TEXT NOT NULL DEFAULT '',
     title TEXT NOT NULL DEFAULT '',
     sort_title TEXT,
-    album_artist TEXT NOT NULL DEFAULT '',
-    artwork BLOB,
-    artist_id TEXT NOT NULL DEFAULT ''
+    artist_id TEXT NOT NULL DEFAULT '',
+    artwork BLOB
   ) STRICT
   CREATE TABLE dbartist (
     rowid INTEGER PRIMARY KEY,
     name TEXT NOT NULL DEFAULT '',
     sort_name TEXT
+  ) STRICT
+  CREATE TABLE dbplaylist (
+    rowid INTEGER PRIMARY KEY,
+    name TEXT NOT NULL DEFAULT '',
+    entities TEXT NOT NULL DEFAULT '',
+    id TEXT NOT NULL DEFAULT '',
+    entity_ids TEXT NOT NULL DEFAULT ''
+  ) STRICT
+  CREATE TABLE dbsearch (
+    rowid INTEGER PRIMARY KEY,
+    name TEXT NOT NULL DEFAULT '',
+    expression TEXT NOT NULL DEFAULT '',
+    id TEXT NOT NULL DEFAULT ''
   ) STRICT
   CREATE TABLE dbtrack (
     rowid INTEGER PRIMARY KEY,
@@ -99,6 +117,52 @@ sql_type = "TEXT NOT NULL"
 name = "sort_name"
 rust_type = "Option < String >"
 sql_type = "TEXT"
+
+[output_generated_tables_do_not_edit.dbplaylist]
+name = "dbplaylist"
+
+[[output_generated_tables_do_not_edit.dbplaylist.columns]]
+name = "rowid"
+rust_type = "Option < i64 >"
+sql_type = "INTEGER PRIMARY KEY"
+
+[[output_generated_tables_do_not_edit.dbplaylist.columns]]
+name = "id"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbplaylist.columns]]
+name = "name"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbplaylist.columns]]
+name = "entity_ids"
+rust_type = "Vec < String >"
+sql_type = "TEXT NOT NULL"
+
+[output_generated_tables_do_not_edit.dbsearch]
+name = "dbsearch"
+
+[[output_generated_tables_do_not_edit.dbsearch.columns]]
+name = "rowid"
+rust_type = "Option < i64 >"
+sql_type = "INTEGER PRIMARY KEY"
+
+[[output_generated_tables_do_not_edit.dbsearch.columns]]
+name = "id"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbsearch.columns]]
+name = "name"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
+
+[[output_generated_tables_do_not_edit.dbsearch.columns]]
+name = "expression"
+rust_type = "String"
+sql_type = "TEXT NOT NULL"
 
 [output_generated_tables_do_not_edit.dbtrack]
 name = "dbtrack"

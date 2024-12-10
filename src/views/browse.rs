@@ -2,18 +2,8 @@ use gpui::*;
 use std::sync::Arc;
 
 use crate::*;
-use elements::UiAction;
 
 type Vcx<'a> = ViewContext<'a, Browse>;
-
-enum HeaderMode {
-    Home,
-    Search,
-    Playlist,
-    Album,
-    Artist,
-    Label,
-}
 
 enum ItemsMode {
     List,
@@ -22,25 +12,32 @@ enum ItemsMode {
 }
 
 pub struct Browse {
-    pub header_mode: HeaderMode,
-    pub items_mode: ItemsMode,
-    // pub tracks: View<Tracks>,
-    // pub albums: View<Albums>,
+    items_mode: ItemsMode,
+    entity: Option<KallaxEntity>,
+    entities: Vec<KallaxEntity>,
 }
 
 impl Browse {
-    pub fn new(cx: &mut Vcx, library: &Model<Library>) -> Browse {
-        let tracks = cx.new_view(|cx| Tracks::new(cx, library));
-        let albums = cx.new_view(|cx| Albums::new(cx, library));
+    pub fn new(_cx: &mut Vcx) -> Browse {
+        // let tracks = cx.new_view(|cx| Tracks::new(cx));
+        // let albums = cx.new_view(|cx| Albums::new(cx));
 
         Browse {
-            header_mode: HeaderMode::Home,
             items_mode: ItemsMode::Grid,
+            entity: None,
+            entities: Vec::new(),
         }
     }
 
-    pub fn open_album(&mut self, cx: &mut Vcx, library: &Model<Library>, album: &Arc<Album>) {
-        self.header_mode = HeaderMode::Album;
+    pub fn set_entity(&mut self, cx: &mut Vcx, entity_id: String) {
+        self.entity = cx.global::<Library>().get_entity(&entity_id);
+        self.entities = match &self.entity {
+            Some(KallaxEntity::Search(search)) => cx.global::<Library>().execute_search(&search.id()),
+            _ => todo!(),
+        }
+    }
+
+    pub fn open_album(&mut self, _cx: &mut Vcx, _album: &Arc<Album>) {
         // self.tracks.update(cx, |this, cx| {
         //     this.update_view(
         //         cx,
@@ -52,21 +49,23 @@ impl Browse {
 }
 
 impl Render for Browse {
-    fn render(&mut self, cx: &mut Vcx) -> impl IntoElement {
+    fn render(&mut self, _cx: &mut Vcx) -> impl IntoElement {
         let header = div()
             .id("browse-header");
 
-        let header = match self.header_mode {
-            HeaderMode::Home => header.child(String::from("hi")),
-            _ => header.child(div()),
+        let header = match &self.entity {
+            Some(KallaxEntity::Album(album)) => header.child(album.title.clone()),
+            Some(KallaxEntity::Search(search)) => header.child(search.name.clone()),
+            None => header.child(String::from("welcome")),
+            _ => unimplemented!(),
         };
         
         let items = div()
             .id("browse-items");
 
         let items = match self.items_mode {
-            ItemsMode::Grid => items.child(String::from("hi")),
-            _ => items.child(div()),
+            ItemsMode::Grid => items.child(div().children(self.entities.iter().map(|e| div().child(e.name().to_string())))),
+            ItemsMode::List => items.child(div().children(self.entities.iter().map(|e| div().child(e.name().to_string())))),
         };
 
         div()

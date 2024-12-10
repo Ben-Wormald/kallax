@@ -6,7 +6,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use crate::{Playback, PlaybackEvent, Track};
+use crate::{Library, Playback, PlaybackEvent, Track};
 
 type Mcx<'a> = ModelContext<'a, Scrobbler>;
 type Params = Vec<(&'static str, String)>;
@@ -14,7 +14,6 @@ type Params = Vec<(&'static str, String)>;
 const API: &str = "http://ws.audioscrobbler.com/2.0/";
 const USER_AGENT: &str = "kallax-music-player";
 
-#[derive(Default)]
 pub struct Scrobbler {
     client: Arc<Client>,
     current_track: Option<Arc<Track>>,
@@ -38,7 +37,9 @@ impl Scrobbler {
 
         Scrobbler {
             client,
-            ..Default::default()
+            current_track: None,
+            time_started: None,
+            time_elapsed: Duration::default(),
         }
     }
 
@@ -84,17 +85,19 @@ impl Scrobbler {
     }
 
     fn update_now_playing(&mut self, cx: &mut Mcx, track: &Arc<Track>) {
+        let album = cx.global::<Library>().get_album(&track.album_id).unwrap();
+        let artist = cx.global::<Library>().get_artist(&track.artist_id).unwrap();
+        let album_artist = cx.global::<Library>().get_artist(&album.artist_id);
+
         let mut params = vec![
             ("method", String::from("track.updateNowPlaying")),
             ("track", track.title.clone()),
-            ("artist", track.artist_name.clone()),
-            ("album", track.album_title.clone()),
+            ("artist", artist.name.clone()),
+            ("album", album.title.clone()),
+            ("duration", track.duration.to_string()),
         ];
-        if let Some(album_artist) = track.album_artist.clone() {
-            params.push(("albumArtist", album_artist));
-        }
-        if let Some(duration) = track.duration {
-            params.push(("duration", duration.to_string()));
+        if let Some(album_artist) = album_artist {
+            params.push(("albumArtist", album_artist.name.clone()));
         }
 
         self.send(cx, params)
@@ -105,18 +108,20 @@ impl Scrobbler {
     fn scrobble(&mut self, cx: &mut Mcx, track: &Arc<Track>) {
         let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
 
+        let album = cx.global::<Library>().get_album(&track.album_id).unwrap();
+        let artist = cx.global::<Library>().get_artist(&track.artist_id).unwrap();
+        let album_artist = cx.global::<Library>().get_artist(&album.artist_id);
+
         let mut params = vec![
             ("method", String::from("track.scrobble")),
             ("timestamp[0]", timestamp.to_string()),
             ("track[0]", track.title.clone()),
-            ("artist[0]", track.artist_name.clone()),
-            ("album[0]", track.album_title.clone()),
+            ("artist[0]", artist.name.clone()),
+            ("album[0]", album.title.clone()),
+            ("duration[0]", track.duration.to_string()),
         ];
-        if let Some(album_artist) = track.album_artist.clone() {
-            params.push(("albumArtist[0]", album_artist));
-        }
-        if let Some(duration) = track.duration {
-            params.push(("duration[0]", duration.to_string()));
+        if let Some(album_artist) = album_artist {
+            params.push(("albumArtist[0]", album_artist.name.clone()));
         }
 
         self.send(cx, params)

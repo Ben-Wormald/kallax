@@ -4,13 +4,14 @@ use gpui::*;
 mod domain;
 mod elements;
 mod events;
+mod globals;
 mod models;
-mod theme;
 mod utils;
 mod views;
 
 use domain::*;
 use events::*;
+use globals::*;
 use models::*;
 use utils::*;
 use views::*;

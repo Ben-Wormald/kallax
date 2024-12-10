@@ -1,6 +1,6 @@
 use turbosql::{select, Turbosql};
 
-use crate::{Album, Artist, Track};
+use crate::{prefix, Album, Artist, Expression, Field, LogicalExpression, LogicalOperator, MatchExpression, PlaylistShelf, SearchShelf, Track};
 
 #[derive(Clone, Default, Turbosql)]
 pub struct DbTrack {
@@ -122,7 +122,69 @@ impl AsRef<DbArtist> for DbArtist {
     }
 }
 
-pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
+#[derive(Clone, Default, Turbosql)]
+struct DbSearch {
+    rowid: Option<i64>,
+    pub id: String,
+    pub name: String,
+    pub expression: String,
+}
+impl DbSearch {
+    fn to_domain(self) -> SearchShelf {
+        SearchShelf {
+            id: self.id,
+            name: self.name,
+            expression: Expression::Logical(LogicalExpression { operator: LogicalOperator::And, expressions: Vec::new() }),
+        }
+    }
+
+    fn from_domain(search: &SearchShelf) -> DbSearch {
+        DbSearch {
+            rowid: None,
+            id: search.id.clone(),
+            name: search.name.clone(),
+            expression: "TODO".to_string(),
+        }
+    }
+}
+impl AsRef<DbSearch> for DbSearch {
+    fn as_ref(&self) -> &DbSearch {
+        self
+    }
+}
+
+#[derive(Clone, Default, Turbosql)]
+struct DbPlaylist {
+    rowid: Option<i64>,
+    pub id: String,
+    pub name: String,
+    pub entity_ids: Vec<String>,
+}
+impl DbPlaylist {
+    fn to_domain(self) -> PlaylistShelf {
+        PlaylistShelf {
+            id: self.id,
+            name: self.name,
+            entity_ids: self.entity_ids,
+        }
+    }
+
+    fn from_domain(playlist: &PlaylistShelf) -> DbPlaylist {
+        DbPlaylist {
+            rowid: None,
+            id: playlist.id.clone(),
+            name: playlist.name.clone(),
+            entity_ids: playlist.entity_ids.clone(),
+        }
+    }
+}
+impl AsRef<DbPlaylist> for DbPlaylist {
+    fn as_ref(&self) -> &DbPlaylist {
+        self
+    }
+}
+
+pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>, Vec<SearchShelf>, Vec<PlaylistShelf>) {
     let tracks = select!(Vec<DbTrack>).unwrap();
     let tracks = tracks.into_iter().map(|track| track.to_domain()).collect();
 
@@ -132,7 +194,22 @@ pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
     let artists = select!(Vec<DbArtist>).unwrap();
     let artists = artists.into_iter().map(|artist| artist.to_domain()).collect();
 
-    (tracks, albums, artists)
+    // let searches = select!(Vec<DbSearch>).unwrap();
+    // let searches = searches.into_iter().map(|search| search.to_domain()).collect();
+
+    let searches = vec![SearchShelf::new(
+        "all tracks".to_string(),
+        Expression::Match(MatchExpression {
+            field: Field::Type,
+            // operator: MatchOperator::Is,
+            value: prefix::TRACK.to_string(),
+        }),
+    )];
+
+    let playlists = select!(Vec<DbPlaylist>).unwrap();
+    let playlists = playlists.into_iter().map(|playlist| playlist.to_domain()).collect();
+
+    (tracks, albums, artists, searches, playlists)
 }
 
 pub fn save_tracks(tracks: &[Track]) {

@@ -34,6 +34,9 @@ impl NowPlaying {
     fn render_now_playing(&mut self, cx: &mut Vcx) -> impl IntoElement {
         let current_track = self.get_current();
 
+        let album = current_track.and_then(|track| cx.global::<Library>().get_album(&track.album_id));
+        let artist = current_track.and_then(|track| cx.global::<Library>().get_artist(&track.artist_id));
+
         let now_playing = div()
             .id("track-details")
             .flex_grow()
@@ -48,13 +51,13 @@ impl NowPlaying {
                     .px_3()
                     .children([
                         current_track.map_or("-".to_string(), |track| track.title.clone()),
-                        current_track.map_or("-".to_string(), |track| track.artist_name.clone()),
-                        current_track.map_or("-".to_string(), |track| track.album_title.clone()),
+                        artist.map_or("-".to_string(), |artist| artist.name.clone()),
+                        album.clone().map_or("-".to_string(), |album| album.title.clone()),
                     ])
             );
 
-        let now_playing = if let Some(track) = current_track {
-            if let Some(artwork) = track.artwork.clone() {
+        let now_playing = if let Some(album) = album {
+            if let Some(artwork) = album.artwork.clone() {
                 now_playing.child(
                     img(artwork)
                         .flex_none()
@@ -118,7 +121,7 @@ impl NowPlaying {
             )
     }
 
-    fn render_queue(&mut self, cx: &mut Vcx) -> impl IntoElement {
+    fn render_queue(&mut self, _cx: &mut Vcx) -> impl IntoElement {
         div()
             .flex_grow()
             .rounded_b_sm()

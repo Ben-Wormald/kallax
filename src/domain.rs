@@ -1,58 +1,168 @@
 use gpui::RenderImage;
+use uuid::Uuid;
 use std::{hash::Hash, sync::Arc};
 
-pub trait Entity {
-    fn id(&self) -> String;
+pub mod prefix {
+    pub const TRACK: &str = "00";
+    pub const ALBUM: &str = "02";
+    pub const ARTIST: &str = "03";
+    pub const SEARCH: &str = "04";
+    pub const PLAYLIST: &str = "05";
 }
 
-pub enum Shelf {
-    Search(SearchShelf),
-    Playlist(PlaylistShelf),
+// pub trait Entity {
+//     fn id(&self) -> String;
+// }
+
+pub enum KallaxEntity {
+    Track(Arc<Track>),
+    Album(Arc<Album>),
+    Artist(Arc<Artist>),
+    Search(Arc<SearchShelf>),
+    Playlist(Arc<PlaylistShelf>),
 }
-impl Shelf {
+impl KallaxEntity {
     pub fn name(&self) -> &str {
         match self {
-            Shelf::Search(shelf) => &shelf.name,
-            Shelf::Playlist(shelf) => &shelf.name,
+            KallaxEntity::Track(e) => &e.title,
+            KallaxEntity::Album(e) => &e.title,
+            KallaxEntity::Artist(e) => &e.name,
+            KallaxEntity::Search(e) => &e.name,
+            KallaxEntity::Playlist(e) => &e.name,
+        }
+    }
+
+    pub fn id(&self) -> String {
+        match self {
+            KallaxEntity::Track(e) => e.id(),
+            KallaxEntity::Album(e) => e.id(),
+            KallaxEntity::Artist(e) => e.id(),
+            KallaxEntity::Search(e) => e.id(),
+            KallaxEntity::Playlist(e) => e.id(),
+        }
+    }
+}
+
+pub enum Field {
+    Type,
+    Id,
+    NameOrTitle,
+    // Release,
+    // Label,
+    // ...
+}
+
+pub enum LogicalOperator {
+    And,
+    Or,
+    // Not,
+}
+
+// pub enum MatchOperator {
+//     Is,
+//     Contains,
+// }
+
+pub enum Expression {
+    Logical(LogicalExpression),
+    Match(MatchExpression),
+}
+impl Expression {
+    fn matches(&self, entity: &KallaxEntity) -> bool {
+        match self {
+            Expression::Logical(expr) => expr.matches(entity),
+            Expression::Match(expr) => expr.matches(entity),
+        }
+    }
+}
+
+pub struct LogicalExpression {
+    pub operator: LogicalOperator,
+    pub expressions: Vec<Expression>,
+}
+impl LogicalExpression {
+    fn matches(&self, entity: &KallaxEntity) -> bool {
+        match self.operator {
+            LogicalOperator::And => self.expressions.iter().all(|expr| expr.matches(entity)),
+            LogicalOperator::Or => self.expressions.iter().any(|expr| expr.matches(entity)),
+        }
+    }
+}
+
+pub struct MatchExpression {
+    pub field: Field,
+    // pub operator: MatchOperator,
+    pub value: String,
+}
+impl MatchExpression {
+    fn matches(&self, entity: &KallaxEntity) -> bool {
+        match self.field {
+            Field::Type => match entity {
+                KallaxEntity::Track(_) => self.value == prefix::TRACK,
+                KallaxEntity::Album(_) => self.value == prefix::ALBUM,
+                KallaxEntity::Artist(_) => self.value == prefix::ARTIST,
+                KallaxEntity::Search(_) => self.value == prefix::SEARCH,
+                KallaxEntity::Playlist(_) => self.value == prefix::PLAYLIST,
+            },
+            Field::Id => entity.id() == self.value,
+            Field::NameOrTitle => entity.name().contains(&self.value),
         }
     }
 }
 
 pub struct SearchShelf {
+    pub id: String,
     pub name: String,
-    pub search: (),
+    pub expression: Expression,
 }
-impl Entity for SearchShelf {
-    fn id(&self) -> String {
-        let string = format!(
-            "search_{}",
-            self.name,
-        );
-        let id = md5::compute(string);
-        format!("{:x}", id)
+impl SearchShelf {
+    pub fn new(name: String, expression: Expression) -> SearchShelf {
+        let id = Uuid::new_v4().to_string();
+        SearchShelf {
+            id,
+            name,
+            expression,
+        }
+    }
+
+    pub fn matches(&self, entity: &KallaxEntity) -> bool {
+        self.expression.matches(entity)
+    }
+}
+impl SearchShelf {
+    pub fn id(&self) -> String {
+        format!(
+            "{}_{}",
+            prefix::SEARCH,
+            self.id,
+        )
     }
 }
 
 pub struct PlaylistShelf {
+    pub id: String,
     pub name: String,
-    pub tracks: Vec<Track>,
+    pub entity_ids: Vec<String>,
 }
-impl Entity for PlaylistShelf {
-    fn id(&self) -> String {
-        let string = format!(
-            "playlist_{}",
-            self.name,
-        );
-        let id = md5::compute(string);
-        format!("{:x}", id)
+impl PlaylistShelf {
+    fn new(name: String) -> PlaylistShelf {
+        let id = Uuid::new_v4().to_string();
+        PlaylistShelf {
+            id,
+            name,
+            entity_ids: Vec::new(),
+        }
     }
 }
-
-// pub enum Entity {
-//     Track(Track),
-//     Album(Album),
-//     // Artist(Artist),
-// }
+impl PlaylistShelf {
+    pub fn id(&self) -> String {
+        format!(
+            "{}_{}",
+            prefix::PLAYLIST,
+            self.id,
+        )
+    }
+}
 
 pub struct Track {
     pub path: String,
@@ -63,16 +173,15 @@ pub struct Track {
     pub track_number: Option<u32>,
     pub disc_number: Option<u32>,
 }
-impl Entity for Track {
-    fn id(&self) -> String {
-        let string = format!(
-            "track_{}_{}_{}",
+impl Track {
+    pub fn id(&self) -> String {
+        format!(
+            "{}_{}_{}_{}",
+            prefix::TRACK,
             self.title,
             self.album_id,
             self.artist_id,
-        );
-        let id = md5::compute(string);
-        format!("{:x}", id)
+        )
     }
 }
 
@@ -83,15 +192,14 @@ pub struct Album {
     pub duration: u32,
     pub artwork: Option<Arc<RenderImage>>,
 }
-impl Entity for Album {
-    fn id(&self) -> String {
-        let string = format!(
-            "album_{}_{}",
+impl Album {
+    pub fn id(&self) -> String {
+        format!(
+            "{}_{}_{}",
+            prefix::ALBUM,
             self.sort_title.as_ref().unwrap_or(&self.title),
             self.artist_id,
-        );
-        let id = md5::compute(string);
-        format!("{:x}", id)
+        )
     }
 }
 impl Hash for Album {
@@ -110,14 +218,13 @@ pub struct Artist {
     pub name: String,
     pub sort_name: Option<String>,
 }
-impl Entity for Artist {
-    fn id(&self) -> String {
-        let string = format!(
-            "artist_{}",
+impl Artist {
+    pub fn id(&self) -> String {
+        format!(
+            "{}_{}",
+            prefix::ARTIST,
             self.sort_name.as_ref().unwrap_or(&self.name),
-        );
-        let id = md5::compute(string);
-        format!("{:x}", id)
+        )
     }
 }
 impl Hash for Artist {

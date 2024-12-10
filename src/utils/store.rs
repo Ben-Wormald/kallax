@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 
-use crate::{domain::Entity, Album, Artist, Track};
+use crate::{Album, Artist, PlaylistShelf, SearchShelf, Track};
 use super::{database, files::{self, TrackFile}};
 
-pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
-    let (tracks, albums, artists) = database::load();
+pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>, Vec<SearchShelf>, Vec<PlaylistShelf>) {
+    let (tracks, albums, artists, searches, playlists) = database::load();
 
     // TODO sync
 
@@ -14,9 +14,9 @@ pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
         database::save_tracks(&tracks);
         database::save_albums(&albums);
         database::save_artists(&artists);
-        (tracks, albums, artists)
+        (tracks, albums, artists, searches, playlists)
     } else {
-        (tracks, albums, artists)
+        (tracks, albums, artists, searches, playlists)
     }
 }
 

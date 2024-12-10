@@ -1,17 +1,20 @@
 use gpui::*;
+use std::sync::Arc;
 
-use crate::*;
-use elements::UiAction;
+use crate::{KallaxEntity, Library, UiEvent};
 
 type Vcx<'a> = ViewContext<'a, Shelves>;
 
 pub struct Shelves {
-    shelves: Vec<Shelf>,
+    shelves: Vec<KallaxEntity>,
 }
 
 impl Shelves {
-    pub fn new(cx: &mut Vcx, library: &Model<Library>) -> Shelves {
-        let shelves = Vec::new();
+    pub fn new(cx: &mut Vcx) -> Shelves {
+        let searches = cx.global::<Library>().searches.iter().map(|search| KallaxEntity::Search(Arc::clone(search)));
+        let playlists = cx.global::<Library>().playlists.iter().map(|playlist| KallaxEntity::Playlist(Arc::clone(playlist)));
+
+        let shelves = searches.chain(playlists).collect();
 
         Shelves {
             shelves
@@ -29,9 +32,15 @@ impl Render for Shelves {
             .child(
                 div()
                     .children(
-                        self.shelves.iter().map(|shelf|
-                            div().child(shelf.name().to_string())
-                        )
+                        self.shelves.iter().map(|shelf| {
+                            let shelf_id = shelf.id();
+                            div()
+                                .id(ElementId::Name(shelf_id.clone().into()))
+                                .child(shelf.name().to_string())
+                                .on_click(cx.listener(move |_this, _event, cx| {
+                                    cx.emit(Arc::new(UiEvent::EntityOpened(shelf_id.clone())))
+                                }))
+                        })
                     )
             )
     }
