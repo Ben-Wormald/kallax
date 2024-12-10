@@ -51,9 +51,6 @@ fn read_track(path: PathBuf) -> TrackFile {
 
     let artwork = tags.pictures().next().map(|picture| picture.data.clone());
 
-    // let id = md5::compute(&path);
-    // let id = format!("{:x}", id);
-
     TrackFile {
         path,
         title,

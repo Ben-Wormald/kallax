@@ -14,6 +14,7 @@ pub mod prefix {
 //     fn id(&self) -> String;
 // }
 
+#[derive(Clone)]
 pub enum KallaxEntity {
     Track(Arc<Track>),
     Album(Arc<Album>),

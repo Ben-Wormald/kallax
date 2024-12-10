@@ -49,7 +49,7 @@ impl Browse {
 }
 
 impl Render for Browse {
-    fn render(&mut self, _cx: &mut Vcx) -> impl IntoElement {
+    fn render(&mut self, cx: &mut Vcx) -> impl IntoElement {
         let header = div()
             .id("browse-header");
 
@@ -64,8 +64,28 @@ impl Render for Browse {
             .id("browse-items");
 
         let items = match self.items_mode {
-            ItemsMode::Grid => items.child(div().children(self.entities.iter().map(|e| div().child(e.name().to_string())))),
-            ItemsMode::List => items.child(div().children(self.entities.iter().map(|e| div().child(e.name().to_string())))),
+            ItemsMode::Grid => items.children(
+                self.entities.iter().map(|e| {
+                    let e = e.clone();
+                    div()
+                        .id(ElementId::Name(e.id().into()))
+                        .child(e.name().to_string())
+                        .on_click(cx.listener(move |_this, _event, cx| {
+                            on_click_entity(cx, &e);
+                        }))
+                })
+            ),
+            ItemsMode::List => items.children(
+                self.entities.iter().map(|e| {
+                    let e = e.clone();
+                    div()
+                        .id(ElementId::Name(e.id().into()))
+                        .child(e.name().to_string())
+                        .on_click(cx.listener(move |_this, _event, cx| {
+                            on_click_entity(cx, &e);
+                        }))
+                })
+            ),
         };
 
         div()
@@ -76,4 +96,12 @@ impl Render for Browse {
             .child(header)
             .child(items)
     }
+}
+
+fn on_click_entity(cx: &mut Vcx, entity: &KallaxEntity) {
+    match entity {
+        KallaxEntity::Track(track) => cx.emit(UiEvent::play(track)),
+        _ => todo!(),
+    }
+    cx.notify();
 }
