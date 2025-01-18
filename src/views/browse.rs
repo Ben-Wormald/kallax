@@ -1,3 +1,4 @@
+use elements::list_entity;
 use gpui::*;
 use std::sync::Arc;
 
@@ -9,6 +10,13 @@ enum ItemsMode {
     List,
     Grid,
     // CoverFlow,
+}
+
+pub enum BrowseContext {
+    Album(usize),
+    Artist,
+    Search,
+    Playlist(usize),
 }
 
 pub struct Browse {
@@ -23,7 +31,7 @@ impl Browse {
         // let albums = cx.new_view(|cx| Albums::new(cx));
 
         Browse {
-            items_mode: ItemsMode::Grid,
+            items_mode: ItemsMode::List,
             entity: None,
             entities: Vec::new(),
         }
@@ -76,14 +84,15 @@ impl Render for Browse {
                 })
             ),
             ItemsMode::List => items.children(
-                self.entities.iter().map(|e| {
-                    let e = e.clone();
-                    div()
-                        .id(ElementId::Name(e.id().into()))
-                        .child(e.name().to_string())
-                        .on_click(cx.listener(move |_this, _event, cx| {
-                            on_click_entity(cx, &e);
-                        }))
+                self.entities.iter().enumerate().map(|(i, e)| {
+                    let browse_context = match &self.entity {
+                        Some(KallaxEntity::Album(_)) => BrowseContext::Album(i),
+                        Some(KallaxEntity::Search(_)) => BrowseContext::Search,
+                        Some(KallaxEntity::Artist(_)) => BrowseContext::Artist,
+                        Some(KallaxEntity::Playlist(_)) => BrowseContext::Playlist(i),
+                        _ => unimplemented!(),
+                    };
+                    list_entity(e, browse_context, cx)
                 })
             ),
         };

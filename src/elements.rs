@@ -1,64 +1,16 @@
 use gpui::*;
 use std::sync::Arc;
 
-use crate::*;
+pub mod list_entity;
 
+pub use list_entity::*;
+
+use crate::*;
 use context_menu::ContextMenuItem;
 
 pub struct UiAction {
     pub label: &'static str,
     pub event: Arc<UiEvent>,
-}
-
-pub enum BrowseContext {
-    Album(usize),
-    Artist,
-    Search,
-    Playlist(usize),
-}
-
-pub fn list_entity(
-    entity: &KallaxEntity,
-    browse_context: BrowseContext,
-    cx: &mut ViewContext<Browse>,
-) -> impl IntoElement {
-    let children = match browse_context {
-        BrowseContext::Album(track_number) => vec![
-            div().child(track_number.to_string()),
-            div().child(entity.name().to_string()),
-        ],
-        BrowseContext::Artist => match entity {
-            KallaxEntity::Album(_) => vec![
-                div().child(entity.name().to_string()),
-            ],
-            KallaxEntity::Track(track) => vec![
-                div().child(entity.name().to_string()),
-                div().child(cx.global::<Library>()
-                    .get_album(&track.album_id)
-                    .map_or(String::from(""), |album| album.title.clone())
-                ),
-            ],
-            _ => unimplemented!(),
-        },
-        BrowseContext::Search => vec![],
-        BrowseContext::Playlist(_track_number) => vec![],
-    };
-
-    let id = ElementId::Name(entity.id().into());
-
-    let entity = entity.clone();
-    let on_click = cx.listener(move |_this, _event, cx| {
-        match &entity {
-            KallaxEntity::Track(track) => cx.emit(UiEvent::play(&track)),
-            _ => todo!(),
-        }
-        cx.notify();
-    });
-
-    div()
-        .id(id)
-        .on_click(on_click)
-        .children(children)
 }
 
 pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
