@@ -1,6 +1,6 @@
 use gpui::*;
 
-use super::{browse::BrowseContext, Browse, KallaxEntity, Library, UiEvent};
+use super::{browse::BrowseContext, theme, Browse, KallaxEntity, Library, UiEvent};
 
 pub fn list_entity(
     entity: &KallaxEntity,
@@ -84,10 +84,14 @@ pub fn list_entity(
         .on_click(on_click)
         .flex()
         .children(children)
+        .hover(|s| s.bg(rgb(theme::colours::SMOTHER)))
 }
 
 fn row_column() -> Div {
     div()
         .flex_grow()
         .flex_basis(px(1.))
+        .py_0p5()
+        .px_2()
+        .hover(|s| s.text_decoration_solid())
 }
