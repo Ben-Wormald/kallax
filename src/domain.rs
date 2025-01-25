@@ -192,6 +192,7 @@ pub struct Album {
     pub artist_id: String,
     pub duration: u32,
     pub artwork: Option<Arc<RenderImage>>,
+    pub track_ids: Vec<String>,
 }
 impl Album {
     pub fn id(&self) -> String {
@@ -201,6 +202,17 @@ impl Album {
             self.sort_title.as_ref().unwrap_or(&self.title),
             self.artist_id,
         )
+    }
+
+    pub fn unknown() -> Album {
+        Album {
+            title: String::from(""),
+            sort_title: None,
+            artist_id: String::from("ARTIST_UNKNOWN"), // TODO proper id here
+            duration: 0,
+            artwork: None,
+            track_ids: Vec::new(),
+        }
     }
 }
 impl Hash for Album {
@@ -226,6 +238,13 @@ impl Artist {
             entity_type::ARTIST,
             self.sort_name.as_ref().unwrap_or(&self.name),
         )
+    }
+
+    pub fn unknown() -> Artist {
+        Artist {
+            name: String::from(""),
+            sort_name: None,
+        }
     }
 }
 impl Hash for Artist {

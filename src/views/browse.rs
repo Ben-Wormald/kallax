@@ -41,6 +41,7 @@ impl Browse {
         self.entity = cx.global::<Library>().get_entity(&entity_id);
         self.entities = match &self.entity {
             Some(KallaxEntity::Search(search)) => cx.global::<Library>().execute_search(&search.id()),
+            Some(KallaxEntity::Album(album)) => cx.global::<Library>().get_tracks(&album.track_ids),
             _ => todo!(),
         }
     }

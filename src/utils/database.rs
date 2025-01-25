@@ -66,6 +66,7 @@ pub struct DbAlbum {
     pub sort_title: Option<String>,
     pub artist_id: String,
     pub artwork: Option<Vec<u8>>,
+    pub track_ids: Vec<String>,
 }
 impl DbAlbum {
     fn to_domain(self) -> Album {
@@ -75,6 +76,7 @@ impl DbAlbum {
             artist_id: self.artist_id,
             duration: 0,
             artwork: None,
+            track_ids: self.track_ids,
         }
     }
 
@@ -85,6 +87,7 @@ impl DbAlbum {
             sort_title: album.sort_title.clone(),
             artist_id: album.artist_id.clone(),
             artwork: None,
+            track_ids: album.track_ids.clone(),
         }
     }
 }
@@ -197,14 +200,30 @@ pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>, Vec<SearchShelf>, Vec<Pla
     // let searches = select!(Vec<DbSearch>).unwrap();
     // let searches = searches.into_iter().map(|search| search.to_domain()).collect();
 
-    let searches = vec![SearchShelf::new(
-        "all tracks".to_string(),
-        Expression::Match(MatchExpression {
-            field: Field::Type,
-            // operator: MatchOperator::Is,
-            value: entity_type::TRACK.to_string(),
-        }),
-    )];
+    let searches = vec![
+        SearchShelf::new(
+            "All tracks".to_string(),
+            Expression::Match(MatchExpression {
+                field: Field::Type,
+                // operator: MatchOperator::Is,
+                value: entity_type::TRACK.to_string(),
+            }),
+        ),
+        SearchShelf::new(
+            "Albums".to_string(),
+            Expression::Match(MatchExpression {
+                field: Field::Type,
+                value: entity_type::ALBUM.to_string(),
+            }),
+        ),
+        SearchShelf::new(
+            "Artists".to_string(),
+            Expression::Match(MatchExpression {
+                field: Field::Type,
+                value: entity_type::ARTIST.to_string(),
+            }),
+        ),
+    ];
 
     let playlists = select!(Vec<DbPlaylist>).unwrap();
     let playlists = playlists.into_iter().map(|playlist| playlist.to_domain()).collect();

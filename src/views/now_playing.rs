@@ -51,12 +51,12 @@ impl NowPlaying {
                     .px_3()
                     .children([
                         current_track.map_or("-".to_string(), |track| track.title.clone()),
-                        artist.map_or("-".to_string(), |artist| artist.name.clone()),
-                        album.clone().map_or("-".to_string(), |album| album.title.clone()),
+                        artist.map_or("-".to_string(), |artist| artist.name().to_string()),
+                        album.clone().map_or("-".to_string(), |album| album.name().to_string()),
                     ])
             );
 
-        let now_playing = if let Some(album) = album {
+        let now_playing = if let Some(KallaxEntity::Album(album)) = album {
             if let Some(artwork) = album.artwork.clone() {
                 now_playing.child(
                     img(artwork)

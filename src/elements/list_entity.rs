@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use gpui::*;
 
 use super::{browse::BrowseContext, theme, Browse, KallaxEntity, Library, UiEvent};
@@ -25,7 +27,7 @@ pub fn list_entity(
                 row_column()
                     .child(cx.global::<Library>()
                         .get_album(&track.album_id)
-                        .map_or(String::from(""), |album| album.title.clone())
+                        .map_or(String::from(""), |album| album.name().to_string())
                     ),
             ],
             _ => unimplemented!(),
@@ -41,7 +43,7 @@ pub fn list_entity(
                 row_column()
                     .child(cx.global::<Library>()
                         .get_artist(&album.artist_id)
-                        .map_or(String::from(""), |artist| artist.name.clone())
+                        .map_or(String::from(""), |artist| artist.name().to_string())
                     ),
             ],
             KallaxEntity::Track(track) => vec![
@@ -50,12 +52,12 @@ pub fn list_entity(
                 row_column()
                     .child(cx.global::<Library>()
                         .get_album(&track.album_id)
-                        .map_or(String::from(""), |album| album.title.clone())
+                        .map_or(String::from(""), |album| album.name().to_string())
                     ),
                 row_column()
                     .child(cx.global::<Library>()
                         .get_artist(&track.artist_id)
-                        .map_or(String::from(""), |artist| artist.name.clone())
+                        .map_or(String::from(""), |artist| artist.name().to_string())
                     ),
             ],
             _ => unimplemented!(),
@@ -74,7 +76,7 @@ pub fn list_entity(
     let on_click = cx.listener(move |_this, _event, cx| {
         match &entity {
             KallaxEntity::Track(track) => cx.emit(UiEvent::play(&track)),
-            _ => todo!(),
+            entity => cx.emit(Arc::new(UiEvent::EntityOpened(entity.id()))),
         }
         cx.notify();
     });

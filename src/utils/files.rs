@@ -2,6 +2,8 @@ use id3::{Tag, TagLike};
 use rodio::{Decoder, Source};
 use std::{env, fs::{read_dir, File}, io::BufReader, path::PathBuf};
 
+use crate::entity_type;
+
 const SUPPORTED_FILETYPES: [&str; 2] = ["mp3", "wav"];
 
 pub struct TrackFile {
@@ -14,6 +16,34 @@ pub struct TrackFile {
     pub track_number: Option<u32>,
     pub disc_number: Option<u32>,
     pub artwork: Option<Vec<u8>>,
+}
+impl TrackFile {
+    pub fn track_id(&self) -> String {
+        format!(
+            "{}_{}_{}_{}",
+            entity_type::TRACK,
+            self.title,
+            self.album_id(),
+            self.artist_id(),
+        )
+    }
+
+    pub fn album_id(&self) -> String {
+        format!(
+            "{}_{}_{}",
+            entity_type::ALBUM,
+            self.album_title, // TODO use sort title if set
+            self.artist_id(),
+        )
+    }
+
+    pub fn artist_id(&self) -> String {
+        format!(
+            "{}_{}",
+            entity_type::ARTIST,
+            self.artist_name, // TODO use sort name if set
+        )
+    }
 }
 
 pub fn read() -> Vec<TrackFile> {

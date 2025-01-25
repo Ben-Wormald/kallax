@@ -6,7 +6,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use crate::{Library, Playback, PlaybackEvent, Track};
+use crate::{Album, Artist, KallaxEntity, Library, Playback, PlaybackEvent, Track};
 
 type Mcx<'a> = ModelContext<'a, Scrobbler>;
 type Params = Vec<(&'static str, String)>;
@@ -85,9 +85,27 @@ impl Scrobbler {
     }
 
     fn update_now_playing(&mut self, cx: &mut Mcx, track: &Arc<Track>) {
-        let album = cx.global::<Library>().get_album(&track.album_id).unwrap();
-        let artist = cx.global::<Library>().get_artist(&track.artist_id).unwrap();
+        // TODO refactor these stmts duplicated in scrobble()
+        let album = cx.global::<Library>().get_album(&track.album_id);
+        let album = if let Some(KallaxEntity::Album(album)) = album {
+            album
+        } else {
+            Arc::new(Album::unknown())
+        };
+
+        let artist = cx.global::<Library>().get_artist(&track.artist_id);
+        let artist = if let Some(KallaxEntity::Artist(artist)) = artist {
+            artist
+        } else {
+            Arc::new(Artist::unknown())
+        };
+
         let album_artist = cx.global::<Library>().get_artist(&album.artist_id);
+        let album_artist = if let Some(KallaxEntity::Artist(album_artist)) = album_artist {
+            Some(album_artist)
+        } else {
+            None
+        };
 
         let mut params = vec![
             ("method", String::from("track.updateNowPlaying")),
@@ -108,9 +126,26 @@ impl Scrobbler {
     fn scrobble(&mut self, cx: &mut Mcx, track: &Arc<Track>) {
         let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
 
-        let album = cx.global::<Library>().get_album(&track.album_id).unwrap();
-        let artist = cx.global::<Library>().get_artist(&track.artist_id).unwrap();
+        let album = cx.global::<Library>().get_album(&track.album_id);
+        let album = if let Some(KallaxEntity::Album(album)) = album {
+            album
+        } else {
+            Arc::new(Album::unknown())
+        };
+
+        let artist = cx.global::<Library>().get_artist(&track.artist_id);
+        let artist = if let Some(KallaxEntity::Artist(artist)) = artist {
+            artist
+        } else {
+            Arc::new(Artist::unknown())
+        };
+
         let album_artist = cx.global::<Library>().get_artist(&album.artist_id);
+        let album_artist = if let Some(KallaxEntity::Artist(album_artist)) = album_artist {
+            Some(album_artist)
+        } else {
+            None
+        };
 
         let mut params = vec![
             ("method", String::from("track.scrobble")),

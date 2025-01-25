@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use crate::{Album, Artist, PlaylistShelf, SearchShelf, Track};
 use super::{database, files::{self, TrackFile}};
@@ -22,16 +22,19 @@ pub fn load() -> (Vec<Track>, Vec<Album>, Vec<Artist>, Vec<SearchShelf>, Vec<Pla
 
 fn from_files(files: Vec<TrackFile>) -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
     let mut tracks = Vec::new();
-    let mut albums: HashSet<Album> = HashSet::new();
+    let mut albums: HashMap<String, Album> = HashMap::new();
     let mut artists: HashSet<Artist> = HashSet::new();
 
     for file in files.into_iter() {
+        let track_id = file.track_id();
+        let album_id = file.album_id();
+        let artist_id = file.artist_id();
+
         let artist = Artist {
             name: file.artist_name,
             sort_name: None,
         };
 
-        let artist_id = artist.id();
         artists.insert(artist);
 
         let album_artist_id = if let Some(name) = file.album_artist {
@@ -46,16 +49,20 @@ fn from_files(files: Vec<TrackFile>) -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
             artist_id.clone()
         };
 
-        let album = Album {
-            title: file.album_title,
-            sort_title: None,
-            artist_id: album_artist_id,
-            duration: file.duration,
-            artwork: None,
-        };
-
-        let album_id = album.id();
-        albums.insert(album);
+        albums
+            .entry(album_id.clone())
+            .and_modify(|album| {
+                album.duration += file.duration;
+                album.track_ids.push(track_id.clone());
+            })
+            .or_insert(Album {
+                title: file.album_title,
+                sort_title: None,
+                artist_id: album_artist_id,
+                duration: file.duration,
+                artwork: None,
+                track_ids: vec![track_id],
+            });
 
         let track = Track {
             path: file.path,
@@ -70,7 +77,7 @@ fn from_files(files: Vec<TrackFile>) -> (Vec<Track>, Vec<Album>, Vec<Artist>) {
         tracks.push(track);
     }
 
-    let albums = albums.into_iter().collect();
+    let albums = albums.into_values().collect();
     let artists = artists.into_iter().collect();
     (tracks, albums, artists)
 }

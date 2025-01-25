@@ -4,11 +4,11 @@ use std::sync::Arc;
 use crate::{entity_type, store, Album, Artist, KallaxEntity, PlaylistShelf, SearchShelf, Track};
 
 pub struct Library {
-    pub tracks: Vec<Arc<Track>>,
-    pub albums: Vec<Arc<Album>>,
-    pub artists: Vec<Arc<Artist>>,
-    pub searches: Vec<Arc<SearchShelf>>,
-    pub playlists: Vec<Arc<PlaylistShelf>>,
+    pub tracks: Vec<KallaxEntity>,
+    pub albums: Vec<KallaxEntity>,
+    pub artists: Vec<KallaxEntity>,
+    pub searches: Vec<KallaxEntity>,
+    pub playlists: Vec<KallaxEntity>,
 }
 
 impl Library {
@@ -17,11 +17,11 @@ impl Library {
 
         // TODO make these HashMaps for performance?
         
-        let tracks = tracks.into_iter().map(Arc::new).collect();
-        let albums = albums.into_iter().map(Arc::new).collect();
-        let artists = artists.into_iter().map(Arc::new).collect();
-        let searches = searches.into_iter().map(Arc::new).collect();
-        let playlists = playlists.into_iter().map(Arc::new).collect();
+        let tracks = tracks.into_iter().map(|e| KallaxEntity::Track(Arc::new(e))).collect();
+        let albums = albums.into_iter().map(|e| KallaxEntity::Album(Arc::new(e))).collect();
+        let artists = artists.into_iter().map(|e| KallaxEntity::Artist(Arc::new(e))).collect();
+        let searches = searches.into_iter().map(|e| KallaxEntity::Search(Arc::new(e))).collect();
+        let playlists = playlists.into_iter().map(|e| KallaxEntity::Playlist(Arc::new(e))).collect();
 
         Library {
             tracks,
@@ -32,43 +32,50 @@ impl Library {
         }
     }
 
-    pub fn get_track(&self, id: &str) -> Option<Arc<Track>> {
+    pub fn get_track(&self, id: &str) -> Option<KallaxEntity> {
         self.tracks.iter().find(|track| track.id() == id).cloned()
     }
 
-    pub fn get_album(&self, id: &str) -> Option<Arc<Album>> {
+    pub fn get_tracks(&self, ids: &[String]) -> Vec<KallaxEntity> {
+        self.tracks.iter().filter(|track| ids.contains(&track.id())).cloned().collect()
+    }
+
+    pub fn get_album(&self, id: &str) -> Option<KallaxEntity> {
         self.albums.iter().find(|album| album.id() == id).cloned()
     }
 
-    pub fn get_artist(&self, id: &str) -> Option<Arc<Artist>> {
+    pub fn get_artist(&self, id: &str) -> Option<KallaxEntity> {
         self.artists.iter().find(|artist| artist.id() == id).cloned()
     }
 
-    pub fn get_search(&self, id: &str) -> Option<Arc<SearchShelf>> {
+    pub fn get_search(&self, id: &str) -> Option<KallaxEntity> {
         self.searches.iter().find(|search| search.id() == id).cloned()
     }
 
-    pub fn get_playlist(&self, id: &str) -> Option<Arc<PlaylistShelf>> {
+    pub fn get_playlist(&self, id: &str) -> Option<KallaxEntity> {
         self.playlists.iter().find(|playlist| playlist.id() == id).cloned()
     }
 
     pub fn get_entity(&self, id: &str) -> Option<KallaxEntity> {
         match &id[..2] {
-            entity_type::TRACK => self.get_track(id).map(KallaxEntity::Track),
-            entity_type::SEARCH => self.get_search(id).map(KallaxEntity::Search),
+            entity_type::TRACK => self.get_track(id),
+            entity_type::SEARCH => self.get_search(id),
+            entity_type::ALBUM => self.get_album(id),
+            entity_type::ARTIST => self.get_artist(id),
             _ => panic!()
         }
     }
 
     pub fn execute_search(&self, search_id: &str) -> Vec<KallaxEntity> {
-        if let Some(search) = self.get_search(search_id) {
+        if let Some(KallaxEntity::Search(search)) = self.get_search(search_id) {
             self.tracks
-                .iter().map(|track| KallaxEntity::Track(Arc::clone(track)))
-                .chain(self.albums.iter().map(|album| KallaxEntity::Album(Arc::clone(album))))
-                .chain(self.artists.iter().map(|artist| KallaxEntity::Artist(Arc::clone(artist))))
-                .chain(self.searches.iter().map(|search| KallaxEntity::Search(Arc::clone(search))))
-                .chain(self.playlists.iter().map(|playlist| KallaxEntity::Playlist(Arc::clone(playlist))))
+                .iter()
+                .chain(self.albums.iter())
+                .chain(self.artists.iter())
+                .chain(self.searches.iter())
+                .chain(self.playlists.iter())
                 .filter(|entity| search.matches(entity))
+                .cloned()
                 .collect()
         } else {
             Vec::new()
