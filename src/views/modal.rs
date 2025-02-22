@@ -13,7 +13,7 @@ impl Modal {
 }
 
 impl Render for Modal {
-    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let modal = div()
             .id("modal-overlay")
             .absolute()
@@ -25,7 +25,7 @@ impl Render for Modal {
             .flex()
             .items_center()
             .justify_center()
-            .on_click(cx.listener(|this, _event, cx| {
+            .on_click(cx.listener(|this, _event, _window, cx| {
                 this.is_visible = false;
                 cx.notify();
             }))

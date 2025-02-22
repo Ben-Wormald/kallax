@@ -13,15 +13,15 @@ pub struct UiAction {
     pub event: Arc<UiEvent>,
 }
 
-pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
+pub fn track(track: &Arc<Track>, cx: &mut Context<Tracks>) -> impl IntoElement {
     let on_click = cx.listener({
         let track = Arc::clone(track);
-        move |_this, _event, cx| cx.emit(UiEvent::play(&track))
+        move |_this, _event, _window, cx| cx.emit(UiEvent::play(&track))
     });
     
     let on_right_click = cx.listener({
         let track = Arc::clone(track);
-        move |_this, event: &MouseDownEvent, cx: &mut ViewContext<Tracks>| {
+        move |_this, event: &MouseDownEvent, _window, cx: &mut Context<Tracks>| {
             cx.emit(Arc::new(UiEvent::RightClick(RightClickEvent {
                 position: event.position,
                 items: Arc::new(vec![
@@ -64,7 +64,7 @@ pub fn track(track: &Arc<Track>, cx: &mut ViewContext<Tracks>) -> impl IntoEleme
         .on_mouse_down(MouseButton::Right, on_right_click)
 }
 
-pub fn album(album: &Arc<Album>, cx: &mut ViewContext<Albums>) -> impl IntoElement {
+pub fn album(album: &Arc<Album>, cx: &mut Context<Albums>) -> impl IntoElement {
     let element = div()
         .id(ElementId::Name(album.id().into()))
         .size_64();
@@ -82,7 +82,7 @@ pub fn album(album: &Arc<Album>, cx: &mut ViewContext<Albums>) -> impl IntoEleme
     element
         .on_click({
             let album = Arc::clone(album);
-            cx.listener(move |_this, _event, cx| {
+            cx.listener(move |_this, _event, _window, cx| {
                 cx.emit(UiEvent::album(&album));
             })
         })
@@ -91,7 +91,7 @@ pub fn album(album: &Arc<Album>, cx: &mut ViewContext<Albums>) -> impl IntoEleme
 pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
     tabs: Vec<UiAction>,
     selected: usize,
-    cx: &mut ViewContext<V>,
+    cx: &mut Context<V>,
 ) -> impl IntoElement {
     div()
         .flex()
@@ -118,7 +118,7 @@ pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
                         .rounded_sm()
                         .bg(rgb(theme::colours::YOUTH))
                         .text_color(rgb(theme::colours::SHALLOWS))
-                    ).on_click(cx.listener(move |_this, _event, cx| {
+                    ).on_click(cx.listener(move |_this, _event, _window, cx| {
                         cx.emit(Arc::clone(&item.event));
                     }))
             }

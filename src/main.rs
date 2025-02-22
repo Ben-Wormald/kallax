@@ -21,7 +21,7 @@ actions!(kallax, [Quit]);
 fn main() {
     dotenv().ok();
 
-    App::new().run(|cx| {
+    Application::new().run(|cx| {
         cx.activate(true);
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
@@ -48,8 +48,8 @@ fn main() {
             window_decorations: None,
         };
 
-        cx.open_window(window_options, |cx| {
-            cx.new_view(Kallax::new)
+        cx.open_window(window_options, |_window, cx| {
+            cx.new(Kallax::new)
         }).ok();
     });
 }

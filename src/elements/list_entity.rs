@@ -7,7 +7,7 @@ use super::{browse::BrowseContext, theme, Browse, KallaxEntity, Library, UiEvent
 pub fn list_entity(
     entity: &KallaxEntity,
     browse_context: BrowseContext,
-    cx: &mut ViewContext<Browse>,
+    cx: &mut Context<Browse>,
 ) -> impl IntoElement {
     let children = match browse_context {
         BrowseContext::Album(track_number) => vec![
@@ -73,7 +73,7 @@ pub fn list_entity(
     let id = ElementId::Name(entity.id().into());
 
     let entity = entity.clone();
-    let on_click = cx.listener(move |_this, _event, cx| {
+    let on_click = cx.listener(move |_this, _event, _window, cx| {
         match &entity {
             KallaxEntity::Track(track) => cx.emit(UiEvent::play(&track)),
             entity => cx.emit(Arc::new(UiEvent::EntityOpened(entity.id()))),

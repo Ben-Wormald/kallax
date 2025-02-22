@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use crate::*;
 
-type Vcx<'a> = ViewContext<'a, Browse>;
+type Vcx<'a> = Context<'a, Browse>;
 
 enum ItemsMode {
     List,
@@ -27,8 +27,8 @@ pub struct Browse {
 
 impl Browse {
     pub fn new(_cx: &mut Vcx) -> Browse {
-        // let tracks = cx.new_view(|cx| Tracks::new(cx));
-        // let albums = cx.new_view(|cx| Albums::new(cx));
+        // let tracks = cx.new(|cx| Tracks::new(cx));
+        // let albums = cx.new(|cx| Albums::new(cx));
 
         Browse {
             items_mode: ItemsMode::List,
@@ -58,7 +58,7 @@ impl Browse {
 }
 
 impl Render for Browse {
-    fn render(&mut self, cx: &mut Vcx) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Vcx) -> impl IntoElement {
         let header = div()
             .id("browse-header");
 
@@ -79,7 +79,7 @@ impl Render for Browse {
                     div()
                         .id(ElementId::Name(e.id().into()))
                         .child(e.name().to_string())
-                        .on_click(cx.listener(move |_this, _event, cx| {
+                        .on_click(cx.listener(move |_this, _event, _window, cx| {
                             on_click_entity(cx, &e);
                         }))
                 })

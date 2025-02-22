@@ -4,12 +4,12 @@ use std::sync::Arc;
 use crate::*;
 use self::elements::UiAction;
 
-type Vcx<'a> = ViewContext<'a, Tracks>;
+type Vcx<'a> = Context<'a, Tracks>;
 
 pub struct Tracks {
     pub view: TrackView,
     tracks: Vec<Arc<Track>>,
-    sort_dropdown: View<Dropdown>,
+    sort_dropdown: Entity<Dropdown>,
 }
 
 pub enum TrackView {
@@ -24,7 +24,7 @@ pub enum TrackView {
 }
 
 impl Tracks {
-    pub fn new(cx: &mut Vcx, library: &Model<Library>) -> Tracks {
+    pub fn new(cx: &mut Vcx, library: &Entity<Library>) -> Tracks {
         cx.observe(library, |this, library, cx| {
             this.tracks = get_tracks(cx, &library, &this.view);
             cx.notify();
@@ -32,7 +32,7 @@ impl Tracks {
 
         let view = TrackView::AllTracks;
         let tracks = get_tracks(cx, library, &view);
-        let sort_dropdown = cx.new_view(|_cx| Dropdown::new("Sort", vec![
+        let sort_dropdown = cx.new(|_cx| Dropdown::new("Sort", vec![
             UiAction { label: "Order", event: Arc::new(UiEvent::PauseClicked) }
         ]));
 
@@ -43,14 +43,14 @@ impl Tracks {
         }
     }
 
-    pub fn update_view(&mut self, cx: &mut Vcx, library: &Model<Library>, view: TrackView) {
+    pub fn update_view(&mut self, cx: &mut Vcx, library: &Entity<Library>, view: TrackView) {
         self.view = view;
         self.tracks = get_tracks(cx, library, &self.view);
     }
 }
 
 impl Render for Tracks {
-    fn render(&mut self, cx: &mut ViewContext<Tracks>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Tracks>) -> impl IntoElement {
         div()
             .flex()
             .flex_col()
@@ -68,7 +68,7 @@ impl Render for Tracks {
     }
 }
 
-fn get_tracks(_cx: &mut Vcx, _library: &Model<Library>, view: &TrackView) -> Vec<Arc<Track>> {
+fn get_tracks(_cx: &mut Vcx, _library: &Entity<Library>, view: &TrackView) -> Vec<Arc<Track>> {
     // let tracks = &library.read(cx).tracks;
 
     match view {

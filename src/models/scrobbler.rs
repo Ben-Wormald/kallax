@@ -1,4 +1,4 @@
-use gpui::{Model, ModelContext};
+use gpui::{Context, Entity};
 use reqwest::blocking::Client;
 use std::{
     env,
@@ -8,7 +8,7 @@ use std::{
 
 use crate::{Album, Artist, KallaxEntity, Library, Playback, PlaybackEvent, Track};
 
-type Mcx<'a> = ModelContext<'a, Scrobbler>;
+type Mcx<'a> = Context<'a, Scrobbler>;
 type Params = Vec<(&'static str, String)>;
 
 const API: &str = "http://ws.audioscrobbler.com/2.0/";
@@ -21,7 +21,7 @@ pub struct Scrobbler {
     time_elapsed: Duration,
 }
 impl Scrobbler {
-    pub fn new(cx: &mut Mcx, playback: &Model<Playback>) -> Scrobbler {
+    pub fn new(cx: &mut Mcx, playback: &Entity<Playback>) -> Scrobbler {
         cx.subscribe(playback, |this, _emitter, event, cx| {
             if env::var("ENABLE_SCROBBLING").is_ok_and(|var| var == "true") {
                 match (**event).clone() {

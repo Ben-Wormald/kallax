@@ -18,7 +18,7 @@ impl ContextMenu {
 }
 
 impl Render for ContextMenu {
-    fn render(&mut self, cx: &mut ViewContext<ContextMenu>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<ContextMenu>) -> impl IntoElement {
         if let Some(position) = self.position {
             anchored()
                 .position(position)
@@ -47,7 +47,7 @@ impl Render for ContextMenu {
                                         .child(item.label)
                                         .on_mouse_down(MouseButton::Left, cx.listener({
                                             let event = Arc::clone(&item.event);
-                                            move |this, _event, cx| {
+                                            move |this, _event, _window, cx| {
                                                 cx.emit(Arc::clone(&event));
                                                 this.position = None;
                                                 cx.notify();

@@ -4,7 +4,7 @@ use std::sync::Arc;
 use crate::*;
 use elements::{tab_bar, UiAction};
 
-type Vcx<'a> = ViewContext<'a, NowPlaying>;
+type Vcx<'a> = Context<'a, NowPlaying>;
 
 pub struct NowPlaying {
     pub tracks: Vec<Arc<Track>>,
@@ -13,7 +13,7 @@ pub struct NowPlaying {
 }
 
 impl NowPlaying {
-    pub fn new(cx: &mut Vcx, playback: &Model<Playback>) -> NowPlaying {
+    pub fn new(cx: &mut Vcx, playback: &Entity<Playback>) -> NowPlaying {
         cx.observe(playback, |subscriber, emitter, cx| {
             subscriber.tracks = emitter.read(cx).queue.tracks.clone();
             subscriber.current = emitter.read(cx).queue.current;
@@ -88,7 +88,7 @@ impl NowPlaying {
                             .bg(rgb(theme::colours::TOUCH))
                             .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
                             .child("Pause")
-                            .on_click(cx.listener(|_this, _event, cx|
+                            .on_click(cx.listener(|_this, _event, _window, cx|
                                 cx.emit(Arc::new(UiEvent::PauseClicked))
                             )),
                         div()
@@ -101,7 +101,7 @@ impl NowPlaying {
                             .bg(rgb(theme::colours::TOUCH))
                             .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
                             .child("Resume")
-                            .on_click(cx.listener(|_this, _event, cx|
+                            .on_click(cx.listener(|_this, _event, _window, cx|
                                 cx.emit(Arc::new(UiEvent::ResumeClicked))
                             )),
                         div()
@@ -114,7 +114,7 @@ impl NowPlaying {
                             .bg(rgb(theme::colours::TOUCH))
                             .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
                             .child("Skip")
-                            .on_click(cx.listener(|_this, _event, cx|
+                            .on_click(cx.listener(|_this, _event, _window, cx|
                                 cx.emit(Arc::new(UiEvent::SkipClicked))
                             )),
                     ])
@@ -148,7 +148,7 @@ impl NowPlaying {
 }
 
 impl Render for NowPlaying {
-    fn render(&mut self, cx: &mut Vcx) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Vcx) -> impl IntoElement {
         let now_playing = div()
             .flex_grow()
             .flex()

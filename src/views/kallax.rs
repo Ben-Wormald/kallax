@@ -4,27 +4,27 @@ use std::sync::Arc;
 use crate::*;
 
 pub struct Kallax {
-    playback: Model<Playback>,
-    _scrobbler: Model<Scrobbler>,
-    shelves: View<Shelves>,
-    browse: View<Browse>,
-    now_playing: View<NowPlaying>,
-    context_menu: View<ContextMenu>,
-    modal: View<Modal>,
+    playback: Entity<Playback>,
+    _scrobbler: Entity<Scrobbler>,
+    shelves: Entity<Shelves>,
+    browse: Entity<Browse>,
+    now_playing: Entity<NowPlaying>,
+    context_menu: Entity<ContextMenu>,
+    modal: Entity<Modal>,
 }
 
 impl Kallax {
-    pub fn new(cx: &mut ViewContext<Kallax>) -> Kallax {
+    pub fn new(cx: &mut Context<Kallax>) -> Kallax {
         cx.set_global(Library::new());
 
-        let playback = cx.new_model(Playback::new);
-        let _scrobbler = cx.new_model(|cx| Scrobbler::new(cx, &playback));
+        let playback = cx.new(Playback::new);
+        let _scrobbler = cx.new(|cx| Scrobbler::new(cx, &playback));
 
-        let shelves = cx.new_view(Shelves::new);
-        let browse = cx.new_view(Browse::new);
-        let now_playing = cx.new_view(|cx| NowPlaying::new(cx, &playback));
-        let context_menu = cx.new_view(|_cx| ContextMenu::new());
-        let modal = cx.new_view(|_cx| Modal::new());
+        let shelves = cx.new(Shelves::new);
+        let browse = cx.new(Browse::new);
+        let now_playing = cx.new(|cx| NowPlaying::new(cx, &playback));
+        let context_menu = cx.new(|_cx| ContextMenu::new());
+        let modal = cx.new(|_cx| Modal::new());
 
         cx.subscribe(&shelves, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
             subscriber.handle_ui_event(event, cx);
@@ -63,7 +63,7 @@ impl Kallax {
         }
     }
 
-    pub fn handle_ui_event(&mut self, event: &Arc<UiEvent>, cx: &mut ViewContext<Kallax>) {
+    pub fn handle_ui_event(&mut self, event: &Arc<UiEvent>, cx: &mut Context<Kallax>) {
         match (**event).clone() {
             UiEvent::PlayClicked(event) => self.playback.update(cx, |this, cx| {
                 this.play(Arc::clone(&event.track), cx);
@@ -107,7 +107,7 @@ impl Kallax {
 }
 
 impl Render for Kallax {
-    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
             .size_full()
             .flex()
@@ -122,7 +122,7 @@ impl Render for Kallax {
                 weight: FontWeight::NORMAL,
                 style: FontStyle::Normal,
             })
-            .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, cx| {
+            .on_mouse_down(MouseButton::Left, cx.listener(move |this, _event, _window, cx| {
                 this.context_menu.update(cx, |context_menu, _cx| {
                     context_menu.position = None;
                 });

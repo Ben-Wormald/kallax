@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use crate::{theme, KallaxEntity, Library, UiEvent};
 
-type Vcx<'a> = ViewContext<'a, Shelves>;
+type Vcx<'a> = Context<'a, Shelves>;
 
 pub struct Shelves {
     shelves: Vec<KallaxEntity>,
@@ -23,7 +23,7 @@ impl Shelves {
 }
 
 impl Render for Shelves {
-    fn render(&mut self, cx: &mut Vcx) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Vcx) -> impl IntoElement {
         div()
             .min_h_0()
             .w_64()
@@ -50,7 +50,7 @@ fn render_shelf(shelf: &KallaxEntity, index: usize, cx: &mut Vcx) -> impl IntoEl
         .flex()
         .gap_2()
         .hover(|s| s.bg(rgb(theme::colours::SMOTHER)))
-        .on_click(cx.listener(move |_this, _event, cx| {
+        .on_click(cx.listener(move |_this, _event, _window, cx| {
             cx.emit(Arc::new(UiEvent::EntityOpened(shelf_id.clone())))
         }));
 

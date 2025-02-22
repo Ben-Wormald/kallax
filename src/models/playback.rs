@@ -1,4 +1,4 @@
-use gpui::{AppContext, ModelContext};
+use gpui::{App, Context};
 use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
 use std::{
     fs::File,
@@ -15,7 +15,7 @@ use crate::{PlaybackEvent, Track};
 // https://github.com/aschey/stream-download-rs/tree/main/examples
 // https://docs.rs/axum-streams/latest/axum_streams/index.html
 
-type Mcx<'a> = ModelContext<'a, Playback>;
+type Mcx<'a> = Context<'a, Playback>;
 
 const POLL_DURATION: Duration = Duration::from_millis(100);
 
@@ -47,7 +47,7 @@ impl Playback {
         cx.emit(PlaybackEvent::start(&track));
     }
 
-    pub fn add_to_queue(&mut self, track: Arc<Track>, cx: &mut AppContext) {
+    pub fn add_to_queue(&mut self, track: Arc<Track>, cx: &mut App) {
         self.player.add_to_queue(&track, cx);
         self.queue.add_to_queue(&track);
     }
@@ -66,7 +66,7 @@ impl Playback {
         cx.emit(Arc::new(PlaybackEvent::Resumed));
     }
 
-    pub fn skip(&mut self, cx: &mut AppContext) {
+    pub fn skip(&mut self, cx: &mut App) {
         self.player.skip(cx);
     }
 
@@ -174,7 +174,7 @@ impl Player {
         Decoder::new(file).unwrap()
     }
 
-    fn play(&self, track: &Arc<Track>, cx: &mut AppContext) {
+    fn play(&self, track: &Arc<Track>, cx: &mut App) {
         let track = Arc::clone(track);
         let sink = Arc::clone(&self.sink);
         let queue_len = Arc::clone(&self.queue_len);
@@ -192,7 +192,7 @@ impl Player {
         }).detach();
     }
 
-    fn add_to_queue(&self, track: &Arc<Track>, cx: &mut AppContext) {
+    fn add_to_queue(&self, track: &Arc<Track>, cx: &mut App) {
         let track = Arc::clone(track);
         let sink = Arc::clone(&self.sink);
         let queue_len = Arc::clone(&self.queue_len);
@@ -208,21 +208,21 @@ impl Player {
         }).detach();
     }
 
-    fn pause(&self, cx: &mut AppContext) {
+    fn pause(&self, cx: &mut App) {
         let sink = Arc::clone(&self.sink);
         cx.background_executor().spawn(async move {
             sink.pause();
         }).detach();
     }
 
-    fn resume(&self, cx: &mut AppContext) {
+    fn resume(&self, cx: &mut App) {
         let sink = Arc::clone(&self.sink);
         cx.background_executor().spawn(async move {
             sink.play();
         }).detach();
     }
 
-    fn skip(&self, cx: &mut AppContext) {
+    fn skip(&self, cx: &mut App) {
         let sink = Arc::clone(&self.sink);
         let queue_len = Arc::clone(&self.queue_len);
 

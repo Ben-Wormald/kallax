@@ -25,7 +25,7 @@ impl Dropdown {
 }
 
 impl Render for Dropdown {
-    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let label = format!(
             "{}{}",
             self.label,
@@ -46,7 +46,7 @@ impl Render for Dropdown {
                     .bg(rgb(theme::colours::TOUCH))
                     .hover(|style| style.bg(rgb(theme::colours::HUMAN)))
                     .child(label)
-                    .on_click(cx.listener(|this, _event, cx| {
+                    .on_click(cx.listener(|this, _event, _window, cx| {
                         this.is_open = !this.is_open;
                         cx.notify();
                     }))
@@ -62,7 +62,7 @@ impl Render for Dropdown {
                             .child(option.label)
                             .on_click({
                                 let event = Arc::clone(&option.event);
-                                cx.listener(move |_this, _event, cx| {
+                                cx.listener(move |_this, _event, _window,  cx| {
                                     cx.emit(Arc::clone(&event));
                                 })
                             })

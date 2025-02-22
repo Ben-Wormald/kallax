@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use crate::*;
 
-type Vcx<'a> = ViewContext<'a, Albums>;
+type Vcx<'a> = Context<'a, Albums>;
 
 pub struct Albums {
     pub view: AlbumView,
@@ -16,7 +16,7 @@ pub enum AlbumView {
 }
 
 impl Albums {
-    pub fn new(cx: &mut Vcx, library: &Model<Library>) -> Albums {
+    pub fn new(cx: &mut Vcx, library: &Entity<Library>) -> Albums {
         cx.observe(library, |this, library, cx| {
             this.albums = get_albums(cx, &library, &this.view);
             cx.notify();
@@ -33,7 +33,7 @@ impl Albums {
 }
 
 impl Render for Albums {
-    fn render(&mut self, cx: &mut ViewContext<Albums>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Albums>) -> impl IntoElement {
         div()
             .id("albums")
             .flex()
@@ -47,7 +47,7 @@ impl Render for Albums {
     }
 }
 
-fn get_albums(_cx: &mut Vcx, _library: &Model<Library>, view: &AlbumView) -> Vec<Arc<Album>> {
+fn get_albums(_cx: &mut Vcx, _library: &Entity<Library>, view: &AlbumView) -> Vec<Arc<Album>> {
     // let tracks = &library.read(cx).tracks;
     // let mut albums: HashSet<Album> = HashSet::new();
 
