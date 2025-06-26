@@ -1,4 +1,4 @@
-use gpui::{App, Context};
+use gpui::{App, AppContext, Context, Entity};
 use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
 use std::{
     fs::File,
@@ -152,14 +152,14 @@ impl Player {
     fn watch(&self, cx: &mut Mcx) {
         let queue_len = Arc::clone(&self.queue_len);
 
-        cx.spawn(|this, mut cx| async move {
+        cx.spawn(async move |this, cx| {
             let mut prev_len = queue_len.load(SeqCst);
 
             loop {
                 let current_len = queue_len.load(SeqCst);
 
                 if current_len < prev_len {
-                    this.update(&mut cx, |playback, cx| {
+                    this.update(cx, |playback, cx| {
                         playback.on_track_end(cx);
                     }).ok();
                 }
