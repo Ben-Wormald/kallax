@@ -95,5 +95,5 @@ fn row_column() -> Div {
         .flex_basis(px(1.))
         .py_0p5()
         .px_2()
-        .hover(|s| s.text_decoration_solid())
+        .hover(|s| s.text_decoration_solid().text_decoration_1())
 }
