@@ -1,4 +1,4 @@
-use gpui::{App, AppContext, Context, Entity};
+use gpui::{App, Context};
 use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
 use std::{
     fs::File,

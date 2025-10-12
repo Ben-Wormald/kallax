@@ -1,7 +1,7 @@
 use gpui::Global;
 use std::sync::Arc;
 
-use crate::{entity_type, store, Album, Artist, KallaxEntity, PlaylistShelf, SearchShelf, Track};
+use crate::{entity_type, store, KallaxEntity};
 
 pub struct Library {
     pub tracks: Vec<KallaxEntity>,

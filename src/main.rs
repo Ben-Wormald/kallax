@@ -46,6 +46,7 @@ fn main() {
             app_id: None,
             window_min_size: None,
             window_decorations: None,
+            ..Default::default()
         };
 
         cx.open_window(window_options, |_window, cx| {
