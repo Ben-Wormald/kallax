@@ -6,7 +6,7 @@ use crate::{theme, KallaxEntity, Library, UiEvent};
 type Vcx<'a> = Context<'a, Shelves>;
 
 pub struct Shelves {
-    shelves: Vec<KallaxEntity>,
+    pub shelves: Vec<KallaxEntity>,
 }
 
 impl Shelves {

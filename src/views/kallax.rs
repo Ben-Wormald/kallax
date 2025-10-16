@@ -11,10 +11,11 @@ pub struct Kallax {
     now_playing: Entity<NowPlaying>,
     context_menu: Entity<ContextMenu>,
     modal: Entity<Modal>,
+    focus_handle: FocusHandle,
 }
 
 impl Kallax {
-    pub fn new(cx: &mut Context<Kallax>) -> Kallax {
+    pub fn new(window: &mut Window, cx: &mut Context<Kallax>) -> Kallax {
         cx.set_global(Library::new());
 
         let playback = cx.new(Playback::new);
@@ -52,6 +53,9 @@ impl Kallax {
             subscriber.handle_ui_event(event, cx);
         }).detach();
 
+        let focus_handle = cx.focus_handle();
+        window.focus(&focus_handle);
+
         Kallax {
             playback,
             _scrobbler,
@@ -60,6 +64,7 @@ impl Kallax {
             now_playing,
             context_menu,
             modal,
+            focus_handle,
         }
     }
 
@@ -109,6 +114,7 @@ impl Kallax {
 impl Render for Kallax {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
+            .track_focus(&self.focus_handle)
             .size_full()
             .flex()
             .flex_col()
@@ -126,6 +132,15 @@ impl Render for Kallax {
                 this.context_menu.update(cx, |context_menu, _cx| {
                     context_menu.position = None;
                 });
+            }))
+            .on_action(cx.listener(|this, _: &ShelfOne, _window, cx| {
+                if let Some(shelf) = this.shelves.read(cx).shelves.first() {
+                    let shelf_id = shelf.id();
+                    this.browse.update(cx, move |this, cx| {
+                        this.set_entity(cx, shelf_id);
+                        cx.notify();
+                    });
+                }
             }))
             .child(
                 div()

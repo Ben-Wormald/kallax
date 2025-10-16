@@ -16,16 +16,23 @@ use models::*;
 use utils::*;
 use views::*;
 
-actions!(kallax, [Quit]);
+actions!(kallax, [Quit, ShelfOne]);
 
 fn main() {
     dotenv().ok();
 
-    Application::new().run(|cx| {
-        cx.activate(true);
-        cx.on_action(|_: &Quit, cx| cx.quit());
-        cx.bind_keys([KeyBinding::new("cmd-q", Quit, None)]);
-        cx.set_menus(vec![Menu { name: "Kallax".into(), items: vec![MenuItem::action("Quit", Quit),]}]);
+    Application::new().run(|app| {
+        app.activate(true);
+        app.on_action(|_: &Quit, app| app.quit());
+        app.bind_keys([
+            KeyBinding::new("cmd-q", Quit, None),
+            KeyBinding::new("cmd-1", ShelfOne, None),
+        ]);
+        app.set_menus(vec![
+            Menu { name: "Kallax".into(), items: vec![
+                MenuItem::action("Quit", Quit),
+            ]},
+        ]);
 
         let window_options = WindowOptions {
             titlebar: Some(TitlebarOptions {
@@ -49,8 +56,8 @@ fn main() {
             ..Default::default()
         };
 
-        cx.open_window(window_options, |_window, cx| {
-            cx.new(Kallax::new)
+        app.open_window(window_options, |window, app| {
+            app.new(|cx| Kallax::new(window, cx))
         }).ok();
     });
 }
