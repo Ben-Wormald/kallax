@@ -23,6 +23,7 @@ pub struct Browse {
     items_mode: ItemsMode,
     entity: Option<KallaxEntity>,
     entities: Vec<KallaxEntity>,
+    list_state: ListState,
 }
 
 impl Browse {
@@ -34,6 +35,7 @@ impl Browse {
             items_mode: ItemsMode::List,
             entity: None,
             entities: Vec::new(),
+            list_state: ListState::new(0, ListAlignment::Top, px(200.0)),
         }
     }
 
@@ -43,7 +45,8 @@ impl Browse {
             Some(KallaxEntity::Search(search)) => cx.global::<Library>().execute_search(&search.id()),
             Some(KallaxEntity::Album(album)) => cx.global::<Library>().get_tracks(&album.track_ids),
             _ => todo!(),
-        }
+        };
+        self.list_state =  ListState::new(self.entities.len(), ListAlignment::Top, px(200.0));
     }
 
     pub fn open_album(&mut self, _cx: &mut Vcx, _album: &Arc<Album>) {
@@ -54,6 +57,33 @@ impl Browse {
         //         tracks::TrackView::Album(album.artist_name.clone(), album.title.clone()),
         //     );
         // });
+    }
+
+    pub fn render_entity(&mut self, index: usize, _window: &mut Window, cx: &mut Vcx) -> AnyElement {
+        let entity = self.entities.get(index).unwrap();
+
+        match self.items_mode {
+            ItemsMode::Grid => {
+                let entity = entity.clone();
+                div()
+                    .id(ElementId::Name(entity.id().into()))
+                    .child(entity.name().to_string())
+                    .on_click(cx.listener(move |_this, _event, _window, cx| {
+                        on_click_entity(cx, &entity);
+                    }))
+                    .into_any_element()
+            },
+            ItemsMode::List => {
+                let browse_context = match &self.entity {
+                    Some(KallaxEntity::Album(_)) => BrowseContext::Album(index),
+                    Some(KallaxEntity::Search(_)) => BrowseContext::Search,
+                    Some(KallaxEntity::Artist(_)) => BrowseContext::Artist,
+                    Some(KallaxEntity::Playlist(_)) => BrowseContext::Playlist(index),
+                    _ => unimplemented!(),
+                };
+                list_entity(entity, browse_context, cx).into_any_element()
+            }
+        }
     }
 }
 
@@ -68,43 +98,21 @@ impl Render for Browse {
             None => header.child(String::from("welcome")),
             _ => unimplemented!(),
         };
-        
-        let items = div()
-            .id("browse-items");
-
-        let items = match self.items_mode {
-            ItemsMode::Grid => items.children(
-                self.entities.iter().map(|e| {
-                    let e = e.clone();
-                    div()
-                        .id(ElementId::Name(e.id().into()))
-                        .child(e.name().to_string())
-                        .on_click(cx.listener(move |_this, _event, _window, cx| {
-                            on_click_entity(cx, &e);
-                        }))
-                })
-            ),
-            ItemsMode::List => items.children(
-                self.entities.iter().enumerate().map(|(i, e)| {
-                    let browse_context = match &self.entity {
-                        Some(KallaxEntity::Album(_)) => BrowseContext::Album(i),
-                        Some(KallaxEntity::Search(_)) => BrowseContext::Search,
-                        Some(KallaxEntity::Artist(_)) => BrowseContext::Artist,
-                        Some(KallaxEntity::Playlist(_)) => BrowseContext::Playlist(i),
-                        _ => unimplemented!(),
-                    };
-                    list_entity(e, browse_context, cx)
-                })
-            ),
-        };
 
         div()
             .flex_grow()
             .flex()
             .flex_col()
-            .min_h_0()
+            .h_full()
             .child(header)
-            .child(items)
+            .child(
+                list(
+                    self.list_state.clone(),
+                    cx.processor(Self::render_entity),
+                )
+                .h_full()
+                .w_full()
+            )
     }
 }
 

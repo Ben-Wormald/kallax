@@ -84,6 +84,7 @@ pub fn list_entity(
     div()
         .id(id)
         .on_click(on_click)
+        .w_full()
         .flex()
         .children(children)
         .hover(|s| s.bg(rgb(theme::colours::SMOTHER)))
