@@ -2,7 +2,7 @@ use elements::list_entity;
 use gpui::*;
 use std::sync::Arc;
 
-use crate::*;
+use crate::{elements::Input, *};
 
 type Vcx<'a> = Context<'a, Browse>;
 
@@ -24,18 +24,22 @@ pub struct Browse {
     entity: Option<KallaxEntity>,
     entities: Vec<KallaxEntity>,
     list_state: ListState,
+    search: Entity<Input>,
 }
 
 impl Browse {
-    pub fn new(_cx: &mut Vcx) -> Browse {
+    pub fn new(cx: &mut Vcx) -> Browse {
         // let tracks = cx.new(|cx| Tracks::new(cx));
         // let albums = cx.new(|cx| Albums::new(cx));
+
+        let search = cx.new(|cx| Input::new("browse-search", cx));
 
         Browse {
             items_mode: ItemsMode::List,
             entity: None,
             entities: Vec::new(),
             list_state: ListState::new(0, ListAlignment::Top, px(200.0)),
+            search,
         }
     }
 
@@ -104,6 +108,7 @@ impl Render for Browse {
             .flex()
             .flex_col()
             .h_full()
+            .child(self.search.clone())
             .child(header)
             .child(
                 list(

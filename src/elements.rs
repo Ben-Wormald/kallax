@@ -3,10 +3,12 @@ use std::sync::Arc;
 
 pub mod button;
 pub mod hotkey;
+pub mod input;
 pub mod list_entity;
 
 pub use button::*;
 pub use hotkey::*;
+pub use input::*;
 pub use list_entity::*;
 
 use crate::*;
