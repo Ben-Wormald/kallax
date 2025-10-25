@@ -5,6 +5,18 @@ edition = "2021"
 license = "GPL-3.0"
 repository = "https://github.com/Ben-Wormald/kallax"
 
+[package.metadata.bundle]
+name = "Kallax"
+identifier = "uk.co.benwormald.kallax"
+icon = [
+  "./assets/128x128.png",
+  "./assets/128x128@2x.png",
+  "./assets/256x256.png",
+  "./assets/256x256@2x.png",
+  "./assets/512x512.png",
+  "./assets/512x512@2x.png",
+]
+
 [dependencies]
 dotenv = "0.15.0"
 gpui = "0.2.0"
