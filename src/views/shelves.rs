@@ -1,7 +1,7 @@
 use gpui::*;
 use std::sync::Arc;
 
-use crate::{theme, KallaxEntity, Library, UiEvent};
+use crate::{elements::hotkey, theme, KallaxEntity, Library, UiEvent};
 
 type Vcx<'a> = Context<'a, Shelves>;
 
@@ -45,7 +45,7 @@ fn render_shelf(shelf: &KallaxEntity, index: usize, cx: &mut Vcx) -> impl IntoEl
 
     let shelf_element = div()
         .id(ElementId::Name(shelf_id.clone().into()))
-        .py_0p5()
+        .py_1()
         .px_2()
         .flex()
         .gap_2()
@@ -55,16 +55,8 @@ fn render_shelf(shelf: &KallaxEntity, index: usize, cx: &mut Vcx) -> impl IntoEl
         }));
 
     let shelf_element = if index <= 9 {
-        let hotkey = format!("⌘ {}", index);
         shelf_element
-            .child(div()
-                .w_10()
-                .flex()
-                .justify_center()
-                .rounded_md()
-                .border_1()
-                .border_color(rgb(theme::colours::STILL))
-                .child(hotkey))
+            .child(hotkey(format!("⌘ {}", index)))
     } else {
         shelf_element
     };

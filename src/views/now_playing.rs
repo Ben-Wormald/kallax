@@ -1,7 +1,7 @@
 use gpui::*;
 use std::sync::Arc;
 
-use crate::*;
+use crate::{elements::button, *};
 use elements::{tab_bar, UiAction};
 
 type Vcx<'a> = Context<'a, NowPlaying>;
@@ -44,7 +44,6 @@ impl NowPlaying {
             .flex_col()
             .gap_px()
             .rounded_b_sm()
-            // .bg(rgb(theme::colours::AMSTERDAM))
             .child(
                 div()
                     .py_1()
@@ -78,42 +77,15 @@ impl NowPlaying {
                     .mt_auto()
                     .gap_px()
                     .children([
-                        div()
-                            .id("pause")
-                            .flex_1()
-                            .py_1()
-                            .px_3()
-                            .flex()
-                            .justify_center()
-                            .bg(rgb(theme::colours::TOUCH))
-                            .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
-                            .child("Pause")
+                        button("pause", "Pause", None)
                             .on_click(cx.listener(|_this, _event, _window, cx|
                                 cx.emit(Arc::new(UiEvent::PauseClicked))
                             )),
-                        div()
-                            .id("resume")
-                            .flex_1()
-                            .py_1()
-                            .px_3()
-                            .flex()
-                            .justify_center()
-                            .bg(rgb(theme::colours::TOUCH))
-                            .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
-                            .child("Resume")
+                        button("resume", "Resume", None)
                             .on_click(cx.listener(|_this, _event, _window, cx|
                                 cx.emit(Arc::new(UiEvent::ResumeClicked))
                             )),
-                        div()
-                            .id("skip")
-                            .flex_1()
-                            .py_1()
-                            .px_3()
-                            .flex()
-                            .justify_center()
-                            .bg(rgb(theme::colours::TOUCH))
-                            .hover(|style| style.bg(rgb(theme::colours::SHALLOWS)))
-                            .child("Skip")
+                        button("skip", "Skip", None)
                             .on_click(cx.listener(|_this, _event, _window, cx|
                                 cx.emit(Arc::new(UiEvent::SkipClicked))
                             )),
@@ -125,7 +97,6 @@ impl NowPlaying {
         div()
             .flex_grow()
             .rounded_b_sm()
-            .bg(rgb(theme::colours::AMSTERDAM))
             .children(self.tracks.iter().enumerate().map(|(index, track)| {
                 div()
                     .id(ElementId::Name(track.title.clone().into()))

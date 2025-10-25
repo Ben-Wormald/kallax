@@ -1,8 +1,12 @@
 use gpui::*;
 use std::sync::Arc;
 
+pub mod button;
+pub mod hotkey;
 pub mod list_entity;
 
+pub use button::*;
+pub use hotkey::*;
 pub use list_entity::*;
 
 use crate::*;
@@ -103,22 +107,17 @@ pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
                 .px_3()
                 .flex()
                 .justify_center()
-                .child(item.label);
+                .text_color(rgb(theme::colours::SHALLOWS))
+                .rounded_t_sm()
+                .child(item.label)
+                .hover(|style| style
+                    .bg(rgb(theme::colours::YOUTH))
+                );
 
             if index == selected {
-                tab
-                    .bg(rgb(theme::colours::AMSTERDAM))
-                    .text_color(rgb(theme::colours::WINTER))
-                    .rounded_t_sm()
+                tab.bg(rgb(theme::colours::SMOTHER))
             } else {
-                tab
-                    .text_color(rgb(theme::colours::AMSTERDAM))
-                    .rounded_t_sm()
-                    .hover(|style| style
-                        .rounded_sm()
-                        .bg(rgb(theme::colours::YOUTH))
-                        .text_color(rgb(theme::colours::SHALLOWS))
-                    ).on_click(cx.listener(move |_this, _event, _window, cx| {
+                tab.on_click(cx.listener(move |_this, _event, _window, cx| {
                         cx.emit(Arc::clone(&item.event));
                     }))
             }
