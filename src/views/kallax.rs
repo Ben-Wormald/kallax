@@ -119,7 +119,7 @@ impl Render for Kallax {
             .flex()
             .flex_col()
             .min_h_0()
-            .bg(rgb(theme::colours::WINTER))
+            .bg(rgb(theme::colours::SMOTHER))
             .text_color(rgb(theme::colours::SHALLOWS))
             .font(Font {
                 family: "Work Sans".into(),

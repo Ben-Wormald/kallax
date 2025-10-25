@@ -49,7 +49,7 @@ fn render_shelf(shelf: &KallaxEntity, index: usize, cx: &mut Vcx) -> impl IntoEl
         .px_2()
         .flex()
         .gap_2()
-        .hover(|s| s.bg(rgb(theme::colours::SMOTHER)))
+        .hover(|s| s.bg(rgb(theme::colours::YOUTH)))
         .on_click(cx.listener(move |_this, _event, _window, cx| {
             cx.emit(Arc::new(UiEvent::EntityOpened(shelf_id.clone())))
         }));

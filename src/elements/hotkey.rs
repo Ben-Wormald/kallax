@@ -10,5 +10,6 @@ pub fn hotkey(label: String) -> impl IntoElement {
         .rounded_md()
         .border_1()
         .border_color(rgb(theme::colours::STILL))
+        .bg(rgb(theme::colours::WINTER))
         .child(label)
 }
