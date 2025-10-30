@@ -62,7 +62,8 @@ impl Library {
             entity_type::SEARCH => self.get_search(id),
             entity_type::ALBUM => self.get_album(id),
             entity_type::ARTIST => self.get_artist(id),
-            _ => panic!()
+            entity_type::PLAYLIST => self.get_playlist(id),
+            _ => None,
         }
     }
 

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::*;
+use crate::{elements::Input, *};
 
 use context_menu::ContextMenuItem;
 
@@ -36,6 +36,7 @@ impl gpui::EventEmitter<Arc<UiEvent>> for Dropdown {}
 impl gpui::EventEmitter<Arc<UiEvent>> for NowPlaying {}
 impl gpui::EventEmitter<Arc<UiEvent>> for Shelves {}
 impl gpui::EventEmitter<Arc<UiEvent>> for Tracks {}
+impl gpui::EventEmitter<Arc<UiEvent>> for Input {}
 
 #[derive(Clone)]
 pub struct PlayClickedEvent {
@@ -66,3 +67,4 @@ impl PlaybackEvent {
     }
 }
 impl gpui::EventEmitter<Arc<PlaybackEvent>> for Playback {}
+impl gpui::EventEmitter<Arc<PlaybackEvent>> for MacOS {}

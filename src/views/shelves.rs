@@ -31,7 +31,7 @@ impl Render for Shelves {
             .px_2()
             .flex()
             .flex_col()
-            .child(div().flex().justify_center().child(String::from("SHELVES")))
+            .child(div().flex().justify_center().child(String::from("Library")))
             .child(div()
                 .children(
                     self.shelves.iter().enumerate().map(|(i, shelf)| render_shelf(shelf, i + 1, cx))

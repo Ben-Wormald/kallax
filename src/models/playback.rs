@@ -36,6 +36,10 @@ impl Playback {
         }
     }
 
+    pub fn handle_event(&mut self, event: &Arc<PlaybackEvent>, cx: &mut Context<Playback>) {
+        todo!()
+    }
+
     pub fn play(&mut self, track: Arc<Track>, cx: &mut Mcx) {
         if self.queue.current.is_some() {
             cx.emit(Arc::new(PlaybackEvent::TrackEnded));

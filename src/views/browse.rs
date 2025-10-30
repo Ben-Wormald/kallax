@@ -29,10 +29,17 @@ pub struct Browse {
 
 impl Browse {
     pub fn new(cx: &mut Vcx) -> Browse {
-        // let tracks = cx.new(|cx| Tracks::new(cx));
-        // let albums = cx.new(|cx| Albums::new(cx));
+        let search = cx.new(|input_cx| Input::new(
+            "browse-search",
+            input_cx,
+            |search, cx| {
+                cx.emit(Arc::new(UiEvent::EntityOpened(search.to_string())));
+            },
+        ));
 
-        let search = cx.new(|cx| Input::new("browse-search", cx));
+        cx.subscribe(&search, move |_this, _emitter, event: &Arc<UiEvent>, cx| {
+            cx.emit(event.clone());
+        }).detach();
 
         Browse {
             items_mode: ItemsMode::List,
@@ -115,6 +122,7 @@ impl Render for Browse {
                     self.list_state.clone(),
                     cx.processor(Self::render_entity),
                 )
+                .bg(rgb(theme::colours::WINTER))
                 .h_full()
                 .w_full()
             )

@@ -8,16 +8,18 @@ pub struct Input {
     cursor: usize,
     selection: Option<(usize, usize)>,
     id: &'static str,
+    on_submit: Box<dyn Fn(&str, &mut Context<Self>)>
 }
 
 impl Input {
-    pub fn new(id: &'static str, cx: &mut Context<Input>) -> Input {
+    pub fn new(id: &'static str, cx: &mut Context<Input>, on_submit: impl Fn(&str, &mut Context<Self>) + 'static) -> Input {
         Input {
             focus_handle: cx.focus_handle(),
             value: String::new(),
             cursor: 0,
             selection: None,
             id,
+            on_submit: Box::new(on_submit),
         }
     }
 }
@@ -32,8 +34,9 @@ impl Render for Input {
             }))
             .track_focus(&self.focus_handle)
             .on_key_down(cx.listener(|this, event: &KeyDownEvent, _window, cx| {
-                dbg!(event);
-                if let Some(key) = &event.keystroke.key_char {
+                if event.keystroke.key == "enter" {
+                    (this.on_submit)(&this.value, cx);
+                } else if let Some(key) = &event.keystroke.key_char {
                     this.value += key;
                     this.cursor += key.len();
                 } else if event.keystroke.key == "backspace" {
