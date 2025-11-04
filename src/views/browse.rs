@@ -55,19 +55,10 @@ impl Browse {
         self.entities = match &self.entity {
             Some(KallaxEntity::Search(search)) => cx.global::<Library>().execute_search(&search.id()),
             Some(KallaxEntity::Album(album)) => cx.global::<Library>().get_tracks(&album.track_ids),
+            Some(KallaxEntity::Artist(artist)) => cx.global::<Library>().get_artist_albums(&artist.id()),
             _ => todo!(),
         };
         self.list_state =  ListState::new(self.entities.len(), ListAlignment::Top, px(200.0));
-    }
-
-    pub fn open_album(&mut self, _cx: &mut Vcx, _album: &Arc<Album>) {
-        // self.tracks.update(cx, |this, cx| {
-        //     this.update_view(
-        //         cx,
-        //         library,
-        //         tracks::TrackView::Album(album.artist_name.clone(), album.title.clone()),
-        //     );
-        // });
     }
 
     pub fn render_entity(&mut self, index: usize, _window: &mut Window, cx: &mut Vcx) -> AnyElement {
@@ -105,6 +96,7 @@ impl Render for Browse {
 
         let header = match &self.entity {
             Some(KallaxEntity::Album(album)) => header.child(album.title.clone()),
+            Some(KallaxEntity::Artist(artist)) => header.child(artist.name.clone()),
             Some(KallaxEntity::Search(search)) => header.child(search.name.clone()),
             None => header.child(String::from("welcome")),
             _ => unimplemented!(),

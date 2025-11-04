@@ -89,7 +89,7 @@ pub fn album(album: &Arc<Album>, cx: &mut Context<Albums>) -> impl IntoElement {
         .on_click({
             let album = Arc::clone(album);
             cx.listener(move |_this, _event, _window, cx| {
-                cx.emit(UiEvent::album(&album));
+                cx.emit(Arc::new(UiEvent::EntityOpened(album.id())));
             })
         })
 }
@@ -120,8 +120,8 @@ pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
                 tab.bg(rgb(theme::colours::SMOTHER))
             } else {
                 tab.on_click(cx.listener(move |_this, _event, _window, cx| {
-                        cx.emit(Arc::clone(&item.event));
-                    }))
+                    cx.emit(Arc::clone(&item.event));
+                }))
             }
         }))
 }

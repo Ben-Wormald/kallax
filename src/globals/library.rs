@@ -44,6 +44,16 @@ impl Library {
         self.albums.iter().find(|album| album.id() == id).cloned()
     }
 
+    pub fn get_artist_albums(&self, artist_id: &str) -> Vec<KallaxEntity> {
+        self.albums.iter().filter(|album| {
+            if let KallaxEntity::Album(album) = album {
+                album.artist_id == artist_id
+            } else {
+                false
+            }
+        }).cloned().collect()
+    }
+
     pub fn get_artist(&self, id: &str) -> Option<KallaxEntity> {
         self.artists.iter().find(|artist| artist.id() == id).cloned()
     }

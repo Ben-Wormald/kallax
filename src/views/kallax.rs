@@ -43,16 +43,6 @@ impl Kallax {
             subscriber.handle_ui_event(event, cx);
         }).detach();
 
-        // let tracks = browse.read(cx).tracks.clone();
-        // cx.subscribe(&tracks, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-        //     subscriber.handle_ui_event(event, cx);
-        // }).detach();
-
-        // let albums = browse.read(cx).albums.clone();
-        // cx.subscribe(&albums, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
-        //     subscriber.handle_ui_event(event, cx);
-        // }).detach();
-
         cx.subscribe(&context_menu, move |subscriber, _emitter, event: &Arc<UiEvent>, cx| {
             subscriber.handle_ui_event(event, cx);
         }).detach();
@@ -99,10 +89,6 @@ impl Kallax {
                 this.skip(cx);
                 cx.notify();
             }),
-            UiEvent::AlbumClicked(album) => self.browse.update(cx, |this, cx| {
-                this.open_album(cx, &album);
-                cx.notify();
-            }),
             UiEvent::NowPlayingTabClicked(tab_index) => self.now_playing.update(cx, |this, cx| {
                 this.selected_tab = tab_index;
                 cx.notify();
@@ -113,7 +99,6 @@ impl Kallax {
                 cx.notify();
             }),
             UiEvent::EntityOpened(entity_id) => self.browse.update(cx, |this, cx| {
-                dbg!(&entity_id);
                 this.set_entity(cx, entity_id);
                 cx.notify();
             }),

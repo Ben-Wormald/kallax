@@ -2,7 +2,21 @@ use gpui::{Context, Entity};
 use objc2::{rc::Retained, runtime::{AnyObject, ProtocolObject}};
 use objc2_avf_audio::{AVAudioSession, AVAudioSessionCategoryPlayback};
 use objc2_foundation::{NSDictionary, NSMutableDictionary, NSNumber, NSObject, NSString};
-use objc2_media_player::{MPMediaItemPropertyAlbumArtist, MPMediaItemPropertyAlbumTitle, MPMediaItemPropertyArtist, MPMediaItemPropertyMediaType, MPMediaItemPropertyPlaybackDuration, MPMediaItemPropertyTitle, MPNowPlayingInfoCenter, MPNowPlayingInfoMediaType, MPNowPlayingInfoPropertyDefaultPlaybackRate, MPNowPlayingInfoPropertyElapsedPlaybackTime, MPNowPlayingInfoPropertyPlaybackRate, MPNowPlayingPlaybackState};
+use objc2_media_player::{
+    MPMediaItemPropertyAlbumArtist,
+    MPMediaItemPropertyAlbumTitle,
+    MPMediaItemPropertyArtist,
+    MPMediaItemPropertyMediaType,
+    MPMediaItemPropertyPlaybackDuration,
+    MPMediaItemPropertyTitle,
+    MPMusicPlayerController,
+    MPNowPlayingInfoCenter,
+    MPNowPlayingInfoMediaType,
+    MPNowPlayingInfoPropertyDefaultPlaybackRate,
+    MPNowPlayingInfoPropertyElapsedPlaybackTime,
+    MPNowPlayingInfoPropertyPlaybackRate,
+    MPNowPlayingPlaybackState,
+};
 
 use crate::{events::PlaybackEvent, models::Playback};
 
@@ -54,7 +68,7 @@ impl MacOS {
                 &NSNumber::new_f64(1.0),
             ]);
 
-            info_center.setNowPlayingInfo(None);
+            // info_center.setNowPlayingInfo(None);
             info_center.setNowPlayingInfo(Some(&*now_playing_info));
             info_center.setPlaybackState(MPNowPlayingPlaybackState::Playing);
         }
