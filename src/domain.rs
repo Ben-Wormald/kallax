@@ -106,7 +106,7 @@ impl MatchExpression {
                 KallaxEntity::Playlist(_) => self.value == entity_type::PLAYLIST,
             },
             Field::Id => entity.id() == self.value,
-            Field::NameOrTitle => entity.name().contains(&self.value),
+            Field::NameOrTitle => entity.name().to_lowercase().contains(&self.value.to_lowercase()),
         }
     }
 }
@@ -124,6 +124,16 @@ impl SearchShelf {
             name,
             expression,
         }
+    }
+
+    pub fn new_text_match(text: &str) -> SearchShelf {
+        SearchShelf::new(
+            text.to_string(),
+            Expression::Match(MatchExpression {
+                field: Field::NameOrTitle,
+                value: text.to_string(),
+            }),
+        )
     }
 
     pub fn matches(&self, entity: &KallaxEntity) -> bool {

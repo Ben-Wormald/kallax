@@ -1,7 +1,7 @@
 use gpui::Global;
 use std::sync::Arc;
 
-use crate::{entity_type, store, KallaxEntity};
+use crate::{KallaxEntity, domain::SearchShelf, entity_type, store};
 
 pub struct Library {
     pub tracks: Vec<KallaxEntity>,
@@ -9,6 +9,7 @@ pub struct Library {
     pub artists: Vec<KallaxEntity>,
     pub searches: Vec<KallaxEntity>,
     pub playlists: Vec<KallaxEntity>,
+    pub temporary_search: Option<KallaxEntity>,
 }
 
 impl Library {
@@ -29,6 +30,7 @@ impl Library {
             artists,
             searches,
             playlists,
+            temporary_search: None,
         }
     }
 
@@ -58,8 +60,14 @@ impl Library {
         self.artists.iter().find(|artist| artist.id() == id).cloned()
     }
 
-    pub fn get_search(&self, id: &str) -> Option<KallaxEntity> {
-        self.searches.iter().find(|search| search.id() == id).cloned()
+    pub fn get_search(&self, id: &str) -> Option<&KallaxEntity> {
+        if let Some(temporary_search) = &self.temporary_search {
+            if temporary_search.id() == id {
+                return Some(temporary_search);
+            }
+        }
+
+        self.searches.iter().find(|search| search.id() == id)
     }
 
     pub fn get_playlist(&self, id: &str) -> Option<KallaxEntity> {
@@ -69,12 +77,16 @@ impl Library {
     pub fn get_entity(&self, id: &str) -> Option<KallaxEntity> {
         match &id[..2] {
             entity_type::TRACK => self.get_track(id),
-            entity_type::SEARCH => self.get_search(id),
+            entity_type::SEARCH => self.get_search(id).cloned(),
             entity_type::ALBUM => self.get_album(id),
             entity_type::ARTIST => self.get_artist(id),
             entity_type::PLAYLIST => self.get_playlist(id),
             _ => None,
         }
+    }
+
+    pub fn set_temporary_search(&mut self, search: KallaxEntity) {
+        self.temporary_search = Some(search);
     }
 
     pub fn execute_search(&self, search_id: &str) -> Vec<KallaxEntity> {

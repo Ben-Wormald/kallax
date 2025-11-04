@@ -33,7 +33,10 @@ impl Browse {
             "browse-search",
             input_cx,
             |search, cx| {
-                cx.emit(Arc::new(UiEvent::EntityOpened(search.to_string())));
+                let search = KallaxEntity::Search(Arc::new(SearchShelf::new_text_match(search)));
+                let id = search.id();
+                cx.global_mut::<Library>().set_temporary_search(search);
+                cx.emit(Arc::new(UiEvent::EntityOpened(id)));
             },
         ));
 
