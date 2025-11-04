@@ -1,7 +1,7 @@
 use gpui::Global;
 use std::sync::Arc;
 
-use crate::{KallaxEntity, domain::SearchShelf, entity_type, store};
+use crate::{KallaxEntity, entity_type, store};
 
 pub struct Library {
     pub tracks: Vec<KallaxEntity>,

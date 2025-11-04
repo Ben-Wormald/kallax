@@ -1,15 +1,13 @@
 use gpui::{Context, Entity};
-use objc2::{rc::Retained, runtime::{AnyObject, ProtocolObject}};
+use objc2::{rc::Retained, runtime::AnyObject};
 use objc2_avf_audio::{AVAudioSession, AVAudioSessionCategoryPlayback};
-use objc2_foundation::{NSDictionary, NSMutableDictionary, NSNumber, NSObject, NSString};
+use objc2_foundation::{NSDictionary, NSNumber, NSString};
 use objc2_media_player::{
-    MPMediaItemPropertyAlbumArtist,
     MPMediaItemPropertyAlbumTitle,
     MPMediaItemPropertyArtist,
     MPMediaItemPropertyMediaType,
     MPMediaItemPropertyPlaybackDuration,
     MPMediaItemPropertyTitle,
-    MPMusicPlayerController,
     MPNowPlayingInfoCenter,
     MPNowPlayingInfoMediaType,
     MPNowPlayingInfoPropertyDefaultPlaybackRate,
@@ -27,9 +25,9 @@ pub struct MacOS {
 
 impl MacOS {
     pub fn new(cx: &mut Mcx, playback: &Entity<Playback>) -> MacOS {
-        cx.subscribe(playback, |this, _emitter, event, cx| {
+        cx.subscribe(playback, |this, _emitter, event, _cx| {
             match (**event).clone() {
-                PlaybackEvent::TrackStarted(track) => this.play(),
+                PlaybackEvent::TrackStarted(_track) => this.play(),
                 PlaybackEvent::Paused => (),
                 PlaybackEvent::Resumed => (),
                 PlaybackEvent::TrackEnded => (),

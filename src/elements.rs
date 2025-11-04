@@ -12,13 +12,13 @@ pub use input::*;
 pub use list_entity::*;
 
 use crate::*;
-use context_menu::ContextMenuItem;
 
 pub struct UiAction {
     pub label: &'static str,
     pub event: Arc<UiEvent>,
 }
 
+/*
 pub fn track(track: &Arc<Track>, cx: &mut Context<Tracks>) -> impl IntoElement {
     let on_click = cx.listener({
         let track = Arc::clone(track);
@@ -69,7 +69,9 @@ pub fn track(track: &Arc<Track>, cx: &mut Context<Tracks>) -> impl IntoElement {
         .on_click(on_click)
         .on_mouse_down(MouseButton::Right, on_right_click)
 }
+*/
 
+/*
 pub fn album(album: &Arc<Album>, cx: &mut Context<Albums>) -> impl IntoElement {
     let element = div()
         .id(ElementId::Name(album.id().into()))
@@ -93,6 +95,7 @@ pub fn album(album: &Arc<Album>, cx: &mut Context<Albums>) -> impl IntoElement {
             })
         })
 }
+*/
 
 pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
     tabs: Vec<UiAction>,

@@ -6,7 +6,7 @@ use crate::*;
 pub struct Kallax {
     playback: Entity<Playback>,
     _scrobbler: Entity<Scrobbler>,
-    macos: Entity<MacOS>,
+    _macos: Entity<MacOS>,
     shelves: Entity<Shelves>,
     browse: Entity<Browse>,
     now_playing: Entity<NowPlaying>,
@@ -21,10 +21,10 @@ impl Kallax {
 
         let playback = cx.new(Playback::new);
         let _scrobbler = cx.new(|cx| Scrobbler::new(cx, &playback));
-        let macos = cx.new(|cx| MacOS::new(cx, &playback));
+        let _macos = cx.new(|cx| MacOS::new(cx, &playback));
 
         playback.update(cx, |_this, cx| {
-            cx.subscribe(&macos, move |subscriber, _emitter, event: &Arc<PlaybackEvent>, cx| {
+            cx.subscribe(&_macos, move |subscriber, _emitter, event: &Arc<PlaybackEvent>, cx| {
                 subscriber.handle_event(event, cx);
             }).detach();
         });
@@ -57,7 +57,7 @@ impl Kallax {
         Kallax {
             playback,
             _scrobbler,
-            macos,
+            _macos,
             shelves,
             browse,
             now_playing,
