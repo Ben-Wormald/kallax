@@ -7,6 +7,7 @@ use super::{browse::BrowseContext, theme, Browse, KallaxEntity, Library, UiEvent
 pub fn list_entity(
     entity: &KallaxEntity,
     browse_context: BrowseContext,
+    index: usize,
     cx: &mut Context<Browse>,
 ) -> impl IntoElement {
     let children = match browse_context {
@@ -73,9 +74,11 @@ pub fn list_entity(
     let id = ElementId::Name(entity.id().into());
 
     let entity = entity.clone();
-    let on_click = cx.listener(move |_this, _event, _window, cx| {
+    let on_click = cx.listener(move |this, _event, _window, cx| {
         match &entity {
-            KallaxEntity::Track(track) => cx.emit(UiEvent::play(&track)),
+            KallaxEntity::Track(track) => {
+                cx.emit(UiEvent::play(&this.entities, index))
+            },
             entity => cx.emit(Arc::new(UiEvent::EntityOpened(entity.id()))),
         }
         cx.notify();
@@ -86,6 +89,7 @@ pub fn list_entity(
         .on_click(on_click)
         .w_full()
         .flex()
+        .bg(rgb(theme::colours::WINTER))
         .children(children)
         .hover(|s| s.bg(rgb(theme::colours::SMOTHER)))
 }

@@ -114,17 +114,18 @@ pub fn tab_bar<V: EventEmitter<Arc<UiEvent>>>(
                 .justify_center()
                 .text_color(rgb(theme::colours::SHALLOWS))
                 .rounded_t_sm()
-                .child(item.label)
-                .hover(|style| style
-                    .bg(rgb(theme::colours::YOUTH))
-                );
+                .child(item.label);
 
             if index == selected {
                 tab.bg(rgb(theme::colours::SMOTHER))
             } else {
-                tab.on_click(cx.listener(move |_this, _event, _window, cx| {
-                    cx.emit(Arc::clone(&item.event));
-                }))
+                tab.bg(rgb(theme::colours::WINTER))
+                    .hover(|style| style
+                        .bg(rgb(theme::colours::YOUTH))
+                    )
+                    .on_click(cx.listener(move |_this, _event, _window, cx| {
+                        cx.emit(Arc::clone(&item.event));
+                    }))
             }
         }))
 }

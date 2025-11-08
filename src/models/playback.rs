@@ -10,7 +10,7 @@ use std::{
     time::Duration,
 };
 
-use crate::{PlaybackEvent, Track};
+use crate::{PlaybackEvent, Track, domain::KallaxEntity};
 
 // https://github.com/aschey/stream-download-rs/tree/main/examples
 // https://docs.rs/axum-streams/latest/axum_streams/index.html
@@ -40,13 +40,20 @@ impl Playback {
         todo!()
     }
 
-    pub fn play(&mut self, track: Arc<Track>, cx: &mut Mcx) {
+    pub fn play(&mut self, queue: Vec<KallaxEntity>, index: usize, cx: &mut Mcx) {
         if self.queue.current.is_some() {
             cx.emit(Arc::new(PlaybackEvent::TrackEnded));
         }
 
+        let queue: Vec<Arc<Track>> = queue.into_iter().map(|e| match e {
+            KallaxEntity::Track(track) => track,
+            _ => todo!("expand albums etc."),
+        }).collect();
+
+        let track = queue.get(index).unwrap().clone();
+
         self.player.play(&track, cx);
-        self.queue.play(&track);
+        self.queue.play(queue, index);
 
         cx.emit(PlaybackEvent::start(&track));
     }
@@ -93,9 +100,9 @@ pub struct Queue {
     pub is_playing: bool,
 }
 impl Queue {
-    fn play(&mut self, track: &Arc<Track>) {
-        self.tracks = vec![Arc::clone(track)];
-        self.current = Some(0);
+    fn play(&mut self, queue: Vec<Arc<Track>>, index: usize) {
+        self.tracks = queue;
+        self.current = Some(index);
         self.is_playing = true;
     }
 

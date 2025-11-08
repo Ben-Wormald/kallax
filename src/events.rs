@@ -16,8 +16,11 @@ pub enum UiEvent {
     EntityOpened(String),
 }
 impl UiEvent {
-    pub fn play(track: &Arc<Track>) -> Arc<UiEvent> {
-        Arc::new(UiEvent::PlayClicked(PlayClickedEvent { track: Arc::clone(track) }))
+    pub fn play(queue: &[KallaxEntity], index: usize) -> Arc<UiEvent> {
+        Arc::new(UiEvent::PlayClicked(PlayClickedEvent {
+            queue: queue.to_vec(),
+            index,
+        }))
     }
 
     pub fn queue(track: &Arc<Track>) -> Arc<UiEvent> {
@@ -33,7 +36,8 @@ impl gpui::EventEmitter<Arc<UiEvent>> for Input {}
 
 #[derive(Clone)]
 pub struct PlayClickedEvent {
-    pub track: Arc<Track>,
+    pub queue: Vec<KallaxEntity>,
+    pub index: usize,
 }
 
 #[derive(Clone)]

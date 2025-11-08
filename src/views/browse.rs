@@ -22,7 +22,7 @@ pub enum BrowseContext {
 pub struct Browse {
     items_mode: ItemsMode,
     entity: Option<KallaxEntity>,
-    entities: Vec<KallaxEntity>,
+    pub entities: Vec<KallaxEntity>,
     list_state: ListState,
     search: Entity<Input>,
 }
@@ -86,7 +86,7 @@ impl Browse {
                     Some(KallaxEntity::Playlist(_)) => BrowseContext::Playlist(index),
                     _ => unimplemented!(),
                 };
-                list_entity(entity, browse_context, cx).into_any_element()
+                list_entity(entity, browse_context, index, cx).into_any_element()
             }
         }
     }
@@ -126,7 +126,7 @@ impl Render for Browse {
 
 fn on_click_entity(cx: &mut Vcx, entity: &KallaxEntity) {
     match entity {
-        KallaxEntity::Track(track) => cx.emit(UiEvent::play(track)),
+        KallaxEntity::Track(track) => cx.emit(UiEvent::play(&[], 0)),
         _ => todo!(),
     }
     cx.notify();

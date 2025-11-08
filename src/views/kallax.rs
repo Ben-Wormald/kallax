@@ -70,7 +70,7 @@ impl Kallax {
     pub fn handle_ui_event(&mut self, event: &Arc<UiEvent>, cx: &mut Context<Kallax>) {
         match (**event).clone() {
             UiEvent::PlayClicked(event) => self.playback.update(cx, |this, cx| {
-                this.play(Arc::clone(&event.track), cx);
+                this.play(event.queue, event.index, cx);
                 cx.notify();
             }),
             UiEvent::QueueClicked(event) => self.playback.update(cx, |this, cx| {
