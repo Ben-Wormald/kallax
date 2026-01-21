@@ -19,7 +19,7 @@ icon = [
 
 [dependencies]
 dotenv = "0.15.0"
-gpui = "0.2.0"
+gpui = "0.2.2"
 id3 = "1.12.0"
 image = "0.25"
 md5 = "0.7.0"

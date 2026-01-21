@@ -2,7 +2,7 @@ use elements::list_entity;
 use gpui::*;
 use std::sync::Arc;
 
-use crate::{elements::Input, *};
+use crate::{elements::{Input, button}, *};
 
 type Vcx<'a> = Context<'a, Browse>;
 
@@ -95,10 +95,16 @@ impl Browse {
 impl Render for Browse {
     fn render(&mut self, _window: &mut Window, cx: &mut Vcx) -> impl IntoElement {
         let header = div()
-            .id("browse-header");
+            .id("browse-header")
+            .flex();
 
         let header = match &self.entity {
-            Some(KallaxEntity::Album(album)) => header.child(album.title.clone()),
+            Some(KallaxEntity::Album(album)) => header
+                .child(album.title.clone())
+                .child(
+                    button("browse-header-album-play", "Play", Some(String::from("⌘ P")))
+                        .min_w_0()
+                ),
             Some(KallaxEntity::Artist(artist)) => header.child(artist.name.clone()),
             Some(KallaxEntity::Search(search)) => header.child(search.name.clone()),
             None => header.child(String::from("welcome")),
