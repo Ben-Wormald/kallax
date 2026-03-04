@@ -7,7 +7,7 @@ pub fn hotkey(label: String) -> impl IntoElement {
         .w_10()
         .flex()
         .justify_center()
-        .rounded_md()
+        .rounded_sm()
         .border_1()
         .border_color(rgb(theme::colours::STILL))
         .bg(rgb(theme::colours::WINTER))

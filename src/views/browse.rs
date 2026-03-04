@@ -116,6 +116,8 @@ impl Render for Browse {
             .flex()
             .flex_col()
             .h_full()
+            .px_2()
+            .bg(rgb(theme::colours::YOUTH))
             .child(self.search.clone())
             .child(header)
             .child(
@@ -123,7 +125,6 @@ impl Render for Browse {
                     self.list_state.clone(),
                     cx.processor(Self::render_entity),
                 )
-                .bg(rgb(theme::colours::WINTER))
                 .h_full()
                 .w_full()
             )

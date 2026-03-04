@@ -89,9 +89,9 @@ pub fn list_entity(
         .on_click(on_click)
         .w_full()
         .flex()
-        .bg(rgb(theme::colours::WINTER))
-        .children(children)
+        .rounded_md()
         .hover(|s| s.bg(rgb(theme::colours::SMOTHER)))
+        .children(children)
 }
 
 fn row_column() -> Div {

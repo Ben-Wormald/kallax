@@ -125,6 +125,7 @@ impl Render for NowPlaying {
             .flex()
             .flex_col()
             .max_w_80()
+            .bg(rgb(theme::colours::YOUTH))
             .child(
                 tab_bar(vec![
                     UiAction {

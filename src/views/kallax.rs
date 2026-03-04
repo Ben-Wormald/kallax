@@ -114,7 +114,7 @@ impl Render for Kallax {
             .flex()
             .flex_col()
             .min_h_0()
-            .bg(rgb(theme::colours::SMOTHER))
+            .bg(rgb(theme::colours::YOUTH))
             .text_color(rgb(theme::colours::SHALLOWS))
             .font(Font {
                 family: "Work Sans".into(),
@@ -145,7 +145,9 @@ impl Render for Kallax {
                 div()
                     .flex_grow()
                     .flex()
+                    .gap_0p5()
                     .min_h_0()
+                    .bg(rgb(theme::colours::STILL))
                     .child(self.shelves.clone())
                     .child(self.browse.clone())
                     .child(self.now_playing.clone())

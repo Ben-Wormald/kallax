@@ -17,7 +17,7 @@ impl Shelves {
         let shelves = searches.chain(playlists).cloned().collect();
 
         Shelves {
-            shelves
+            shelves,
         }
     }
 }
@@ -31,8 +31,12 @@ impl Render for Shelves {
             .px_2()
             .flex()
             .flex_col()
+            .bg(rgb(theme::colours::YOUTH))
             .child(div().flex().justify_center().child(String::from("Library")))
             .child(div()
+                .flex()
+                .flex_col()
+                .gap_1()
                 .children(
                     self.shelves.iter().enumerate().map(|(i, shelf)| render_shelf(shelf, i + 1, cx))
                 )
@@ -46,10 +50,11 @@ fn render_shelf(shelf: &KallaxEntity, index: usize, cx: &mut Vcx) -> impl IntoEl
     let shelf_element = div()
         .id(ElementId::Name(shelf_id.clone().into()))
         .py_1()
-        .px_2()
+        .px_1()
         .flex()
         .gap_2()
-        .hover(|s| s.bg(rgb(theme::colours::YOUTH)))
+        .rounded_md()
+        .hover(|s| s.bg(rgb(theme::colours::SMOTHER)))
         .on_click(cx.listener(move |_this, _event, _window, cx| {
             cx.emit(Arc::new(UiEvent::EntityOpened(shelf_id.clone())))
         }));
