@@ -3,6 +3,8 @@ use std::sync::Arc;
 
 use crate::*;
 
+actions!(kallax, [ShelfOne, Play]);
+
 pub struct Kallax {
     playback: Entity<Playback>,
     _scrobbler: Entity<Scrobbler>,
@@ -51,8 +53,13 @@ impl Kallax {
             subscriber.handle_ui_event(event, cx);
         }).detach();
 
+        cx.bind_keys([
+            KeyBinding::new("cmd-p", Play, None),
+            KeyBinding::new("cmd-1", ShelfOne, None),
+        ]);
+
         let focus_handle = cx.focus_handle();
-        window.focus(&focus_handle);
+        window.focus(&focus_handle, cx);
 
         Kallax {
             playback,
@@ -136,6 +143,12 @@ impl Render for Kallax {
                         cx.notify();
                     });
                 }
+            }))
+            .on_action(cx.listener(|this, _: &Play, _window, cx| {
+                this.browse.update(cx, |this, cx| {
+                    this.play_current(cx);
+                    cx.notify(); // needed after emit?
+                })
             }))
             .child(
                 div()

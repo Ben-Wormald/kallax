@@ -7,14 +7,14 @@ pub fn button(id: &'static str, label: &'static str, hotkey: Option<String>) -> 
         .id(id)
         .flex_1()
         .py_1()
-        .px_3()
+        .px_1()
         .flex()
         .gap_2()
+        .rounded_md()
         .justify_center()
-        .rounded_sm()
         .border_1()
-        .border_color(rgb(theme::colours::LIFEFORMS))
-        .bg(rgb(theme::colours::WINTER))
+        .border_color(rgb(theme::colours::TOMORROW))
+        .bg(rgb(theme::colours::YOUTH))
         .hover(|style| style.bg(rgb(theme::colours::SMOTHER)));
 
     if let Some(hotkey) = hotkey {

@@ -29,7 +29,7 @@ impl Render for Input {
         div()
             .id(self.id)
             .on_click(cx.listener(|this, _event, window, cx| {
-                this.focus_handle.focus(window);
+                this.focus_handle.focus(window, cx);
                 cx.notify();
             }))
             .track_focus(&self.focus_handle)

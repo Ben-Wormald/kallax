@@ -3,6 +3,8 @@ use std::sync::Arc;
 
 use crate::*;
 
+// TODO stop hover and click beneath open menu
+
 pub struct ContextMenu {
     pub position: Option<Point<Pixels>>,
     pub items: Arc<Vec<ContextMenuItem>>,
@@ -26,35 +28,28 @@ impl Render for ContextMenu {
                     div()
                         .flex_col()
                         .border_1()
-                        .border_color(rgb(theme::colours::SHALLOWS))
-                        .bg(rgb(theme::colours::SMOTHER))
+                        .border_color(rgb(theme::colours::TOMORROW))
+                        .bg(rgb(theme::colours::YOUTH))
                         .p(px(2.))
                         .rounded_md()
                         .rounded_tl_none()
-                        .child(
+                        .children(self.items.iter().map(|item|
                             div()
-                                .rounded_sm()
-                                .rounded_tl_none()
-                                .bg(rgb(theme::colours::AMSTERDAM))
-                                .p(px(1.))
-                                .children(self.items.iter().map(|item|
-                                    div()
-                                        .id(ElementId::Name(item.label.into()))
-                                        .py_1()
-                                        .px_3()
-                                        .rounded(px(1.))
-                                        .hover(|style| style.bg(rgb(theme::colours::TOUCH)))
-                                        .child(item.label)
-                                        .on_mouse_down(MouseButton::Left, cx.listener({
-                                            let event = Arc::clone(&item.event);
-                                            move |this, _event, _window, cx| {
-                                                cx.emit(Arc::clone(&event));
-                                                this.position = None;
-                                                cx.notify();
-                                            }
-                                        }))
-                                ))
-                        )
+                                .id(ElementId::Name(item.label.into()))
+                                .py_1()
+                                .px_3()
+                                .rounded(px(1.))
+                                .hover(|style| style.bg(rgb(theme::colours::SMOTHER)))
+                                .child(item.label)
+                                .on_mouse_down(MouseButton::Left, cx.listener({
+                                    let event = Arc::clone(&item.event);
+                                    move |this, _event, _window, cx| {
+                                        cx.emit(Arc::clone(&event));
+                                        this.position = None;
+                                        cx.notify();
+                                    }
+                                }))
+                        ))
                 )
         } else {
             anchored()

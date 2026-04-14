@@ -90,20 +90,37 @@ impl Browse {
             }
         }
     }
+
+    pub fn play_current(&self, cx: &mut Vcx) {
+        if !self.entities.is_empty() {
+            cx.emit(UiEvent::play(&self.entities, 0));
+        }
+    }
 }
 
 impl Render for Browse {
     fn render(&mut self, _window: &mut Window, cx: &mut Vcx) -> impl IntoElement {
         let header = div()
             .id("browse-header")
-            .flex();
+            .flex()
+            .mt_2()
+            .mb_3()
+            .items_center();
 
         let header = match &self.entity {
             Some(KallaxEntity::Album(album)) => header
                 .child(album.title.clone())
                 .child(
-                    button("browse-header-album-play", "Play", Some(String::from("⌘ P")))
-                        .min_w_0()
+                    div()
+                        .ml_auto()
+                        .child(
+                            button("browse-header-album-play", "Play", Some(String::from("⌘ P")))
+                                .min_w_0()
+                                .on_click(cx.listener(|this, _event, _window, cx|
+                                    this.play_current(cx)
+                                )
+                        )
+                    )
                 ),
             Some(KallaxEntity::Artist(artist)) => header.child(artist.name.clone()),
             Some(KallaxEntity::Search(search)) => header.child(search.name.clone()),

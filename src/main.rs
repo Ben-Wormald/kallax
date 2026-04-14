@@ -16,22 +16,21 @@ use models::*;
 use utils::*;
 use views::*;
 
-actions!(kallax, [Quit, ShelfOne]);
+actions!(kallax, [Quit]);
 
 fn main() {
     dotenv().ok();
 
-    Application::new().run(|app| {
+    Application::with_platform(gpui_platform::current_platform(false)).run(|app| {
         app.activate(true);
         app.on_action(|_: &Quit, app| app.quit());
         app.bind_keys([
             KeyBinding::new("cmd-q", Quit, None),
-            KeyBinding::new("cmd-1", ShelfOne, None),
         ]);
         app.set_menus(vec![
             Menu { name: "Kallax".into(), items: vec![
                 MenuItem::action("Quit", Quit),
-            ]},
+            ], disabled: false },
         ]);
 
         let window_options = WindowOptions {
@@ -48,11 +47,7 @@ fn main() {
             show: true,
             kind: WindowKind::Normal,
             is_movable: true,
-            display_id: None,
             window_background: WindowBackgroundAppearance::Opaque,
-            app_id: None,
-            window_min_size: None,
-            window_decorations: None,
             ..Default::default()
         };
 
